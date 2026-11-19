@@ -152,11 +152,28 @@ class Reader:
         return block
 
 
+def remote_assets(s, release):
+    """The release's files now (retried: the connection may come and go)."""
+    for attempt in range(30):
+        try:
+            r = s.get(f"{API}/releases/{release['id']}", timeout=30)
+            r.raise_for_status()
+            return r.json().get("assets", [])
+        except requests.RequestException:
+            time.sleep(10)
+    sys.exit("GitHub'a ulaşılamıyor.")
+
+
 def upload(s, release, path, label=None):
-    for asset in release.get("assets", []):
+    """Upload one file; a file already there with the same size is kept (so a broken run can just be repeated)."""
+    size = path.stat().st_size
+    for asset in remote_assets(s, release):
         if asset["name"] == path.name:
-            s.delete(asset["url"]).raise_for_status()
-    for attempt in range(3):
+            if asset.get("state") == "uploaded" and asset["size"] == size and path.name != "manifest.json":
+                say(f"  zaten yüklü: {path.name}")
+                return asset
+            s.delete(asset["url"], timeout=30)
+    for attempt in range(6):
         reader = Reader(path)
         try:
             r = s.post(f"{UPLOADS}/releases/{release['id']}/assets", params={"name": path.name, "label": label or ""},
@@ -166,14 +183,17 @@ def upload(s, release, path, label=None):
                 return r.json()
             say(f"  yükleme hatası {r.status_code}: {r.text[:200]}")
         except requests.RequestException as e:
-            say(f"  yükleme kesildi: {e}")
+            say(f"  yükleme kesildi, tekrar denenecek: {type(e).__name__}")
         finally:
             reader.f.close()
-        # a half-uploaded asset blocks the name: remove it before trying again
-        for asset in s.get(f"{API}/releases/{release['id']}").json().get("assets", []):
+        time.sleep(15 * (attempt + 1))
+        # a half-uploaded file blocks the name: remove it before trying again
+        for asset in remote_assets(s, release):
             if asset["name"] == path.name:
-                s.delete(asset["url"])
-        time.sleep(5 * (attempt + 1))
+                try:
+                    s.delete(asset["url"], timeout=30)
+                except requests.RequestException:
+                    pass
     sys.exit(f"{path.name} yüklenemedi.")
 
 
@@ -199,10 +219,26 @@ def main():
     ap.add_argument("--no-build", action="store_true", help="use the existing dist folder")
     ap.add_argument("--notes", default="", help="what changed (shown in the app)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--upload-only", action="store_true",
+                    help="build nothing: upload what an interrupted run left in packaging/output")
     args = ap.parse_args()
 
     OUT.mkdir(exist_ok=True)
     RELEASES.mkdir(exist_ok=True)
+    if args.upload_only:
+        mfile = OUT / "manifest.json"
+        if json.loads(mfile.read_text(encoding="utf-8"))["version"] != VERSION:
+            sys.exit("packaging/output başka bir sürümün dosyalarını tutuyor.")
+        assets = ([OUT / "update.json"] if (OUT / "update.json").exists() else []) + sorted(OUT.glob("update-*.zip"))
+        assets += sorted(OUT.glob("OyunCeviri-Kurulum*")) + [mfile]
+        s = session()
+        release = release_for(s, args.notes, False)
+        for a in assets:
+            say(f"Yükleniyor: {a.name} ({a.stat().st_size / 1e6:.1f} MB)")
+            upload(s, release, a)
+        (RELEASES / f"{VERSION}.json").write_text(mfile.read_text(encoding="utf-8"), encoding="utf-8")
+        say(f"Bitti: {release.get('html_url', '')}")
+        return
     if not args.no_build:
         build()
     say(f"Sürüm {VERSION}: dosyaların özeti çıkarılıyor…")
