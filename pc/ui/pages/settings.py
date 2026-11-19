@@ -120,7 +120,8 @@ class SettingsPage(QWidget):
             f"Oyun Çeviri {VERSION}<br>"
             f"<span style='color:{theme.MUTED}'>PS5 altyazılarını okuyup Türkçeye çevirir ve TV'de gösterir. "
             f"Her şey bu bilgisayarda çalışır.<br>Ayar dosyası: {config.CONFIG_PATH}<br>"
-            f"Güncellemeler: github.com/{REPO}</span>")
+            f"Güncellemeler ve kaynak kodu: github.com/{REPO}<br>Lisans: GNU AGPL-3.0 · Kullanılan bileşenler ve "
+            f"oyun paketlerinin kaynakları: THIRD-PARTY-NOTICES.md (uygulama klasöründe)</span>")
         info.setWordWrap(True)
         about.add(info)
         lay.addWidget(about)

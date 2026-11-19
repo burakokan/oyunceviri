@@ -35,6 +35,8 @@ datas = (tree("models/opus-mt-tc-big-en-tr") + tree("models/llm/gemma4e2b") + ll
          + [(p, "packs") for p in glob.glob(os.path.join(ROOT, "packs", "*.json.gz"))]
          + [(p, os.path.join("packs", "fixes")) for p in glob.glob(os.path.join(ROOT, "packs", "fixes", "*.json"))]
          + [(os.path.join(ROOT, name), ".") for name in ("OyunCeviri-TV.apk", "OyunCeviri-Samsung.wgt", "OyunCeviri-LG.ipk")]
+         # the license, copyright notice and third-party notices travel with the program (AGPL-3.0)
+         + [(os.path.join(ROOT, name), ".") for name in ("LICENSE", "NOTICE", "THIRD-PARTY-NOTICES.md")]
          + collect_data_files("rapidocr") + collect_data_files("windows_capture"))
 
 binaries = ([(p, os.path.join("nvidia", "cublas", "bin"))

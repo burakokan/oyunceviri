@@ -1,0 +1,27 @@
+Oyun Çeviri - PS5 subtitles translated into Turkish, shown on the TV
+Copyright (C) 2026 burakokan
+https://github.com/burakokan/oyunceviri
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+Public License version 3 as published by the Free Software Foundation (see LICENSE). It is distributed in the hope
+that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+Oyun Çeviri is a separate, newly written program (Python / Kotlin / JavaScript). It uses, unmodified, the native
+Remote Play library of CouchSubs (vendor/couchsubs_native.dll):
+
+    CouchSubs - Copyright (C) 2026 Sinan Yorulmaz
+    https://github.com/yorulmazsinan/couchsubs  (GNU AGPL-3.0)
+    Source of the library: windows/native/ in that repository.
+
+The library itself is built on chiaki-ng (libchiaki, GNU AGPL-3.0 with OpenSSL exception) and FFmpeg (LGPL-2.1+).
+Oyun Çeviri also reads CouchSubs' game pack format and follows ideas of CouchSubs and of GameTranslator by sefflex
+(https://gitlab.com/sefflex/GameTranslator, a modified version of CouchSubs, GNU AGPL-3.0) for reading and filtering
+subtitles and for installing the TV apps. Both are licensed under the GNU AGPL-3.0 like this project. Some game packs
+come from these two projects (see THIRD-PARTY-NOTICES.md).
+
+Third-party components, models and game pack sources are listed in THIRD-PARTY-NOTICES.md.
+
+This project is not affiliated with, endorsed or sponsored by Sony Interactive Entertainment, any game publisher,
+CouchSubs or GameTranslator. "PlayStation", "PS5", "PSN" and "Remote Play" are trademarks of Sony Interactive
+Entertainment Inc. Game titles, characters and dialogue belong to their respective owners.

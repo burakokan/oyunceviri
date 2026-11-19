@@ -1,6 +1,8 @@
 # Oyun Çeviri
 
-PS5 oyunlarının İngilizce altyazılarını okuyup Türkçeye çevirir ve TV'de, oyunun üstünde gösterir. Kişisel kullanım içindir.
+PS5 oyunlarının İngilizce altyazılarını okuyup Türkçeye çevirir ve TV'de, oyunun üstünde gösterir. Kişisel, ticari olmayan kullanım içindir.
+
+Lisans: [GNU AGPL-3.0](LICENSE) · Telif ve kaynak bildirimi: [NOTICE](NOTICE) · Kullanılan bileşenler, modeller ve oyun paketlerinin kaynakları: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
 ## Klasörler
 
@@ -48,3 +50,40 @@ Genel → "Ayarları başka bilgisayara taşı" bölümünde iki düğme var: "D
 - **Taşınanlar:** altyazı alanı ve eşikleri, görev ve telefon alanları, filtreler, çeviri motoru, TV görünümü, konuşmacı renkleri.
 - **API anahtarları:** Dosyaya yalnızca kullanıcı "Evet, anahtarlarla" derse girer. Anahtarsız bir dosya yüklenirse bilgisayardaki mevcut anahtarlar korunur.
 - **Taşınmayanlar:** PS5 bağlantısı ve PSN hesabı (`ps5.json`), TV'nin adresi ve markası, chiaki-ng yolu. Bunlar her bilgisayarda yeniden kurulur. Dosyaya elle eklenseler bile yükleme sırasında dikkate alınmaz.
+
+## Lisans
+
+Oyun Çeviri, [GNU Affero General Public License 3.0](LICENSE) ile dağıtılır. Kaynak kodu bu depodadır.
+
+Bu lisansın seçilme sebebi, Remote Play için kullanılan `vendor/couchsubs_native.dll` kitaplığının (CouchSubs, chiaki-ng tabanlı) AGPL-3.0 lisanslı olmasıdır. Kitaplık değiştirilmeden kullanılır; kaynak kodu CouchSubs deposunda, `windows/native/` klasöründedir.
+
+Lisansın kısa özeti:
+- Programı kullanmak, değiştirmek ve paylaşmak serbesttir.
+- Paylaşılan her kopyada (değiştirilmiş olanlar dahil) kaynak kodu ve bu lisans da verilmelidir.
+- Program olduğu gibi verilir, hiçbir garanti yoktur.
+
+Kurulumdaki diğer bileşenlerin her biri kendi lisansıyla dağıtılır: Qt / PySide6, llama.cpp, adb, CUDA dosyaları, OPUS-MT, quickmt ve Gemma modelleri gibi. Liste ve lisanslar [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) dosyasındadır. Gemma modeli [Gemma Terms of Use](https://ai.google.dev/gemma/terms) koşullarına tabidir.
+
+## Oyun paketleri
+
+`packs/` klasöründeki paketler, oyun diyaloglarının Türkçe çevirileridir.
+
+- Bir kısmı [CouchSubs](https://github.com/yorulmazsinan/couchsubs) ve [GameTranslator](https://gitlab.com/sefflex/GameTranslator) projelerinden alınmıştır.
+- Bir kısmı bu proje için topluluk vikilerindeki İngilizce metinlerden Gemini ile çevrilmiştir. Kaynak CC BY-SA ise paket de CC BY-SA 3.0 ile, kaynağın yazarları belirtilerek paylaşılır.
+
+Hangi paketin nereden geldiği [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) dosyasındadır.
+
+Oyunların adları, karakterleri ve diyalogları yapımcılarına aittir. Paketler yalnızca sahip olunan oyunlarla kişisel ve ticari olmayan kullanım içindir. Hak sahibiyseniz ve bir paketin kaldırılmasını istiyorsanız depoda bir *issue* açın; paket kaldırılır.
+
+## Teşekkürler
+
+- [CouchSubs](https://github.com/yorulmazsinan/couchsubs) (Sinan Yorulmaz): Remote Play kitaplığı, oyun paketleri ve paket biçimi.
+- [GameTranslator](https://gitlab.com/sefflex/GameTranslator) (sefflex): altyazı ayıklama fikirleri ve oyun paketleri.
+- [chiaki-ng](https://github.com/chiaki-ng/chiaki-ng): açık kaynak PlayStation Remote Play istemcisi.
+- Helsinki-NLP (OPUS-MT), quickmt, Google (Gemma), RapidOCR / PaddleOCR, llama.cpp ve listedeki diğer projelerin geliştiricileri.
+
+## Yasal uyarı
+
+- Bu proje Sony Interactive Entertainment, herhangi bir oyun yapımcısı, CouchSubs ya da GameTranslator ile bağlantılı değildir ve onlar tarafından desteklenmez.
+- PlayStation, PS5, PSN ve Remote Play, Sony Interactive Entertainment Inc.'in ticari markalarıdır. Oyun adları sahiplerinin markalarıdır ve burada yalnızca uygulamanın çalıştığı oyunları belirtmek için anılır.
+- Uygulama oyunlara ya da PS5'e müdahale etmez. Yalnızca kullanıcının kendi PS5'inden Remote Play ile gelen görüntüyü okur.
