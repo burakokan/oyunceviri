@@ -31,6 +31,7 @@ data class Style(
     val position: String = "bottom", // bottom | middle | top
     val offset: Int = 6,             // % of screen height from the edge
     val align: String = "center",    // left | center | right
+    val xOffset: Int = 0,            // % of screen width the subtitle is moved sideways (- left, + right)
     val maxWidth: Int = 80,          // % of screen width
     // original English
     val showEnglish: Boolean = false,
@@ -58,7 +59,7 @@ data class Style(
         put("speakerShow", speakerShow); put("speakerColors", speakerColors); put("speakerColor", speakerColor); put("speakerOwnLine", speakerOwnLine)
         put("outline", outline); put("outlineColor", outlineColor); put("shadow", shadow)
         put("bgColor", bgColor); put("bgOpacity", bgOpacity); put("bgRadius", bgRadius); put("bgPadding", bgPadding)
-        put("position", position); put("offset", offset); put("align", align); put("maxWidth", maxWidth)
+        put("position", position); put("offset", offset); put("align", align); put("xOffset", xOffset); put("maxWidth", maxWidth)
         put("showEnglish", showEnglish); put("englishSize", englishSize); put("englishColor", englishColor)
         put("englishAbove", englishAbove)
         put("lingerMs", lingerMs); put("fadeMs", fadeMs); put("stackPrevious", stackPrevious)
@@ -95,6 +96,7 @@ data class Style(
             position = j.optString("position", base.position),
             offset = j.optInt("offset", base.offset),
             align = j.optString("align", base.align),
+            xOffset = j.optInt("xOffset", base.xOffset).coerceIn(-45, 45),
             maxWidth = j.optInt("maxWidth", base.maxWidth),
             showEnglish = j.optBoolean("showEnglish", base.showEnglish),
             englishSize = j.optInt("englishSize", base.englishSize),

@@ -4,7 +4,7 @@
  * messages: one box per area, "⟦1⟧" in the text is a button icon sent as a PNG). */
 (function () {
   "use strict";
-  var VERSION = "1.4-web";
+  var VERSION = "1.5-web";
   var PORT = 8765;
   var PLATFORM = window.tizen ? "tizen"
     : (window.PalmSystem || window.webOSSystem || /Web0S|webOS/i.test(navigator.userAgent)) ? "webos" : "browser";
@@ -12,7 +12,7 @@
   var DEFAULT_STYLE = {
     textSize: 30, bold: true, textColor: "#FFFFFF", speakerShow: true, speakerColor: "#FFD54F",
     outline: 3, outlineColor: "#000000", shadow: 6, bgColor: "#000000", bgOpacity: 55, bgRadius: 12,
-    bgPadding: 14, position: "bottom", offset: 6, align: "center", maxWidth: 80, showEnglish: false,
+    bgPadding: 14, position: "bottom", offset: 6, align: "center", xOffset: 0, maxWidth: 80, showEnglish: false,
     englishSize: 60, englishColor: "#B0BEC5", lingerMs: 400, prevHoldMs: 2500, readBaseMs: 1500,
     readPerCharMs: 50, readMaxMs: 5000, lineSpacing: 115, uppercase: false, speakerColors: true, maxLines: 4,
     provisional: true, prevSmaller: false, speakerOwnLine: false, stackPrevious: false
@@ -218,6 +218,7 @@
     else if (style.position === "middle") { subs.style.top = "45%"; }
     else { subs.style.bottom = off; }
     subs.style.textAlign = style.align;
+    subs.style.transform = "translateX(" + ((style.xOffset || 0) / 100 * 1920) + "px)";   // moved left / right
     render();
   }
 

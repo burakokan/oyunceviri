@@ -227,6 +227,12 @@ class RegionPage(QWidget):
         self.size, size_row = self._area_slider("Yazı boyutu", "İngilizce yazının boyutuna göre. Sığmazsa "
                                                 "kendiliğinden küçülür.", 50, 200, "size", unit="%", restyle=True)
         card.add(size_row)
+        self.keep_lines = Toggle(True)
+        self.keep_lines.toggled.connect(lambda v: self._set_area("keep_lines", v, True))
+        card.add(SettingRow("Satır sayısı İngilizceyle aynı",
+                            "Türkçe, İngilizce kaç satırsa o kadar satırda gösterilir (\"Paradise Taxi / "
+                            "Dialing...\" iki satır kalır); sığmazsa yazı biraz küçülür. Kapalıyken kutu aşağı "
+                            "doğru uzar.", self.keep_lines))
         self.fg = ColorButton(lambda v: self._set_area("fg", v, True))
         card.add(SettingRow("Yazı rengi", None, self.fg))
         self.bg = ColorButton(lambda v: self._set_area("bg", v, True))
@@ -303,6 +309,7 @@ class RegionPage(QWidget):
                 slider.value_label.setText(f"{int(a[key])}{slider.unit}")
             self.fg.set_value(a["fg"])
             self.skip_menus.setChecked(bool(a.get("skip_menus")))
+            self.keep_lines.setChecked(bool(a.get("keep_lines", True)))
             self.ignore.setText(", ".join(a.get("ignore") or []))
             self.bg.set_value(a["bg"])
             self._syncing = False

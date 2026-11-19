@@ -131,7 +131,8 @@ def keep_reading(a, english, paragraph):
 def area_cfg(cfg, kind):
     """The settings of an area with every key present (older config files lack the newer ones)."""
     from .config import DEFAULTS
-    base = dict(LOOK, enabled=False, roi=None, filter="any", text_min=170, bg_max=80, skip_menus=False, ignore=[])
+    base = dict(LOOK, enabled=False, roi=None, filter="any", text_min=170, bg_max=80, skip_menus=False, ignore=[],
+                keep_lines=True)
     base.update(DEFAULTS.get("regions", {}).get(kind, {}))
     base.update(cfg.get("regions", {}).get(kind, {}))
     return base
@@ -783,14 +784,17 @@ class RegionTranslator:
         # Turkish runs ~25% longer: the box may grow (to the right, or both ways when centred, up to the area's
         # edge) and down.
         if center:
-            wide = bw * 1.6 if place in ("top", "bottom") else max(bw * 1.15, roi[2] * w)
+            # at the fixed top / bottom place there is room: up to 3x the English width (at most 45% of the screen)
+            wide = max(bw * 1.6, min(0.45 * w, bw * 3)) if place in ("top", "bottom") else max(bw * 1.15, roi[2] * w)
             cx = x0 + bw / 2
             half = max(bw / 2, min(wide / 2, cx - 4, w - cx - 4))
             mw = 2 * half
         else:
             right = max(x0 + bw, int((roi[0] + roi[2]) * w))
             mw = min(w - x0 - 4, max(bw * 1.15, right - x0))
-        mh = min(h - y0 - 4, bh * 1.8)
+        # As many lines as the English ("Paradise Taxi / Dialing..." stays two lines; "Arama yapılıyor..." wrapped
+        # onto a third): the TV makes the letters a bit smaller instead of growing the box downwards.
+        mh = min(h - y0 - 4, bh * (1.08 if a.get("keep_lines", True) else 1.8))
         opacity = max(0, min(100, int(a.get("opacity", 92))))
         # The TV takes the letters' size from the box height / rows; one reading's box can be a bit taller or
         # shorter (an icon, a cut row), so the size is corrected to the area's usual row distance.

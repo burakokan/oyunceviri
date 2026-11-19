@@ -53,6 +53,7 @@ SCHEMA = [
         ("position", "Dikey konum", "choice", [("bottom", "Altta"), ("middle", "Ortada"), ("top", "Üstte")]),
         ("offset", "Kenardan uzaklık", "int", 0, 45, 1, "%"),
         ("align", "Yatay hizalama", "choice", [("left", "Sola"), ("center", "Ortaya"), ("right", "Sağa")]),
+        ("xOffset", "Yatay kaydırma (sola − / sağa +)", "int", -45, 45, 1, "%"),
     ]),
     ("İngilizce orijinal", [
         ("showEnglish", "İngilizcesini de göster", "bool"),
@@ -80,6 +81,8 @@ PRESETS = [
     ("Büyük ve okunaklı", {"textSize": 40, "bgOpacity": 75, "maxWidth": 90}),
     ("Sade", {"font": "light", "bold": False, "outline": 0, "shadow": 0, "bgOpacity": 40}),
     ("Üstte", {"position": "top", "offset": 5}),
+    ("Sol alt köşe", {"position": "bottom", "align": "left", "offset": 4, "maxWidth": 55}),
+    ("Sağ alt köşe", {"position": "bottom", "align": "right", "offset": 4, "maxWidth": 55}),
 ]
 
 DEFAULT_STYLE = {
@@ -87,7 +90,8 @@ DEFAULT_STYLE = {
     "letterSpacing": 0, "speakerShow": True, "speakerColors": True, "speakerColor": "#FFD54F",
     "speakerOwnLine": False, "outline": 3,
     "outlineColor": "#000000", "shadow": 6, "bgColor": "#000000", "bgOpacity": 55, "bgRadius": 12,
-    "bgPadding": 14, "position": "bottom", "offset": 6, "align": "center", "maxWidth": 80, "showEnglish": False,
+    "bgPadding": 14, "position": "bottom", "offset": 6, "align": "center", "xOffset": 0, "maxWidth": 80,
+    "showEnglish": False,
     "englishSize": 60, "englishColor": "#B0BEC5", "englishAbove": False, "lingerMs": 400, "fadeMs": 120,
     "stackPrevious": False, "prevHoldMs": 2500, "readBaseMs": 1500, "readPerCharMs": 50, "readMaxMs": 5000,
     "provisional": True, "autoShrink": False, "prevSmaller": False, "maxLines": 4,

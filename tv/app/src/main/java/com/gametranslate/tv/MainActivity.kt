@@ -221,6 +221,7 @@ class MainActivity : Activity() {
         }
         val margin = if (style.position == "middle") 0 else preview.height * style.offset / 100
         val side = if (style.align == "center") 0 else w * 3 / 100
+        previewSubtitle.translationX = w * style.xOffset / 100f
         previewSubtitle.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT, vertical or horizontal).apply {
             if (style.position == "top") topMargin = margin else bottomMargin = margin
@@ -367,6 +368,8 @@ class MainActivity : Activity() {
                         { s, v -> s.copy(offset = v) }, 0, 45, 1) { "%$it" },
                     choice("Yatay hizalama", null, listOf("left" to "Sola", "center" to "Ortaya", "right" to "Sağa"),
                         { it.align }, { s, v -> s.copy(align = v) }),
+                    number("Yatay kaydırma", "Altyazıyı sola (−) ya da sağa (+) kaydırır.", { it.xOffset },
+                        { s, v -> s.copy(xOffset = v) }, -45, 45, 1) { "%$it" },
                 )
             },
             Category("İngilizce orijinal") {

@@ -176,6 +176,7 @@ class OverlayService : Service() {
         val metrics = resources.displayMetrics
         v.referenceWidth = metrics.widthPixels
         v.applyStyle(s)
+        v.translationX = metrics.widthPixels * s.xOffset / 100f      // moved left / right (a corner, a free spot)
         if (!s.stackPrevious) v.clearPrevious()
         val vertical = when (s.position) {
             "top" -> Gravity.TOP

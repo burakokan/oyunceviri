@@ -88,7 +88,8 @@ DEFAULTS = {
     # whose readings are left out (the user's exceptions).
     # Look on the TV: place cover (over the English) | below | above | top | bottom (fixed, centred; offset % from
     # the edge); align left | center; size % of the English text; fg / bg colours; opacity % of the box (0: none,
-    # shadowed text).
+    # shadowed text); keep_lines: the Turkish has as many lines as the English (smaller letters instead of a taller
+    # box).
     "regions": {
         "hint": {"enabled": False, "roi": None, "filter": "dark_box", "text_min": 170, "bg_max": 80,
                  "skip_menus": True, "ignore": [],
