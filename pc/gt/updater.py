@@ -6,9 +6,11 @@ Every release (tag "v1.2.3", made by packaging/publish.py) carries:
   update-1.2.3-1.zip…  the files that changed since the release "base" (each part < 2 GB)
   OyunCeviri-Kurulum…  only in some releases: the full setup for a new PC
 The app walks the releases newer than itself in order (each one's base must be the one before), downloads and
-checks every part, unpacks them into update/staging and, when the user agrees or closes the app, quits and lets a
-small PowerShell script copy the files over the installed ones (and start the app again). Settings, PS5 keys, logs
-and caches are never part of an update.
+checks every part and unpacks them into update/staging - only when the user clicks "İndir ve kur": the app looks
+for new versions by itself (at start and every hour) but never downloads or installs one on its own, so it never
+restarts during a game. Then it quits and a small PowerShell script copies the files over the installed ones and
+starts the app again. The user's own files (settings, PS5 keys, speaker colours, caches, logs, TV keys, packs being
+built) are never written or deleted by an update, whatever a release contains (see PROTECTED).
 """
 import hashlib
 import json
@@ -117,7 +119,8 @@ class Updater:
             if r.status_code == 403 and r.headers.get("X-RateLimit-Remaining") == "0":
                 raise UpdateError("GitHub sorgu sınırı doldu, bir saat sonra tekrar dene.")
             if not self._headers().get("Authorization"):
-                raise UpdateError("Güncellemeler gizli depoda: aşağıya GitHub erişim anahtarını gir.")
+                raise UpdateError("Güncelleme kaynağı bulunamadı. Depo gizli yapıldıysa aşağıya GitHub erişim "
+                                  "anahtarını gir.")
             raise UpdateError("Erişim anahtarı kabul edilmedi (süresi dolmuş ya da bu depoya izni yok).")
         if r.status_code >= 400:
             raise UpdateError(f"GitHub hata verdi ({r.status_code}). Biraz sonra tekrar dene.")

@@ -120,8 +120,13 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
         if not (x0 <= cx <= x1) and min(abs(x0 - cx), abs(x1 - cx)) > max_offset * w:
             continue
         if colored is None:
-            hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
-            colored = _letters_only(((hsv[..., 2] >= max(v_min - 25, 0)) * 255).astype(np.uint8))
+            v = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 2]
+            bright = v >= max(v_min - 25, 0)
+            # On a sunlit street the bright pavement melts into a coloured name ("Joey:") and the blob is thrown
+            # away as too big, so the name stayed outside the row and the line had no speaker: letters with a dark
+            # outline next to them are taken too (the pavement has none).
+            colored = (_letters_only((bright * 255).astype(np.uint8))
+                       | _letters_only(((bright & (cv2.erode(v, _OUTLINE) < 60)) * 255).astype(np.uint8)))
         cols = colored[y0:y1].any(axis=0)
         while x0 > 0 and cols[max(0, x0 - gap // 2):x0].any():
             x0 = max(0, x0 - gap // 2) + int(np.argmax(cols[max(0, x0 - gap // 2):x0]))

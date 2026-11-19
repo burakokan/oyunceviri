@@ -14,10 +14,9 @@ from gt.version import REPO, VERSION
 from .. import theme
 from ..widgets import Card, Divider, SettingRow, Toggle, icon_button
 
-TOKEN_HELP = ("Depo gizli olduğu için gerekiyor, her bilgisayarda bir kez girilir. Almak için: github.com → sağ üstte "
-              "profil → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new "
-              "token. Repository access: <b>Only select repositories → oyunceviri</b>, Permissions: <b>Contents → "
-              "Read-only</b>. Çıkan anahtarı buraya yapıştır.")
+TOKEN_HELP = ("Gerekmez, boş bırak: güncellemeler herkese açık depodan gelir. Yalnızca depo bir gün gizli yapılırsa "
+              "okuma izinli bir anahtar (github.com → Settings → Developer settings → Fine-grained tokens, "
+              "<b>Contents → Read-only</b>) buraya yapıştırılır.")
 
 
 class SettingsPage(QWidget):
@@ -78,17 +77,18 @@ class SettingsPage(QWidget):
         update.add(Divider())
         auto = Toggle(self.cfg["update"]["auto"])
         auto.toggled.connect(self._set_auto_update)
-        update.add(SettingRow("Kendiliğinden güncelle",
-                              "Açılışta yeni sürüme bakar ve arka planda indirir. Uygulamayı kapatınca kurulur; "
-                              "oyun sırasında hiçbir şey yeniden başlamaz. Oyun paketleri ve TV uygulaması da "
-                              "bununla güncellenir.", auto))
+        update.add(SettingRow("Yeni sürümü kendiliğinden ara",
+                              "Açılışta ve açıkken saatte bir yeni sürüme bakar, varsa haber verir. Hiçbir şey "
+                              "kendiliğinden indirilmez ya da kurulmaz: kurulum yalnızca sen \"İndir ve kur\"a "
+                              "basınca olur, oyun sırasında program yeniden başlamaz. Ayarların, PS5 kaydın, "
+                              "konuşmacı renklerin ve kayıtların güncellemede değişmez.", auto))
         update.add(Divider())
         self.token = QLineEdit(self.cfg["update"].get("token", ""))
         self.token.setEchoMode(QLineEdit.Password)
         self.token.setPlaceholderText("github_pat_…")
         self.token.setMinimumWidth(260)
         self.token.editingFinished.connect(self._set_token)
-        token_row = SettingRow("GitHub erişim anahtarı", TOKEN_HELP, self.token)
+        token_row = SettingRow("GitHub erişim anahtarı (gerekmez)", TOKEN_HELP, self.token)
         for label in token_row.findChildren(QLabel):
             label.setOpenExternalLinks(True)
         update.add(token_row)
@@ -124,7 +124,7 @@ class SettingsPage(QWidget):
         self.cfg["update"]["token"] = token
         self.win.persist_config(("update", "token"))
         if token:
-            self.win.check_updates(download=FROZEN and self.cfg["update"]["auto"])
+            self.win.check_updates()
 
     def _update_clicked(self):
         state, _, plan = self.win.update_state
@@ -132,8 +132,9 @@ class SettingsPage(QWidget):
             self.win.download_update(plan)
         elif state == "ready":
             self.win.install_update()
-        elif state == "setup" and plan:
-            QDesktopServices.openUrl(QUrl(plan.get("url") or f"https://github.com/{REPO}/releases"))
+        elif state == "setup" and plan or state == "available":
+            # the full setup is needed, or the app runs from source (it cannot install): the release page
+            QDesktopServices.openUrl(QUrl((plan or {}).get("url") or f"https://github.com/{REPO}/releases"))
         else:
             self.win.check_updates()
 
@@ -144,7 +145,9 @@ class SettingsPage(QWidget):
                   "ready": (theme.Icon.REFRESH, "Yeniden başlat ve kur"), "setup": (theme.Icon.OPEN, "Sayfayı aç")}
         if state == "available" and FROZEN:
             mb = max(1, round((plan or {}).get("size", 0) / 1e6))
-            glyph, text = theme.Icon.SYNC, f"İndir ({mb} MB)"
+            glyph, text = theme.Icon.SYNC, f"İndir ve kur ({mb} MB)"
+        elif state == "available":
+            glyph, text = theme.Icon.OPEN, "Sürüm sayfası"
         else:
             glyph, text = labels.get(state, (theme.Icon.SYNC, "Denetle"))
         self.update_button.setText(f"{glyph}  {text}")

@@ -31,6 +31,12 @@ Bu komut uygulamayı derler. Yalnız değişen dosyaları içeren bir güncellem
 
 ## Kurulu uygulamanın güncellenmesi
 
-- Uygulama açılışta yeni sürüme bakar ve arka planda indirir. Güncelleme uygulama kapanınca kurulur; Genel → Güncelleme → "Yeniden başlat ve kur" ile hemen de kurulabilir.
-- Depo gizli olduğu için her bilgisayara bir kez okuma izinli bir GitHub anahtarı girilir (Genel → Güncelleme). Bu anahtar yalnızca `config.json` içinde durur.
+- Uygulama açılışta ve açıkken saatte bir yeni sürüme bakar. Yeni sürüm varsa yalnızca haber verir; hiçbir şeyi kendiliğinden indirmez ya da kurmaz. Kurulum, Genel → Güncelleme → "İndir ve kur" düğmesine basınca olur. Böylece oyun sırasında program hiç yeniden başlamaz.
+- Depo herkese açık, o yüzden erişim anahtarı gerekmez.
+- Güncelleme kullanıcının kendi dosyalarına hiç dokunmaz: `config.json`, `ps5.json`, `speakers.json`, önbellekler, `logs/`, `tv-keys/`, `packs/build/`. Bir sürüm bu dosyaları yanlışlıkla içerse ya da silinecekler listesine koysa bile durum değişmez. Kanıt testi gerçek uygulamaya dokunmaz, `D:\OyunCeviriTest` içinde ayrı bir kurulum kullanır:
+
+```powershell
+.venv\Scripts\python.exe packaging\update_proof.py
+```
+
 - Bağlanan Android TV uygulaması eskiyse, altyazı durdurulmuşken ağ üzerinden kendiliğinden güncellenir.

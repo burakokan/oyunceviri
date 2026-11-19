@@ -11,6 +11,13 @@ from ..widgets import Card, Divider, SettingRow, Toggle, icon_button
 FONTS = [("sans", "Standart"), ("condensed", "Dar"), ("medium", "Orta kalın"), ("light", "İnce"),
          ("serif", "Tırnaklı"), ("mono", "Eş aralıklı")]
 
+# How new lines come: "single" = one line, a new translation takes the old one's place; "stack" = the old one moves
+# up a row (dimmed) and stays until it could be read. Stored in the style as maxLines / prevHoldMs / stackPrevious.
+LAYOUTS = [("stack", "Önceki çeviri yukarı kaysın (kalabalık sahnede alt alta)"),
+           ("single", "Tek satır: yeni çeviri eskisinin yerine geçsin")]
+LAYOUT_STYLE = {"single": {"maxLines": 1, "prevHoldMs": 0, "stackPrevious": False},
+                "stack": {"maxLines": 4, "prevHoldMs": 2500, "stackPrevious": False}}
+
 # (section, [(key, title, kind, options...)])
 SCHEMA = [
     ("Yazı", [
@@ -153,6 +160,10 @@ class TvLookPage(QWidget):
         top.add_layout(presets)
         lay.addWidget(top)
 
+        layout_card = Card("Satır düzeni")
+        layout_card.add(self._control(("_layout", "Yeni çeviri gelince", "layout")))
+        lay.addWidget(layout_card)
+
         grid = QGridLayout()
         grid.setSpacing(16)
         for i, (section, fields) in enumerate(SCHEMA):
@@ -259,6 +270,14 @@ class TvLookPage(QWidget):
             h.addWidget(value)
             self.controls[key] = (kind, slider, value, unit)
             return SettingRow(title, None, box)
+        if kind == "layout":
+            combo = QComboBox()
+            for v, label in LAYOUTS:
+                combo.addItem(label, v)
+            combo.currentIndexChanged.connect(lambda _=0, combo=combo: self._set_layout(combo.currentData()))
+            self.controls[key] = (kind, combo)
+            return SettingRow(title, "Tek satırda ekranda hep yalnız en son çeviri durur; önceki satır yukarı kaymaz. "
+                              "Uzun bir cümle yine iki satıra bölünebilir.", combo)
         if kind == "bool":
             t = Toggle()
             t.toggled.connect(lambda v, key=key: self._set(key, v))
@@ -278,8 +297,12 @@ class TvLookPage(QWidget):
     def _fill(self):
         self._loading = True
         for key, ctl in self.controls.items():
-            v = self.style.get(key, DEFAULT_STYLE[key])
             kind = ctl[0]
+            if kind == "layout":
+                ctl[1].setCurrentIndex(ctl[1].findData(
+                    "single" if int(self.style.get("maxLines", DEFAULT_STYLE["maxLines"])) <= 1 else "stack"))
+                continue
+            v = self.style.get(key, DEFAULT_STYLE[key])
             if kind == "int":
                 ctl[1].setValue(int(v))
                 ctl[2].setText(f"%{v}" if ctl[3] == "%" else f"{v}{ctl[3]}")
@@ -300,6 +323,14 @@ class TvLookPage(QWidget):
         self.style[key] = value
         self._send_timer.start()
         self.win.save_config()      # shown on the TV now; kept with Kaydet, undone with Vazgeç
+
+    def _set_layout(self, layout):
+        if self._loading:
+            return
+        self.style.update(LAYOUT_STYLE[layout])
+        self._fill()                # the "Zamanlama" controls show the new values
+        self._send_timer.start()
+        self.win.save_config()
 
     def _send(self):
         self.win.server.send({"type": "style", "style": self.style})

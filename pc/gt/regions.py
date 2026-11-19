@@ -3,6 +3,11 @@
 - "hint":  the tutorial / objective box ("Press (L3) to swim faster, and press again…"): all its rows are one
            paragraph, translated together.
 - "phone": the in-game phone's messages: every message (paragraph) is translated on its own, one under the other.
+- "objective": the short mission objective under the subtitles ("Go to the bank."), translated as one line.
+
+Every area has its own reading filter (cfg regions.<kind>.filter: only white text in a dark box - the hint box -, only
+outlined white text like subtitles, only bright text, or everything), so a sign or a poster that drifts into the area
+is not translated, and its own look on the TV (place, size, colours, box).
 
 The user picks each area on the "Altyazı Alanı" page (fractions of the PS5 picture, built-in Remote Play only).
 A few times a second the area is compared with how it looked; when it changed, its text is searched (RapidOCR
@@ -39,7 +44,21 @@ KINDS = {
               "context": "Text messages on a character's phone in a video game, written informally between friends. "
                          "Natural spoken Turkish (\"sen\"), slang and swearing as strong as the English. Keep names.",
               "paragraph": False},
+    "objective": {"label": "Görev hedefi",
+                  "context": "A short mission objective shown under the subtitles of a video game (\"Go to the bank.\", "
+                             "\"Follow Jason.\"). A short Turkish imperative to one player (\"sen\" form: "
+                             "\"Bankaya git.\"). Keep the names of people and places.",
+                  "paragraph": True},
 }
+# Which text an area reads (the rest - signs, posters, the scene - is left out):
+FILTERS = {
+    "dark_box": "Koyu kutudaki beyaz yazı",        # the hint box: white letters on a dark, plain background
+    "outlined": "Kenarlıklı beyaz yazı",           # like subtitles: white letters with a dark outline / shadow
+    "bright": "Parlak (beyaz) yazı",
+    "any": "Alandaki her yazı",
+}
+PLACES = ("cover", "below", "above", "top", "bottom")
+WATCH_EVERY = 0.7           # s between readings of an area that is only being looked at on the area page
 CHECK_EVERY = 0.15          # s between looks at the areas
 MIN_READ_GAP = 0.35         # s between two readings of the same area
 REREAD_SECONDS = 2.5        # read again at least this often while a translation is shown
@@ -49,7 +68,78 @@ SMALL_ROW = 28              # px: rows lower than this are enlarged x2 before re
 CACHE_FILE = ROOT / "region_cache.json"
 TOKEN = re.compile(r"⟦(\d+)(?:\|([^⟧]*))?⟧")   # an icon: ⟦1|L3⟧ in English, ⟦1⟧ in Turkish
 _LETTER = re.compile(r"[A-Za-z]")
-STYLE = {"fg": "#ffffff", "bg": "#10151c", "alpha": 0.92}
+# The look of an area on the TV when nothing is set (config.DEFAULTS has the same per area).
+LOOK = {"place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
+        "opacity": 92}
+
+
+def area_cfg(cfg, kind):
+    """The settings of an area with every key present (older config files lack the newer ones)."""
+    from .config import DEFAULTS
+    base = dict(LOOK, enabled=False, roi=None, filter="any", text_min=170, bg_max=80)
+    base.update(DEFAULTS.get("regions", {}).get(kind, {}))
+    base.update(cfg.get("regions", {}).get(kind, {}))
+    return base
+
+
+# ---------------------------------------------------------------- which text is read
+
+def row_look(crop, rect, text_min=170):
+    """How a piece of text looks -> dict: "bright" (light letters at all; dark text on a light message bubble has
+    none), the letters' brightness and colourfulness (0-255), the background's brightness and how plain it is, and
+    how much of the letters has a dark outline next to it (GTA's subtitles and objectives: ~0.9; a sign: ~0)."""
+    x0, y0, x1, y1 = rect
+    rh = max(1, y1 - y0)
+    pad = max(2, int(0.25 * rh))
+    region = crop[max(0, y0 - pad):y1 + pad, max(0, x0 - pad):x1 + pad]
+    if region.size == 0:
+        return None
+    hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+    v, s = hsv[..., 2], hsv[..., 1]
+    light = (((v >= max(120, text_min - 30)) & (s <= 90)) * 255).astype(np.uint8)
+    # Letter-sized pieces only: a sunlit wall or the sky behind the text is not "the letters".
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(light, connectivity=8)
+    keep = np.zeros(n, bool)
+    keep[1:] = ((stats[1:, cv2.CC_STAT_HEIGHT] <= 1.6 * rh) & (stats[1:, cv2.CC_STAT_WIDTH] <= 3 * rh)
+                & (stats[1:, cv2.CC_STAT_AREA] >= 4))
+    letters = keep[labels]
+    count = int(letters.sum())
+    if count < 20:
+        return {"bright": False}
+    around = cv2.dilate(letters.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    bg = ~around
+    # The outline is judged on the letters' edge pixels (thick bold letters have a bright middle far from it).
+    edge = letters & ~(cv2.erode(letters.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+    near_dark = cv2.erode(v, np.ones((5, 5), np.uint8)) < 70
+    return {"bright": True, "text_v": float(np.median(v[letters])), "text_s": float(np.median(s[letters])),
+            "bg_v": float(np.median(v[bg])) if bg.any() else 0.0,
+            "bg_hi": float(np.percentile(v[bg], 85)) if bg.any() else 0.0,
+            "outline": float((edge & near_dark).sum() / max(1, int(edge.sum())))}
+
+
+def accepts(look, a):
+    """-> (row is read, why not) for an area's filter settings `a`."""
+    kind = a.get("filter", "any")
+    if kind == "any":
+        return True, ""
+    if look is None or not look["bright"]:
+        return False, "açık renk yazı yok"
+    if look["text_v"] < a.get("text_min", 170):
+        return False, "yazı soluk"
+    if kind == "dark_box":
+        dark = a.get("bg_max", 80)
+        if look["bg_v"] > dark:
+            return False, "zemin açık"
+        if look["bg_hi"] > dark + 60:
+            return False, "zemin düz değil"     # a dark sign in a bright, busy scene
+        if look["text_s"] > 70:
+            return False, "yazı renkli"
+    elif kind == "outlined":
+        if look["outline"] < 0.6:
+            return False, "kenarlık yok"
+    elif kind == "bright" and look["text_s"] > 70:
+        return False, "yazı renkli"
+    return True, ""
 
 
 # ---------------------------------------------------------------- icons
@@ -125,8 +215,9 @@ class AreaReader:
             return ""
         return r.txts[0].strip()
 
-    def read(self, crop):
-        """-> rows [{"rect": (x0, y0, x1, y1), "pieces": ["text" | {"icon": png}]}], top to bottom."""
+    def read(self, crop, area=None):
+        """-> rows [{"rect": (x0, y0, x1, y1), "pieces": ["text" | {"icon": png}], "ok": True}], top to bottom.
+        area: the area's settings; rows its filter leaves out come with "ok": False and "why" (not read)."""
         r = self.det(crop, use_det=True, use_cls=False, use_rec=False)
         h, w = crop.shape[:2]
         boxes = []
@@ -136,6 +227,18 @@ class AreaReader:
             x0, y0, x1, y1 = max(0, x0 - 2), max(0, y0 - 2), min(w, x1 + 2), min(h, y1 + 2)
             if y1 - y0 >= 8 and x1 - x0 >= 8:
                 boxes.append((x0, y0, x1, y1))
+        out = []
+        if area is not None and area.get("filter", "any") != "any":
+            # Every piece of text on its own: a sign next to the objective on the same row is left out, the
+            # objective is still read.
+            kept = []
+            for b in boxes:
+                ok, why = accepts(row_look(crop, b, area.get("text_min", 170)), area)
+                if ok:
+                    kept.append(b)
+                else:
+                    out.append({"rect": b, "pieces": [], "ok": False, "why": why})
+            boxes = kept
         rows = []
         for b in sorted(boxes, key=lambda b: (b[1] + b[3]) / 2):
             cy, bh = (b[1] + b[3]) / 2, b[3] - b[1]
@@ -145,7 +248,6 @@ class AreaReader:
                     break
             else:
                 rows.append({"cy": cy, "h": bh, "boxes": [b]})
-        out = []
         for row in rows:
             bx = row["boxes"]
             rect = (min(b[0] for b in bx), min(b[1] for b in bx), max(b[2] for b in bx), max(b[3] for b in bx))
@@ -156,7 +258,7 @@ class AreaReader:
             letters = sum(len(_LETTER.findall(p)) for p in pieces if isinstance(p, str))
             if letters < 2 and not any(isinstance(p, dict) for p in pieces):
                 continue
-            out.append({"rect": rect, "pieces": pieces})
+            out.append({"rect": rect, "pieces": pieces, "ok": True})
         return out
 
     def _read_row(self, crop, rect, boxes):
@@ -200,6 +302,8 @@ def compose(rows, paragraph):
     """Rows -> (english with ⟦n|label⟧ for every icon, {n: png}, blocks [(english, rows)])."""
     icons, lines = {}, []
     for row in rows:
+        if not row.get("ok", True):
+            continue
         words = []
         for p in row["pieces"]:
             if isinstance(p, dict):
@@ -303,6 +407,10 @@ class RegionTranslator:
         self._sent = None
         self._size = (1920, 1080)
         self.last = {}          # kind -> {"en", "tr", "via"} for the UI
+        # The area page shows what an area reads (also while it is off): kinds it looks at, and per kind the last
+        # reading {"time", "size": (w, h) of the crop, "rows": [{"rect", "ok", "why", "text"}]}.
+        self.watching = set()
+        self.debug = {}
         threading.Thread(target=self._loop, daemon=True).start()
         threading.Thread(target=self._translate_loop, daemon=True).start()
 
@@ -312,17 +420,24 @@ class RegionTranslator:
         a = self.cfg.get("regions", {}).get(kind, {})
         return bool(a.get("enabled") and a.get("roi"))
 
+    def area(self, kind):
+        return area_cfg(self.cfg, kind)
+
     def preview(self, kind, seconds=8):
         """A sample box on the TV at the chosen place (no game needed)."""
         roi = self.cfg.get("regions", {}).get(kind, {}).get("roi") or [0.03, 0.05, 0.3, 0.2]
         w, h = self._size
         rect = (int(roi[0] * w), int(roi[1] * h), int((roi[0] + roi[2] * 0.9) * w),
                 int((roi[1] + roi[3] * 0.6) * h))
+        if kind == "objective":
+            # one row as high as a subtitle's
+            rect = (int(roi[0] * w), int(roi[1] * h), int((roi[0] + roi[2]) * w), int(roi[1] * h + 0.035 * h))
         sample = {"hint": "Daha hızlı yüzmek için ⟦1⟧ tuşuna bas, daha da hızlanmak için tekrar bas. Suda yana "
                           "kaymak ya da geri yüzmek için ⟦2⟧ tuşunu basılı tut.",
-                  "phone": "Lucia: Neredesin? Herkes seni bekliyor.\nJason: Geliyorum, 5 dakika."}[kind]
+                  "phone": "Lucia: Neredesin? Herkes seni bekliyor.\nJason: Geliyorum, 5 dakika.",
+                  "objective": "Bankaya git."}[kind]
         icons = {"1": _sample_icon("L3", True), "2": _sample_icon("L2", False)} if kind == "hint" else {}
-        box = self._box(kind, rect, 3 if kind == "hint" else 2, sample, icons, w, h)
+        box = self._box(kind, rect, {"hint": 3, "phone": 2}.get(kind, 1), sample, icons, w, h)
         self.server.send({"type": "regions", "boxes": [box]})
 
         def back():
@@ -343,6 +458,9 @@ class RegionTranslator:
         while True:
             time.sleep(CHECK_EVERY)
             kinds = [k for k in KINDS if self.enabled(k)]
+            watched = [k for k in KINDS if k in self.watching and k not in kinds and self.area(k).get("roi")]
+            if watched and self.rp is not None and self.rp.seq:
+                self._watch_only(watched)
             if not kinds or self.rp is None or not self.rp.seq:
                 self._hide_all()
                 continue
@@ -369,6 +487,33 @@ class RegionTranslator:
                     self._look(kind, frame)
                 except Exception as e:  # noqa: BLE001 - shown in the UI, the loop goes on
                     self.on_status(kind, f"Hata: {e}")
+
+    def _watch_only(self, kinds):
+        """An area that is off but open on the area page: read now and then so the page shows what it would read
+        (nothing is translated or sent)."""
+        now = time.monotonic()
+        due = [k for k in kinds if now - self.debug.get(k, {}).get("time", 0) >= WATCH_EVERY]
+        if not due:
+            return
+        _, frame = self.rp.frame()
+        if frame is None:
+            return
+        if self._reader is None:
+            try:
+                self._reader = AreaReader()
+            except Exception:  # noqa: BLE001 - tried again on the next look
+                return
+        for kind in due:
+            crop, _ = self._crop(kind, frame)
+            if crop.size:
+                self._note(kind, crop, self._reader.read(crop, self.area(kind)))
+
+    def _note(self, kind, crop, rows):
+        out = []
+        for r in rows:
+            text = " ".join(p if isinstance(p, str) else f"[{p.get('label') or 'tuş'}]" for p in r["pieces"])
+            out.append({"rect": r["rect"], "ok": r.get("ok", True), "why": r.get("why", ""), "text": text})
+        self.debug[kind] = {"time": time.monotonic(), "size": (crop.shape[1], crop.shape[0]), "rows": out}
 
     def _crop(self, kind, frame):
         h, w = frame.shape[:2]
@@ -397,7 +542,8 @@ class RegionTranslator:
         a.read_at = now
         if self._reader is None:
             self._reader = AreaReader()
-        rows = self._reader.read(crop)
+        rows = self._reader.read(crop, self.area(kind))
+        self._note(kind, crop, rows)
         english, icons, _ = compose(rows, KINDS[kind]["paragraph"])
         if not english:
             a.candidate = ""
@@ -414,6 +560,7 @@ class RegionTranslator:
             return
         a.candidate = ""
         x0, y0 = origin
+        rows = [r for r in rows if r.get("ok", True)]
         rect = (x0 + min(r["rect"][0] for r in rows), y0 + min(r["rect"][1] for r in rows),
                 x0 + max(r["rect"][2] for r in rows), y0 + max(r["rect"][3] for r in rows))
         with self._lock:
@@ -507,19 +654,40 @@ class RegionTranslator:
     # ---- TV ----
 
     def _box(self, kind, rect, rows, tr, icons, w, h):
+        """The Turkish box for the TV with the area's own look: where (over the English, under / above it, or at a
+        fixed place at the top / bottom of the screen), how big, which colours, with or without a box."""
+        a = self.area(kind)
         x0, y0, x1, y1 = rect
-        place = self.cfg.get("regions", {}).get(kind, {}).get("place", "cover")
         bw, bh = x1 - x0, y1 - y0
+        place = a.get("place", "cover")
+        gap = int(0.012 * h)
+        roi = a.get("roi") or [0, 0, 1, 1]
+        center = a.get("align") == "center"
         if place == "below":
-            y0 = min(h - bh, y1 + int(0.012 * h))
-        # Turkish runs ~25% longer: the box may grow right (up to the area's edge) and down.
-        roi = self.cfg.get("regions", {}).get(kind, {}).get("roi") or [0, 0, 1, 1]
-        right = max(x1, int((roi[0] + roi[2]) * w))
-        mw = min(w - x0 - 4, max(bw * 1.15, right - x0))
+            y0 = min(h - bh, y1 + gap)
+        elif place == "above":
+            y0 = max(0, y0 - bh - gap)
+        elif place in ("top", "bottom"):
+            edge = int(float(a.get("offset", 8)) / 100 * h)
+            y0 = edge if place == "top" else max(0, h - edge - bh)
+            x0 = (w - bw) // 2
+            center = True
+        # Turkish runs ~25% longer: the box may grow (to the right, or both ways when centred, up to the area's
+        # edge) and down.
+        if center:
+            wide = bw * 1.6 if place in ("top", "bottom") else max(bw * 1.15, roi[2] * w)
+            cx = x0 + bw / 2
+            half = max(bw / 2, min(wide / 2, cx - 4, w - cx - 4))
+            mw = 2 * half
+        else:
+            right = max(x0 + bw, int((roi[0] + roi[2]) * w))
+            mw = min(w - x0 - 4, max(bw * 1.15, right - x0))
         mh = min(h - y0 - 4, bh * 1.8)
+        opacity = max(0, min(100, int(a.get("opacity", 92))))
         return {"id": kind, "x": x0 / w, "y": y0 / h, "w": bw / w, "h": bh / h, "mw": mw / w, "mh": mh / h,
-                "lines": max(1, rows), "tr": tr, "icons": icons, "fg": STYLE["fg"], "bg": STYLE["bg"],
-                "alpha": STYLE["alpha"], "scale": 1.0, "shadow": False}
+                "lines": max(1, rows), "tr": tr, "icons": icons, "fg": a.get("fg", "#FFFFFF"),
+                "bg": a.get("bg", "#10151C"), "alpha": opacity / 100, "scale": float(a.get("size", 100)) / 100,
+                "shadow": opacity == 0, "align": "center" if center else "left"}
 
     def _send(self):
         w, h = self._size

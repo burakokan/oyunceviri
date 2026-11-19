@@ -17,7 +17,7 @@ from .ocr import (RowCache, changed, keep_boxes, make_ocr, outline_mask, outline
                   text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
-from .speakers import SpeakerColors
+from .speakers import SpeakerColors, SpeakerNames
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
 
@@ -116,6 +116,13 @@ def join_parts(english_parts, turkish_parts):
     return " ".join(out)
 
 
+def punch(mask, holes):
+    """The mask with the given rectangles [(y0, y1, x0, x1)] emptied."""
+    for y0, y1, x0, x1 in holes:
+        mask[y0:y1, x0:x1] = 0
+    return mask
+
+
 def compatible(speaker_a, speaker_b):
     return not (speaker_a and speaker_b and speaker_a != speaker_b)
 
@@ -161,6 +168,10 @@ class Engine:
         self._opens = deque(maxlen=OPEN_MAX)
         self._ended = deque(maxlen=20)  # whether recent lines ended with punctuation
         self.colors = SpeakerColors()
+        # The names read this session (misread / cut-off names are fixed with them) and whether the game names the
+        # speaker on every line (then a line without a name is not given the previous speaker's name).
+        self.names = SpeakerNames()
+        self._named = deque(maxlen=12)
         self._sticky = StickyRows()     # objectives / notices that stay while people talk
         self.repeats = RepeatGuard()    # signs / billboards read again and again
         self._cleared = True  # the screen was empty since the previous line
@@ -181,6 +192,8 @@ class Engine:
         if self.running:
             return
         self.cfg = cfg
+        self.names = SpeakerNames()         # a new session may be another game
+        self._named.clear()
         self.conductor.warm(cfg)            # open the online connections / start Gemma before the first line
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -376,11 +389,12 @@ class Engine:
                     if recorder:
                         recorder(bgr, t_frame)
                     boxes = None
+                    holes = self._holes(roi, bgr.shape)
                     if outlined:
-                        mask = outline_mask(bgr, cfg["text_v_min"], cfg["text_s_max"])
+                        mask = punch(outline_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
                         boxes = self.lines(cfg, bgr, mask, roi)
                     if not boxes:
-                        mask = text_mask(bgr, cfg["text_v_min"], cfg["text_s_max"])
+                        mask = punch(text_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
                         boxes = self.lines(cfg, bgr, mask, roi)
                     beat["rows"] = max(beat["rows"], len(boxes))
                     sig = signature(keep_boxes(mask, boxes))
@@ -458,6 +472,25 @@ class Engine:
     def roi(self):
         return self.cfg.get("roi_builtin") if self._builtin else self.cfg.get("roi")
 
+    def _holes(self, roi, shape):
+        """The extra areas that are on (objective, hint box, phone) inside the subtitle area, in its pixels
+        [(y0, y1, x0, x1)]: the subtitle reader leaves them to the area translator, so the objective under the
+        subtitles is not read as dialogue too. The areas exist only with built-in Remote Play."""
+        if not self._builtin or not roi:
+            return []
+        h, w = shape[:2]
+        x, y, rw, rh = roi
+        out = []
+        for a in (self.cfg.get("regions") or {}).values():
+            r = a.get("roi") if a.get("enabled") else None
+            if not r or rw <= 0 or rh <= 0:
+                continue
+            x0, x1 = max(0, int((r[0] - x) / rw * w)), min(w, int((r[0] + r[2] - x) / rw * w))
+            y0, y1 = max(0, int((r[1] - y) / rh * h)), min(h, int((r[1] + r[3] - y) / rh * h))
+            if x1 > x0 and y1 > y0:
+                out.append((y0, y1, x0, x1))
+        return out
+
     def _read_roi(self):
         """The chosen subtitle area, widened a little on both sides: GTA's longest lines run past a tight area and
         lost their first letters / final full stop (then the line was held as unfinished). The centered-block finder
@@ -507,10 +540,16 @@ class Engine:
             ocr_ms += (time.perf_counter() - t0) * 1000
             if better:
                 text = better
+        if self.names_always():
+            # A menu next to the dialogue on the same screen row (GTA's garage: "…Pair with transmisJoey: There ya
+            # go."): the row starts at the known speaker's name.
+            text = "\n".join(row if filters.split_speaker(row)[0] else (self.names.find(row) or row)
+                             for row in text.split("\n"))
         # Every speaker's line on its own row, in screen order (a busy scene shows several at once); lines that
         # stay on screen (or come back) are not translated again.
         for rows in filters.utterance_rows(text):
             speaker, first = filters.split_speaker(rows[0])
+            speaker = self.names.resolve(speaker)   # "CO wiison" -> "CO Wilson", "…ress" -> "Waitress"
             rows = [first] + rows[1:]
             if len(rows) > 1:
                 # Two people's unnamed lines read as one block ("You can still walk away" over "Do you know how bad
@@ -543,6 +582,11 @@ class Engine:
                 continue
             self._utterance(line, op, now)
 
+    def names_always(self):
+        """The game writes the speaker's name in front of (nearly) every line of dialogue."""
+        named = self._named
+        return len(named) >= 6 and sum(named) >= 0.85 * len(named)
+
     def _open_for(self, speaker, now):
         """The newest unfinished line on the TV this line may complete: the same speaker's (a line without a name:
         the newest one)."""
@@ -560,6 +604,8 @@ class Engine:
         Split sentences are not held back any more: the first part is shown at once and, when the rest comes, the
         whole sentence is written over it (it used to wait 2-3.5 s for the rest)."""
         speaker, english = line["speaker"], line["english"]
+        if op and not speaker and op["speaker"] and self.names_always():
+            op = None   # the game names everyone: a line read without a name is not glued to someone else's
         if op:
             stripped = english.strip()
             if _ASIDE.match(stripped):
@@ -584,9 +630,15 @@ class Engine:
         last = self._last
         hint = bool(line.get("hint"))
         speaker = line["speaker"]
-        if not speaker and not hint and last and not self._cleared and now - last["time"] < CONTINUATION_SECONDS:
-            # Games drop the name when the same person keeps talking and the line is replaced directly.
+        if (not speaker and not hint and last and not self._cleared and now - last["time"] < CONTINUATION_SECONDS
+                and not self.names_always()):
+            # Games drop the name when the same person keeps talking and the line is replaced directly. A game
+            # that names the speaker on every line (GTA 6) does not: there a line without a name had its name
+            # misread or cut off, and giving it the previous speaker's name put one person's words in another's
+            # mouth ("cO Wilson: Shit, you haven't heard?" was shown as Lucia's).
             speaker = last["speaker"]
+        if not hint and replaces is None:
+            self._named.append(bool(line["speaker"]))
         english = line["english"]
         if _TURKISH.search(english):
             return  # already Turkish (PS5 menus, Turkish-language games): nothing to translate

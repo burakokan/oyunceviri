@@ -1,5 +1,5 @@
-"""Area page: pick the subtitle area (and tune the white-text threshold), the hint box area and the phone area
-on the live PS5 picture."""
+"""Area page: pick the subtitle area (and tune the white-text threshold) and the extra areas - hint box, phone,
+mission objective - on the live PS5 picture; every extra area has its own reading filter and its own look on the TV."""
 import os
 import re
 import subprocess
@@ -14,19 +14,25 @@ from gt import config
 from gt.capture import WindowGrabber
 from gt.engine import Engine
 from gt.ocr import make_ocr, text_mask
+from gt.regions import FILTERS, area_cfg
 from gt.remoteplay import RemotePlaySource, needs_link, uses_builtin
 from gt.winutil import find_window
 
 from .. import theme
-from ..widgets import Card, ImageView, RegionSelector, SettingRow, Toggle, draw_lines_preview, icon_button
+from ..widgets import Card, Divider, ImageView, RegionSelector, SettingRow, Toggle, draw_lines_preview, icon_button
+from .tv_look import ColorButton
 
 PREVIEW_WIDTH = 1280
 # The areas that can be chosen here: subtitles (read line by line) and the extra areas (translated as one box).
-AREAS = [("subtitle", "Altyazı"), ("hint", "Görev / ipucu kutusu"), ("phone", "Telefon mesajları")]
-LABELS = {"subtitle": "Altyazı alanı", "hint": "Görev kutusu", "phone": "Telefon"}
+AREAS = [("subtitle", "Altyazı"), ("objective", "Görev hedefi"), ("hint", "Görev / ipucu kutusu"),
+         ("phone", "Telefon mesajları")]
+LABELS = {"subtitle": "Altyazı alanı", "objective": "Görev hedefi", "hint": "Görev kutusu", "phone": "Telefon"}
 PICK_HINTS = {
     "subtitle": "Oyunda bir altyazı ekrandayken görüntünün üstünde fareyle sürükle. İki satırlık altyazılara yer "
                 "bırak, mermi sayısı gibi HUD yazılarını mümkünse dışarıda bırak. Seçim anında kaydedilir.",
+    "objective": "Oyunda altyazının altında kısa görev yazısı (\"Go to the bank.\", \"Press □ to threaten the "
+                 "teller\") çıkınca o satırı fareyle sürükle; uzayabileceği için biraz geniş seç. Altyazı okuyucu "
+                 "bu alanı atlar: görev yazısı ayrı okunur, çevrilir ve TV'de kendi ayarlarıyla gösterilir.",
     "hint": "Oyunda bir görev / ipucu kutusu (\"Press L3 to swim faster…\") ekrandayken kutunun çıktığı yeri "
             "fareyle sürükle; kutu uzayabileceği için biraz geniş seç. Kutudaki bütün satırlar tek cümle gibi "
             "çevrilir ve TV'de tek kutuda, tuş simgeleriyle birlikte gösterilir.",
@@ -39,7 +45,8 @@ _TOKEN_TR = re.compile(r"⟦\d+⟧")
 
 class RegionPage(QWidget):
     title = "Altyazı Alanı"
-    hint = "Altyazının, görev kutusunun ve telefon mesajlarının çıktığı yerleri seç; program yalnızca bu alanları okur."
+    hint = ("Altyazının, görev yazısının, görev kutusunun ve telefon mesajlarının çıktığı yerleri seç; program "
+            "yalnızca bu alanları okur.")
 
     def __init__(self, win):
         super().__init__()
@@ -108,14 +115,23 @@ class RegionPage(QWidget):
             0, 255, "text_s_max")
         tune.add(v_row)
         tune.add(s_row)
+        buttons = QHBoxLayout()
         defaults = icon_button(theme.Icon.REFRESH, "Varsayılan ayarlar")
         defaults.clicked.connect(self.reset_thresholds)
-        tune.add(defaults).setMaximumWidth(220)
+        look = icon_button(theme.Icon.TV, "TV'de görünümü (boyut, renk, konum, tek satır)…")
+        look.clicked.connect(lambda: self.win.go("TvLookPage"))
+        buttons.addWidget(defaults)
+        buttons.addWidget(look)
+        buttons.addStretch(1)
+        tune.add_layout(buttons)
         lay.addWidget(tune, 2)
 
         self.area_card = self._build_area_card()
         self.area_card.hide()
         lay.addWidget(self.area_card, 2)
+        self.look_card = self._build_look_card()
+        self.look_card.hide()
+        lay.addWidget(self.look_card)
         win.bridge.region_status.connect(self.on_region_status)
 
         self.timer = QTimer(self)
@@ -123,19 +139,32 @@ class RegionPage(QWidget):
         self.timer.timeout.connect(self.tick)
 
     def _build_area_card(self):
-        card = Card("2 · Bu alanın çevirisi",
+        card = Card("2 · Bu alanın okunması",
                     "Alanda yazı çıkınca okunur, çevrilir ve TV'de tek kutuda gösterilir; yazı kaybolunca kutu da "
-                    "kalkar. Tuş simgeleri (L3, R2, ✕ …) çeviride aynı yerde, aynı resimle durur.")
+                    "kalkar. Tuş simgeleri (L3, R2, □ …) çeviride aynı yerde, aynı resimle durur.")
         self.area_toggle = Toggle(False)
         self.area_toggle.toggled.connect(self._set_enabled)
         card.add(SettingRow("Bu alanı çevir", "Kapalıyken bu alan hiç okunmaz.", self.area_toggle))
-        self.place = QComboBox()
-        self.place.addItem("İngilizcenin üstüne", "cover")
-        self.place.addItem("İngilizcenin altına", "below")
-        self.place.currentIndexChanged.connect(self._set_place)
-        card.add(SettingRow("TV'de nerede",
-                            "Üstüne: Türkçe kutu İngilizcenin yerine geçer (gerekirse aşağı doğru uzar). Altına: "
-                            "İngilizce kutu görünür kalır, Türkçesi hemen altında çıkar.", self.place))
+        card.add(Divider())
+        self.filter = QComboBox()
+        for value, label in FILTERS.items():
+            self.filter.addItem(label, value)
+        self.filter.currentIndexChanged.connect(lambda _: self._set_area("filter", self.filter.currentData()))
+        card.add(SettingRow("Hangi yazılar okunsun",
+                            "Alana giren tabela, afiş ya da sahne yazısı çevrilmesin diye. Koyu kutudaki beyaz yazı: "
+                            "görev kutusu gibi siyah zeminde beyaz yazı. Kenarlıklı beyaz yazı: altyazı ve görev "
+                            "hedefi gibi koyu kenarlı yazı. Alttaki görüntüde okunan yazılar yeşil, atlananlar "
+                            "kırmızı çerçeveli.", self.filter))
+        self.text_min, text_row = self._area_slider("Yazı parlaklığı",
+                                                    "Harfler en az bu kadar parlak olmalı. Soluk tabelalar da "
+                                                    "okunuyorsa yükselt, asıl yazı atlanıyorsa düşür.",
+                                                    100, 255, "text_min")
+        card.add(text_row)
+        self.bg_max, self.bg_row = self._area_slider("Zemin koyuluğu",
+                                                     "Kutunun zemini en fazla bu kadar açık olabilir. Kutu "
+                                                     "atlanıyorsa yükselt, açık renkli tabelalar okunuyorsa düşür.",
+                                                     20, 160, "bg_max")
+        card.add(self.bg_row)
         self.builtin_note = QLabel("Bu alanlar yalnızca dahili Remote Play ile çalışır (PS5 Bağlantısı sayfası).")
         self.builtin_note.setObjectName("muted")
         self.builtin_note.setWordWrap(True)
@@ -148,15 +177,79 @@ class RegionPage(QWidget):
         self.area_read.setWordWrap(True)
         self.area_read.setTextInteractionFlags(Qt.TextSelectableByMouse)
         card.add(self.area_read)
+        return card
+
+    def _build_look_card(self):
+        card = Card("3 · TV'de görünüm",
+                    "Her alanın kendi ayarı var; değişiklik TV'de hemen görünür. Oyun yoksa \"TV'de örnek göster\" "
+                    "ile dene.")
+        self.place = QComboBox()
+        for value, label in (("cover", "İngilizcenin üstüne"), ("below", "İngilizcenin altına"),
+                             ("above", "İngilizcenin üstünde (yukarıda)"), ("bottom", "Ekranın altında, ortada"),
+                             ("top", "Ekranın üstünde, ortada")):
+            self.place.addItem(label, value)
+        self.place.currentIndexChanged.connect(lambda _: self._set_area("place", self.place.currentData(), True))
+        card.add(SettingRow("Nerede", "Üstüne: Türkçe kutu İngilizcenin yerine geçer. Altına / yukarıda: İngilizce "
+                            "görünür kalır. Ekranın altı / üstü: alanın yeri ne olursa olsun sabit yerde.", self.place))
+        self.offset, self.offset_row = self._area_slider("Kenardan uzaklık", None, 0, 45, "offset", unit="%",
+                                                         restyle=True)
+        card.add(self.offset_row)
+        self.align = QComboBox()
+        self.align.addItem("Sola", "left")
+        self.align.addItem("Ortaya", "center")
+        self.align.currentIndexChanged.connect(lambda _: self._set_area("align", self.align.currentData(), True))
+        self.align_row = SettingRow("Hizalama", "Ortaya: Türkçe, İngilizce yazının ortasına göre iki yana uzar "
+                                    "(altyazının altındaki görev yazısı gibi).", self.align)
+        card.add(self.align_row)
+        card.add(Divider())
+        self.size, size_row = self._area_slider("Yazı boyutu", "İngilizce yazının boyutuna göre. Sığmazsa "
+                                                "kendiliğinden küçülür.", 50, 200, "size", unit="%", restyle=True)
+        card.add(size_row)
+        self.fg = ColorButton(lambda v: self._set_area("fg", v, True))
+        card.add(SettingRow("Yazı rengi", None, self.fg))
+        self.bg = ColorButton(lambda v: self._set_area("bg", v, True))
+        card.add(SettingRow("Kutu rengi", None, self.bg))
+        self.opacity, opacity_row = self._area_slider("Kutunun opaklığı", "0: kutu yok, yazı gölgeli. 100: "
+                                                      "İngilizceyi tamamen kapatır.", 0, 100, "opacity", unit="%",
+                                                      restyle=True)
+        card.add(opacity_row)
+        row = QHBoxLayout()
         sample = icon_button(theme.Icon.TV, "TV'de örnek göster")
         sample.clicked.connect(lambda: self.win.regions.preview(self.area))
-        card.add(sample).setMaximumWidth(240)
+        row.addWidget(sample)
+        row.addStretch(1)
+        card.add_layout(row)
         return card
+
+    def _area_slider(self, title, desc, lo, hi, key, unit="", restyle=False):
+        box = QWidget()
+        h = QHBoxLayout(box)
+        h.setContentsMargins(0, 0, 0, 0)
+        slider = QSlider(Qt.Horizontal)
+        slider.setRange(lo, hi)
+        slider.setMinimumWidth(220)
+        value = QLabel()
+        value.setMinimumWidth(44)
+
+        def changed(v):
+            value.setText(f"{v}{unit}")
+            self._set_area(key, v, restyle)
+
+        slider.valueChanged.connect(changed)
+        slider.value_label = value
+        slider.unit = unit
+        h.addWidget(slider)
+        h.addWidget(value)
+        return slider, SettingRow(title, desc, box)
 
     # ---- areas ----
 
     def _area_cfg(self, kind):
-        return self.cfg.setdefault("regions", {}).setdefault(kind, {"enabled": False, "roi": None, "place": "cover"})
+        """The area's settings in cfg (missing keys filled in from the defaults)."""
+        a = self.cfg.setdefault("regions", {}).setdefault(kind, {})
+        for key, value in area_cfg(self.cfg, kind).items():
+            a.setdefault(key, value)
+        return a
 
     def current_roi(self, kind=None):
         kind = kind or self.area
@@ -173,12 +266,23 @@ class RegionPage(QWidget):
         self.selector.set_others([(LABELS[k], self.current_roi(k)) for k, _ in AREAS if k != kind])
         self.tune.setVisible(kind == "subtitle")
         self.area_card.setVisible(kind != "subtitle")
+        self.look_card.setVisible(kind != "subtitle")
+        self.win.regions.watching = {kind} if kind != "subtitle" and self.isVisible() else set()
         if kind != "subtitle":
             a = self._area_cfg(kind)
             self._syncing = True            # showing the saved values, not changing them
             self.area_toggle.setChecked(bool(a.get("enabled")))
-            self.place.setCurrentIndex(max(0, self.place.findData(a.get("place", "cover"))))
+            self.filter.setCurrentIndex(max(0, self.filter.findData(a["filter"])))
+            self.place.setCurrentIndex(max(0, self.place.findData(a["place"])))
+            self.align.setCurrentIndex(max(0, self.align.findData(a["align"])))
+            for slider, key in ((self.text_min, "text_min"), (self.bg_max, "bg_max"), (self.offset, "offset"),
+                                (self.size, "size"), (self.opacity, "opacity")):
+                slider.setValue(int(a[key]))
+                slider.value_label.setText(f"{int(a[key])}{slider.unit}")
+            self.fg.set_value(a["fg"])
+            self.bg.set_value(a["bg"])
             self._syncing = False
+            self._show_rows_for_settings(a)
             self.builtin_note.setVisible(not self._builtin)
             self.area_status.setText("Durum: " + ("açık" if a.get("enabled") and a.get("roi") else "kapalı"))
             self._show_last()
@@ -190,17 +294,45 @@ class RegionPage(QWidget):
         self.win.persist_config(("regions", self.area, "enabled"))
         self.area_status.setText("Durum: " + ("açık" if on and self.current_roi() else "kapalı"))
 
-    def _set_place(self, _):
-        if self._syncing:
+    def _set_area(self, key, value, restyle=False):
+        """An area setting changed: kept at once (like the area itself), the TV gets the new look right away."""
+        if self._syncing or self.area == "subtitle":
             return
-        self._area_cfg(self.area)["place"] = self.place.currentData()
-        self.win.persist_config(("regions", self.area, "place"))
-        self.win.regions.restyle()
+        a = self._area_cfg(self.area)
+        a[key] = value
+        self.win.persist_config(("regions", self.area, key))
+        self._show_rows_for_settings(a)
+        if restyle:
+            self.win.regions.restyle()
+
+    def _show_rows_for_settings(self, a):
+        """Only the controls that matter for the chosen filter / place are shown."""
+        self.bg_row.setVisible(a["filter"] == "dark_box")
+        fixed = a["place"] in ("top", "bottom")
+        self.offset_row.setVisible(fixed)
+        self.align_row.setVisible(not fixed)
 
     def on_region_status(self, kind, text):
         if kind == self.area:
             self.area_status.setText(f"Durum: {text}")
             self._show_last()
+
+    def _draw_area_rows(self, crop):
+        """The area's picture with the text pieces of its last reading: green = read, red = left out by the
+        filter (the reason next to it)."""
+        info = self.win.regions.debug.get(self.area)
+        if not info or tuple(info["size"]) != (crop.shape[1], crop.shape[0]) or time.monotonic() - info["time"] > 5:
+            return crop
+        out = crop.copy()
+        for r in info["rows"]:
+            x0, y0, x1, y1 = (int(v) for v in r["rect"])
+            color = (80, 200, 80) if r["ok"] else (60, 60, 230)
+            cv2.rectangle(out, (x0, y0), (x1, y1), color, 2)
+            if not r["ok"] and r.get("why"):
+                label = r["why"].translate(str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU"))
+                cv2.putText(out, label, (x0 + 2, max(12, y0 - 4)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1,
+                            cv2.LINE_AA)
+        return out
 
     def _show_last(self):
         last = self.win.regions.last.get(self.area)
@@ -296,6 +428,7 @@ class RegionPage(QWidget):
 
     def hideEvent(self, e):
         super().hideEvent(e)
+        self.win.regions.watching = set()
         self.timer.stop()
         self._close_grab()
 
@@ -347,7 +480,7 @@ class RegionPage(QWidget):
         if crop.size == 0:
             return
         if self.area != "subtitle":
-            self.area_preview.set_image(crop)
+            self.area_preview.set_image(self._draw_area_rows(crop))
             return
         mask = text_mask(crop, self.cfg["text_v_min"], self.cfg["text_s_max"])
         boxes = Engine.lines(self.cfg, crop, mask, roi)

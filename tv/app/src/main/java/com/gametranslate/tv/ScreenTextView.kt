@@ -25,13 +25,14 @@ import org.json.JSONObject
  * fills the screen) with the look chosen on the PC (background, opacity, text size and colour) and the room the
  * text may use: a box never grows over the next translated text, the font gets smaller instead.
  * A box may carry button icons ("icons": {"1": base64 PNG}); "⟦1⟧" in its text is drawn as that picture, as high
- * as the letters.
+ * as the letters. "align": "center" keeps the box centred on the English text (the room "mw" then reaches the same
+ * distance to both sides), like a mission objective under the subtitles.
  */
 class ScreenTextView(context: Context) : View(context) {
 
     private class Box(val x: Float, val y: Float, val w: Float, val h: Float, val mw: Float, val mh: Float,
                       val lines: Int, val text: CharSequence, val fg: Int, val bg: Int, val scale: Float,
-                      val shadow: Boolean)
+                      val shadow: Boolean, val center: Boolean)
 
     /** A button icon inside the text: scales with the font, centred on the letters. */
     private class IconSpan(val bitmap: Bitmap) : ReplacementSpan() {
@@ -75,7 +76,8 @@ class ScreenTextView(context: Context) : View(context) {
                 b.optInt("lines", 1).coerceAtLeast(1), withIcons(b.optString("tr"), b.optJSONObject("icons")),
                 runCatching { Color.parseColor(b.optString("fg", "#ffffff")) }.getOrDefault(Color.WHITE),
                 Color.argb(alpha, Color.red(bg), Color.green(bg), Color.blue(bg)),
-                b.optDouble("scale", 1.0).toFloat().coerceIn(0.4f, 2.5f), b.optBoolean("shadow", false))
+                b.optDouble("scale", 1.0).toFloat().coerceIn(0.4f, 2.5f), b.optBoolean("shadow", false),
+                b.optString("align") == "center")
         }
         visibility = if (boxes.isEmpty()) GONE else VISIBLE
         invalidate()
@@ -120,40 +122,47 @@ class ScreenTextView(context: Context) : View(context) {
             paint.color = b.fg
             if (b.shadow) paint.setShadowLayer(lineH * 0.15f, 0f, lineH * 0.05f, Color.BLACK)
             else paint.clearShadowLayer()
-            val layout = fit(b.text, roomW - 2 * pad, roomH - 2 * pad, lineH, b.scale)
+            val layout = fit(b.text, roomW - 2 * pad, roomH - 2 * pad, lineH, b.scale, b.center)
             val textW = (0 until layout.lineCount).maxOf { layout.getLineWidth(it) }
             val rectW = minOf(roomW, maxOf(boxW, textW + 2 * pad))
             val rectH = minOf(roomH, maxOf(boxH, layout.height + 2 * pad))
+            // Centred: around the middle of the English text; otherwise from its left edge to the right.
+            val cx = left + boxW / 2
             if (Color.alpha(b.bg) > 0) {
                 fill.color = b.bg
-                canvas.drawRoundRect(RectF(left - pad, top - pad, left + rectW, top + rectH), pad, pad, fill)
+                val rect = if (b.center) RectF(cx - rectW / 2, top - pad, cx + rectW / 2, top + rectH)
+                    else RectF(left - pad, top - pad, left + rectW, top + rectH)
+                canvas.drawRoundRect(rect, pad, pad, fill)
             }
             canvas.save()
-            canvas.clipRect(left - pad, top - pad, left + roomW, top + roomH)
-            canvas.translate(left, top + maxOf(0f, (rectH - layout.height) / 2 - pad))
+            if (b.center) canvas.clipRect(cx - roomW / 2, top - pad, cx + roomW / 2, top + roomH)
+            else canvas.clipRect(left - pad, top - pad, left + roomW, top + roomH)
+            val textLeft = if (b.center) cx - layout.width / 2f else left
+            canvas.translate(textLeft, top + maxOf(0f, (rectH - layout.height) / 2 - pad))
             layout.draw(canvas)
             canvas.restore()
         }
     }
 
     /** The original text height x the chosen size first, smaller until it fits the room. */
-    private fun fit(text: CharSequence, w: Float, h: Float, lineH: Float, scale: Float): StaticLayout {
+    private fun fit(text: CharSequence, w: Float, h: Float, lineH: Float, scale: Float,
+                    center: Boolean): StaticLayout {
         var size = lineH * 0.72f * scale
         val min = lineH * 0.35f
-        var layout = make(text, w, size)
+        var layout = make(text, w, size, center)
         while (size > min && (layout.height > h * 1.02f || widest(layout) > w)) {
             size *= 0.92f
-            layout = make(text, w, size)
+            layout = make(text, w, size, center)
         }
         return layout
     }
 
     private fun widest(l: StaticLayout) = (0 until l.lineCount).maxOf { l.getLineWidth(it) }
 
-    private fun make(text: CharSequence, w: Float, size: Float): StaticLayout {
+    private fun make(text: CharSequence, w: Float, size: Float, center: Boolean): StaticLayout {
         paint.textSize = size
         return StaticLayout.Builder.obtain(text, 0, text.length, paint, w.toInt().coerceAtLeast(20))
-            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+            .setAlignment(if (center) Layout.Alignment.ALIGN_CENTER else Layout.Alignment.ALIGN_NORMAL)
             .setLineSpacing(0f, 1.05f)
             .setIncludePad(false)
             .build()

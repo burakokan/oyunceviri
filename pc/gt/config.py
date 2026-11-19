@@ -76,10 +76,25 @@ DEFAULTS = {
     "screen": {"enabled": False, "translator": "gemini", "bg": "auto", "opacity": 90, "text_scale": 100,
                "text_color": "auto", "small_text": False},
     # Extra areas of the PS5 picture translated as a whole into ONE box on the TV (built-in Remote Play only):
-    # hint = tutorial / objective box (button icons kept), phone = the in-game phone's messages.
-    # roi: [x, y, w, h] fractions of the PS5 picture; place: cover (over the English) | below (under it)
-    "regions": {"hint": {"enabled": False, "roi": None, "place": "cover"},
-                "phone": {"enabled": False, "roi": None, "place": "cover"}},
+    # hint = tutorial / objective box (button icons kept), phone = the in-game phone's messages, objective = the
+    # short mission objective under the subtitles ("Go to the bank."; the subtitle reader leaves its area out).
+    # roi: [x, y, w, h] fractions of the PS5 picture.
+    # Reading: filter dark_box (white text in a dark box) | outlined (white text with a dark outline) | bright |
+    # any; text_min: the letters' least brightness (0-255); bg_max: a dark box's most brightness.
+    # Look on the TV: place cover (over the English) | below | above | top | bottom (fixed, centred; offset % from
+    # the edge); align left | center; size % of the English text; fg / bg colours; opacity % of the box (0: none,
+    # shadowed text).
+    "regions": {
+        "hint": {"enabled": False, "roi": None, "filter": "dark_box", "text_min": 170, "bg_max": 80,
+                 "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
+                 "opacity": 92},
+        "phone": {"enabled": False, "roi": None, "filter": "any", "text_min": 170, "bg_max": 80,
+                  "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
+                  "opacity": 92},
+        "objective": {"enabled": False, "roi": None, "filter": "outlined", "text_min": 190, "bg_max": 80,
+                      "place": "cover", "offset": 8, "align": "center", "size": 100, "fg": "#FFFFFF",
+                      "bg": "#000000", "opacity": 80},
+    },
     # Lines that are not in a game pack: smart (DeepL + Qwen + OPUS-MT, best of them) | deepl | groq |
     # gemma (Gemma 4 E2B on this PC) | local (OPUS-MT). deadline_ms: the longest wait for an online answer.
     # fallback: the model used when no online answer comes in time / no internet: nmt (OPUS-MT or quickmt,
@@ -90,9 +105,9 @@ DEFAULTS = {
     # building: unfinished packs continue by themselves when the app starts
     "gemini": {"key": "", "model": "gemini-3.5-flash-lite", "building": False},
     "minimize_to_tray": True,
-    # In-place updates from GitHub Releases: auto = look for a new version at start and download it in the
-    # background (it is installed when the user agrees or closes the app). token: read-only GitHub token for the
-    # private repository (stays on this PC, never in the setup).
+    # In-place updates from GitHub Releases: auto = look for a new version at start and every hour and tell the
+    # user (never downloaded or installed without the user's click, so the app never restarts during a game).
+    # token: a read-only GitHub token, only needed if the repository is private again (stays on this PC).
     "update": {"auto": True, "token": ""},
     # The first-run guide ("Başlarken") was finished
     "onboarded": False,

@@ -4,7 +4,7 @@
  * messages: one box per area, "⟦1⟧" in the text is a button icon sent as a PNG). */
 (function () {
   "use strict";
-  var VERSION = "1.2-web";
+  var VERSION = "1.3-web";
   var PORT = 8765;
   var PLATFORM = window.tizen ? "tizen"
     : (window.PalmSystem || window.webOSSystem || /Web0S|webOS/i.test(navigator.userAgent)) ? "webos" : "browser";
@@ -374,6 +374,11 @@
       el.style.width = "auto";                       // the box hugs the text, at least the English text's width
       el.style.minWidth = (w + pad) + "px";
       el.style.maxWidth = (roomW + pad) + "px";
+      if (b.align === "center") {
+        // centred on the English text (a mission objective under the subtitles)
+        el.style.textAlign = "center";
+        el.style.left = (b.x * 1920 + w / 2 - el.offsetWidth / 2) + "px";
+      }
     }
   }
 

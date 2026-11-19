@@ -32,6 +32,7 @@ ISCC = Path(os.environ["LOCALAPPDATA"]) / "Programs" / "Inno" / "ISCC.exe"
 PART_LIMIT = 1_900_000_000      # GitHub takes release files up to 2 GiB
 
 sys.path.insert(0, str(ROOT / "pc"))
+from gt.updater import protected  # noqa: E402
 from gt.version import REPO, VERSION, parse  # noqa: E402
 
 API = f"https://api.github.com/repos/{REPO}"
@@ -243,8 +244,7 @@ def main():
         build()
     say(f"Sürüm {VERSION}: dosyaların özeti çıkarılıyor…")
     files = manifest(DIST)
-    bad = [rel for rel in files if rel.split("/")[0] in ("logs", "tv-keys", "update")
-           or rel in ("config.json", "ps5.json", "speakers.json", "region_cache.json", "screen_cache.json")]
+    bad = [rel for rel in files if protected(rel)]      # the same list the updater never writes
     if bad:
         sys.exit(f"Kişisel dosya pakette, durduruldu: {bad[:5]}")
 

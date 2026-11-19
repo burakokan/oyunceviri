@@ -16,7 +16,7 @@ import cv2
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "tv-web"
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 WEBOS_ID = "com.oyunceviri.tv"
 APP_FILES = ["index.html", "app.js", "style.css"]
 

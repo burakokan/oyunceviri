@@ -3,8 +3,15 @@ import re
 
 # "Karl: text", "German Infantry: text" - up to four capitalized words before the colon
 _SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-]*(?:\s+[A-Z][\w'’.\-]*){0,3})\s*:\s*(.+)$", re.S)
-# The end of a speaker name cut off by the subtitle area: "a: OK, stay close."
-_CUT_SPEAKER = re.compile(r"^[a-z]{1,3}:\s*")
+# A name OCR read a little wrong ("cO Wilson:", "CO wiison:"): one to three words before the colon, a capital in it.
+_LOOSE_SPEAKER = re.compile(r"^\s*([A-Za-z][\w'’.\-]*(?:\s+[A-Za-z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
+# ...but not a sentence with a colon ("Here's the deal: …", "Listen up: …").
+_NOT_NAME = {"a", "an", "the", "it", "is", "up", "to", "me", "you", "this", "that", "now", "here", "there", "and",
+             "or", "of", "so", "what", "my", "your", "we", "i", "deal", "thing", "is", "are", "was", "do", "go"}
+# The end of a name cut off by the area's edge: "ress: Another one?" (Waitress), "ison Recording: The Hamlet…"
+_CUT_SPEAKER = re.compile(r"^\s*([a-z][a-z'’.\-]{0,11}(?:\s+[A-Z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
+# A cut-off name starts with this: the engine completes it from the names seen before ("…ress" -> "Waitress").
+CUT = "…"
 # HUD letters stuck to the front of a name: "WARaiza" -> "Raiza"
 _NAME_NOISE = re.compile(r"^[A-Z]{1,3}(?=[A-Z][a-z])")
 # OCR reads the pronoun "I" as a lowercase "l"
@@ -75,8 +82,7 @@ def _clean_row(text, f):
         while tokens and _is_hud_token(tokens[-1]) and not tokens[-1].endswith((".", "!", "?", "…")):
             tokens.pop()
         text = " ".join(tokens)
-    text = _CUT_SPEAKER.sub("", text.strip())
-    text = _LOWER_L.sub("I", text)
+    text = _LOWER_L.sub("I", text.strip())
     if f.get("skip_titles", True) and _is_title(text):
         return ""
     letters = sum(c.isalpha() for c in text)
@@ -100,10 +106,23 @@ def _clean_name(name):
 
 
 def split_speaker(text):
-    """-> (speaker or None, line without the speaker)."""
+    """-> (speaker or None, line without the speaker). A name cut off by the area's edge comes as CUT + its end
+    ("…ress"); a misread one as read with a capital first letter ("cO Wilson" -> "CO Wilson")."""
     m = _SPEAKER.match(text)
     if m and len(m.group(1)) <= 30 and m.group(2).strip():
         return _clean_name(m.group(1)), m.group(2).strip()
+    m = _LOOSE_SPEAKER.match(text)
+    if m and m.group(2).strip() and len(m.group(1)) <= 24:
+        words = m.group(1).split()
+        lower = [w for w in words if not any(c.isupper() for c in w)]
+        # The first word has a capital ("cO", "CO"); an all-lowercase first word is a cut-off name (below).
+        if (words[0] not in lower and len(lower) <= 1
+                and not any(w.lower() in _NOT_NAME for w in words)):
+            name = m.group(1)
+            return name[0].upper() + name[1:], m.group(2).strip()
+    m = _CUT_SPEAKER.match(text)
+    if m and m.group(2).strip():
+        return CUT + m.group(1), m.group(2).strip()
     return None, text
 
 

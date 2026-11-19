@@ -86,6 +86,7 @@ class MainWindow(QMainWindow):
         self.tv_activation = (None, "")     # last state and text of "open the TV app"
         self.updater = Updater(self.cfg)
         self.update_state = ("idle", "", None)
+        self._announced = None              # the new version already announced (once per version)
         self._applying = False
         self._tv_updates = set()            # (ip, version) of TV apps already updated / reported this session
         self._tv_update_waiting = []        # Android TV apps to update once the subtitles are stopped
@@ -143,7 +144,11 @@ class MainWindow(QMainWindow):
             self.stack.addWidget(scroll)
         self.select_page(0)
         if not self.cfg.get("onboarded"):
-            self.go("GuidePage")        # first start: the step-by-step guide
+            # Only the very first start opens the step-by-step guide; from then on the app opens on the home page
+            # (the guide stays in the menu under KURULUM).
+            self.go("GuidePage")
+            self.cfg["onboarded"] = True
+            self.persist_config("onboarded")
 
         self.bridge.status.connect(self.on_status)
         self.bridge.clients.connect(self.on_clients)
@@ -606,24 +611,37 @@ class MainWindow(QMainWindow):
                               "ayrıntı logs\\update.log içinde.", error=True)
         ready = self.updater.ready()
         if ready:
-            self._on_update_state("ready", f"{ready} sürümü indirildi. Uygulamayı kapatınca kurulur.", None)
-        elif FROZEN and self.cfg["update"]["auto"]:
-            QTimer.singleShot(20000, lambda: self.check_updates(download=True))
+            self._on_update_state("ready", f"{ready} sürümü indirildi, kurulmayı bekliyor: \"Yeniden başlat ve "
+                                           f"kur\"a bas.", None)
+        # Looked for at start and every hour while the app is open; a new version is only announced, never
+        # downloaded or installed without the user's click (the app must not restart in the middle of a game).
+        QTimer.singleShot(8000, self._auto_check)
+        self._update_timer = QTimer(self, interval=3600 * 1000)
+        self._update_timer.timeout.connect(self._auto_check)
+        self._update_timer.start()
 
-    def check_updates(self, download=False):
-        """Look for a new version (background thread); download it too when download=True."""
+    def _auto_check(self):
+        if self.cfg["update"]["auto"] and self.update_state[0] not in ("checking", "downloading", "ready"):
+            self.check_updates(quiet=True)
+
+    def check_updates(self, download=False, quiet=False):
+        """Look for a new version (background thread); download it too when download=True (the user clicked).
+        quiet: the hourly look - nothing is shown while looking, and a failed look only waits for the next one."""
         if self.update_state[0] in ("checking", "downloading"):
             return
-        self.bridge.update_state.emit("checking", "Yeni sürüm aranıyor…", None)
+        before = self.update_state
+        if not quiet:
+            self.bridge.update_state.emit("checking", "Yeni sürüm aranıyor…", None)
 
         def work():
             try:
                 plan = self.updater.check()
-            except UpdateError as e:
-                self.bridge.update_state.emit("error", str(e), None)
-                return
             except Exception as e:      # an unexpected answer must not break the app
-                self.bridge.update_state.emit("error", f"Güncelleme denetlenemedi: {e}", None)
+                text = str(e) if isinstance(e, UpdateError) else f"Güncelleme denetlenemedi: {e}"
+                if quiet:
+                    self.bridge.update_state.emit(before[0], before[1], before[2])
+                else:
+                    self.bridge.update_state.emit("error", text, None)
                 return
             if plan["state"] == "latest":
                 self.bridge.update_state.emit("latest", f"En yeni sürüm kurulu ({VERSION}).", plan)
@@ -662,8 +680,8 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.bridge.update_state.emit("error", f"Güncelleme indirilemedi: {e}", None)
             return
-        self.bridge.update_state.emit("ready", f"{plan['version']} sürümü indirildi. Uygulamayı kapatınca kurulur; "
-                                               f"hemen kurmak için \"Yeniden başlat ve kur\".", plan)
+        self.bridge.update_state.emit("ready", f"{plan['version']} sürümü indirildi, kurulmayı bekliyor: "
+                                               f"\"Yeniden başlat ve kur\"a bas.", plan)
 
     def _on_update_state(self, state, text, plan):
         previous = self.update_state[0]
@@ -671,18 +689,31 @@ class MainWindow(QMainWindow):
         for page in self.pages:
             if hasattr(page, "on_update_state"):
                 page.on_update_state(state, text, plan)
+        if state == "available" and plan and plan.get("version") != self._announced:
+            # once per version: the tray and the window say it, nothing else happens
+            self._announced = plan["version"]
+            where = "Genel → Güncelleme → İndir ve kur" if FROZEN else "Genel → Güncelleme"
+            self.tray.showMessage("Oyun Çeviri", f"Yeni sürüm var: {plan['version']}. Kurmak istediğinde: {where}.",
+                                  QSystemTrayIcon.Information, 6000)
+            self.show_message(f"Yeni sürüm var: {plan['version']}. Kurmak istediğinde: {where}. Kendiliğinden "
+                              f"kurulmaz.")
         if state == "ready" and previous == "downloading":
-            self.tray.showMessage("Oyun Çeviri", f"Güncelleme hazır ({plan['version']}). Uygulamayı kapatınca "
-                                  f"kurulur.", QSystemTrayIcon.Information, 5000)
+            # the user asked for it a moment ago: offer to install now (or later with the button)
+            self.install_update()
 
     def install_update(self):
         version = self.updater.ready()
         if not version:
             return
         text = (f"{version} sürümü kurulacak: Oyun Çeviri kapanıp birkaç saniye içinde yeniden açılacak."
-                + (" Altyazı çevirisi kısa bir süre duracak." if getattr(self, "_engine_running", False) else ""))
-        if QMessageBox.question(self, "Oyun Çeviri", text, QMessageBox.Ok | QMessageBox.Cancel,
-                                QMessageBox.Ok) != QMessageBox.Ok:
+                + (" Altyazı çevirisi kısa bir süre duracak." if getattr(self, "_engine_running", False) else "")
+                + " Ayarların ve kayıtların olduğu gibi kalır.\n\nŞimdi kurulsun mu? (\"Sonra\" dersen Genel → "
+                  "Güncelleme'deki düğmeyle istediğin zaman kurarsın.)")
+        box = QMessageBox(QMessageBox.Question, "Oyun Çeviri", text, parent=self)
+        now = box.addButton("Şimdi kur", QMessageBox.AcceptRole)
+        box.addButton("Sonra", QMessageBox.RejectRole)
+        box.exec()
+        if box.clickedButton() is not now:
             return
         try:
             self.updater.apply(relaunch=True)
@@ -758,11 +789,6 @@ class MainWindow(QMainWindow):
             config.save(self.cfg if keep else self._saved)
         else:
             config.save(self.cfg)
-        if FROZEN and not self._applying and self.updater.ready():
-            try:
-                self.updater.apply(relaunch=False)      # a downloaded update is installed once the app has closed
-            except OSError:
-                pass
         self.tray.hide()
         from PySide6.QtWidgets import QApplication
         QApplication.quit()
