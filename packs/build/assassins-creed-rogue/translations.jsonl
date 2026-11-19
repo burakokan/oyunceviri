@@ -1,0 +1,1403 @@
+{"key": "2c7d0cf2a16cb60d", "tr": "Demek Albay... Görünüşe bakılırsa hayatım senin için açık bir kitap."}
+{"key": "4691fcb1e6e9051f", "tr": "Alayımdan askerler seni sayıklarken ve yarı boğulmuş halde buldu. Kim olduğunu bilmiyordum ama NE olduğun ortadaydı. Bakılman için seni Finnegan'lara götürdüm. Onların rahmetli oğlu bizim Tarikat'tandandı."}
+{"key": "0441f994dd52da99", "tr": "Üstat Johnson deliye dönmüştü!"}
+{"key": "5d4877136766944b", "tr": "Bu bir risk idi ama kardeşlerini arkada bırakmış olabileceğinden şüphelendim."}
+{"key": "79c4e9f2b6535a7b", "tr": "Albay... El Yazması. Onu bana neden geri verdin?"}
+{"key": "4134be1963c2c898", "tr": "Çünkü Üstat Cormac, güvenimi kazandın. Bundan daha iyi ellerde olamazdı."}
+{"key": "b344c04057d2c10c", "tr": "Saygısızlık etmek istemem efendim... Ama şu an senden çok daha büyük bir hedefim."}
+{"key": "f5e65625bc04f286", "tr": "Beyler? Kesegowaase Albany'yi basmak için adam topluyor. Müttefikleri dost bir Oneida köyünü tehdit ediyor ve Fransız birlikleri çoktan topraklarımıza girdi."}
+{"key": "5b314aee47276f59", "tr": "Fransızları geciktirip Oneida'ya yardım edebilirim."}
+{"key": "c1a8aec75e8cf5bc", "tr": "Albany'deki savunmayı hazırlayacağız."}
+{"key": "2ed47b6bf7eea3bb", "tr": "Kesegowaase ve müttefiklerini alt edecektsek Oneida'ya yardım etmeliyim... ve Fransızlar için elimden ne geliyorsa yapmalıyım."}
+{"key": "342be349be4dae12", "tr": "Rapor ver, asker."}
+{"key": "3a7cbb15ef1d037c", "tr": "Bölgede düşman yok, efendim."}
+{"key": "6e718de50e6f3381", "tr": "Güzel, sakın rahatı bırakmayın."}
+{"key": "9c7ab2f83f926f67", "tr": "Savunma kurmak için ne kadar kerestemiz var?"}
+{"key": "8d85b001267fe362", "tr": "Bir sike yarayacak kadar bile değil."}
+{"key": "b70517c805888176", "tr": "Johnson burada barut ve mermi depolamıştı."}
+{"key": "ce681cd3023b95f0", "tr": "Tanrı ondan razı olsun!"}
+{"key": "fdb4a959658e752b", "tr": "Şimdi, lafı uzatmak gibi olmasın ama acaba Kesegowaase'in zayıf yönlerini biliyor musun?"}
+{"key": "6e39796615a9fcb7", "tr": "Hiç yok. O, Suikastçılara katılmadan çok uzun süre önce izci ve paralı askerdi."}
+{"key": "97b0ce585d4ced32", "tr": "O halde şans tanrıçası seninle olsun."}
+{"key": "c1c98052aeded4a1", "tr": "Kendi şansımı kendim yaratırım."}
+{"key": "2db7489867ae0573", "tr": "Albay ordunun belli bir kısmı üzerinde hatırı sayılır bir kontrole sahip. Ama Kesegowaase'e karşı düzgün bir savunma kuracaksak hem askerlere hem de yerli müttefiklerine ihtiyacımız olacak."}
+{"key": "8e34a10901155589", "tr": "Kesegowaase'in Fransızların yanında yer alan her kabilede müttefikleri var, ayrıca diğer pek çokları da onunla: tuzaflar, avcılar, izciler... Toplayabildiğimiz bütün yardıma ihtiyacımız olacak."}
+{"key": "10627d23b680aa60", "tr": "Saygıdeğer kişi. Adım Shay Patrick Cormac. Ben... ben bir dostum."}
+{"key": "656a8e660d4d7472", "tr": "Gerçekten de bir dost. Halkımın minnettarlığını kazandın Shay Patrick Cormac. Bu dünyada nefes aldığın sürece, bizim aramızda sana her zaman bir yer olacak."}
+{"key": "b2918e11c9250f8c", "tr": "Teşekkür ederim."}
+{"key": "81bdab306e446c1e", "tr": "Asıl ben teşekkür ederim genç adam. Benimle yürür müsün acaba? Adım Onatah. Halkımın arasında bir efsane vardır. Ayaklarımız altındaki toprağın nasıl doğduğunu, iyiliğin ve kötülüğün bu dünyaya nasıl geldiğini anlatır. Gökyüzü Kadını bilgeliğini topraklarımıza saçtı. Onun yolunu takip edersen halkımızın gerçeğini öğrenirsin... ve belki de bu mağaraya kilitlenmiş ödülü ortaya çıkarırsın... Eğer sandığım kadar kahramansan."}
+{"key": "a09865bca5067be9", "tr": "Beni onurlandırıyorsun, saygıdeğer kişi."}
+{"key": "2b8c7d07b5ef6501", "tr": "Asıl sen bizi onurlandırıyorsun Shay Patrick Cormac. Hoşça kal."}
+{"key": "20d5f5790d87e573", "tr": "Avlanmaya mı geldin dostum? Bugün geyik avlamayacağız, sana o kadar söyleyeyim! Sana da biraz bırakmaya çalışırım!"}
+{"key": "9bccba9062e8fb7f", "tr": "Zor zamanlar bunlar, ölüm sis gibi havada süzülüyor. herkese yardım edecek kadar malzemem yok. Ticaret yolları çok tehlikeli, seyahat etmek isteyen pek az kişi var. Tanrı'ya şükredelim ki bir gün bir kez ve forall huzura erebilelim."}
+{"key": "33bb5c910395887e", "tr": "İyi insan, senin de günün kötü geçiyor gibi görünüyor. Sırtım korkunç derecede ağrıyor. Bir ayı saldırdı ve aylardır çalışamıyorum! Karnım neredeyse o ayının çıkardığı ses kadar yüksek gürültülüyor. Şimdi de müşterilerimin bazıları şikayet ediyor ve... Hayda!"}
+{"key": "7126af1cd2243f8d", "tr": "Bu herifler her yerde, şiddet yoluyla hayatımızı kontrol etmeye çalışıyorlar. Son makalem onları maske düşürdü, sıradakiyse bir kez ve forall köklerini kazıyacak!"}
+{"key": "8ae6a95c4442ed62", "tr": "Benim zamanımda erkekler adam gibi, yüz yüze dövüşürdü. Bu palyaçolar biraz cesur olup karşıma dikilseydi hiçbiri beni durduramazdı! Ama, ehem... Eskisi gibi çatılara tırmanamıyorum... Bana bir el atar mısın?"}
+{"key": "e5a78fdad7992f5f", "tr": "O pislikler! Önlerine çıkan son kadının cadı gibi diri diri yakıldığını söyleyip bana onlarca tehdit mesajı gönderdiler. Sadece birer kabadayılar. Arkamda yerel yönetim var. Kasabamızı bu pis yozlaşmadan arındırmamızın an meselesi olduğundan eminim!"}
+{"key": "dbbe4e09f8b445fe", "tr": "Yemi yutacağını biliyordum, \"kahraman\"! Yakalayın şunu kardeşler!"}
+{"key": "d1f20e54a68d2661", "tr": "Sen! Buralarda canlı bir insan göreliyim çok uzun zaman oldu. Garip, neredeyse eski dostlarımı hatırlatıyorsun. Hayal görüyorum herhalde. Yakınlarda dolanıyor olabilirler ve etrafta geziniyorsan güvenliğinden sorumlu olamam."}
+{"key": "add2bc83d3b362b6", "tr": "Bu lanet kasabadaki herkes balık tuttuğum yeri çalmaya çalışıyor. Bugün hiçbiri beni durduramayacak! Sen! Balık tutmaktan hoşlanmıyorsun, değil mi?"}
+{"key": "908b6bbeae2aeb0b", "tr": "Bu muhteşem değil mi? Sonsuz okyanus manzarası... Kendini tanıtmana gerek yok, kim olduğunu biliyorum. Ne yazık ki seninle aynı kaderi paylaşmayacağım..."}
+{"key": "14f7899a90fdd7cc", "tr": "Burada konuşamayız. Çok riskli. Şunu bil: bugün sakin görünüyor ama Fransızların harekete geçtiğini çok iyi biliyorum."}
+{"key": "74ab122712b138a3", "tr": "Sadece bu işçileri gözetliyor, onları güvende tutmaya çalışıyorum. Kimi işe alacaklarına ve ne zaman çalışacaklarına karar verirken olabildiğim mertebe adilim. Bu adamların neden bana zarar vermek istediğini hiç bilmiyorum. Zengin bir adam olduğumu mu düşünüyorlar? Ha ha..."}
+{"key": "fc5db79849a36514", "tr": "Her şey sakin, efendim. Buzdan başka bir şey yok dışarıda."}
+{"key": "0d9496ed72ced13a", "tr": "Önde düşman var!"}
+{"key": "6a1c52beea3cfccf", "tr": "Topları hazırlayın!"}
+{"key": "0b15b93fbaa0c8d2", "tr": "İşte amiral gemisi, kaptan!"}
+{"key": "0bcea57237a95cab", "tr": "Yanında bir armadayla birlikte! Ateşi amiral gemisine odaklayın! Onu batırırsak diğerleri cesaretini kaybedebilir!"}
+{"key": "cdd6804b060d04b5", "tr": "Rüzgar güçleniyor, efendim!"}
+{"key": "aafbf454c4b00509", "tr": "Önde Fransız donanması var, kaptan!"}
+{"key": "439967050c8aca50", "tr": "Ateş gemileri!"}
+{"key": "333000e4fe1ab8f5", "tr": "Bu bir pusu! Yaklaşmalarına izin vermeyin!"}
+{"key": "4c2789bdba5f87c9", "tr": "Fransız amiral gemisi, efendim!"}
+{"key": "d8227833da2935e7", "tr": "O takviye birlikler cehennemin neresinde kaldı? Onu kendimiz batırmak zorunda kalacağız. Bu Fransız suları onun mezarı olsun!"}
+{"key": "9c1db3ad350ef72c", "tr": "Üstat Kenway, Adéwalé'yi yok etmeye kafayı koymuş gibi görünüyor."}
+{"key": "e6b7263dbded29c6", "tr": "Sen koymamış mısın? Kendi çapında güçlü bir adam ve Suikastçılar için bir umut simgesi. Onu ortadan kaldırmak temellerini sarsar."}
+{"key": "e8ecc4031d7d76fd", "tr": "Sarsar, biliyorum. Ama yazık oluyor sanki. İyi adamdır, Gist."}
+{"key": "f132f189b10f3d33", "tr": "Yaşlı Washington da öyleydi. Ve Smith, onunla içki içmekten bayağı keyif alırdım. Wardrop da öyle, her ne kadar herif ne kadar içki içeceğini bilemese de. Biliyorsun, o ve Weeks hiç anlaşamazdı."}
+{"key": "8b252f5b70aecac6", "tr": "Vicdanımı sınamaya çalışıyorsan Gist, başardın."}
+{"key": "1aa20c335278d3d4", "tr": "Savaş zamanında yaşıyoruz Shay, ama bizim için her zaman savaş zamanıdır. Amcam Jedidiah gibi konuştum, o da huysuzun tekiydi! Dur da anlatayım..."}
+{"key": "45cc928c7d89d6f0", "tr": "Başka zaman Gist."}
+{"key": "8e4f534d36cf5eee", "tr": "Peki efendim."}
+{"key": "cc01af6e34c0e135", "tr": "Rüzgar neyi getirdi böyle!"}
+{"key": "875d836256576454", "tr": "Selamün aleyküm, beyler!"}
+{"key": "f195888943260f64", "tr": "Kaptan Cook'un hüneri yine işimize yaradı."}
+{"key": "78ee7ad970de4c3d", "tr": "Aradığınız adamın yerini tespit ettim."}
+{"key": "d84a94080490478b", "tr": "Adéwalé mi?"}
+{"key": "e5a70b1f1f35d038", "tr": "Aynen öyle. En son buradan iki fersah uzaktaki Fransız kalesinde görülmüş, nehrin kıyısında."}
+{"key": "5a096509f500f812", "tr": "O fındıkkurduğun Fransız kalesinde ne işi varmış?"}
+{"key": "26f686fcd5fd8bc1", "tr": "Gemisini tamir ediyordur herhalde. Louisbourg'dan sonra..."}
+{"key": "57a6f3601cfaedd7", "tr": "Teşekkürler Üstat Cook. Gerisini biz hallederiz."}
+{"key": "2b7c733c5489b06a", "tr": "Elveda ve rüzgarınız bol olsun, beyler."}
+{"key": "8b44a0baf18cbf4d", "tr": "Kale hemen ileride."}
+{"key": "b70661fb38c2a8b6", "tr": "Güzel, o zaman yola devam edelim."}
+{"key": "f257b7dbce78f138", "tr": "Tanrı korusun! Onun burada ne işi var?"}
+{"key": "62645bde8ebdccde", "tr": "Hiç mantıklı değil. Bu nehirlerde okyanus gemisi için yeterli derinlik yoktur neredeyse. Mıh gibi kalır manevra yapamaz."}
+{"key": "367dd9e8f6092a90", "tr": "Manevra kabiliyetinin pek önemi yok."}
+{"key": "6b7619f36dc640ac", "tr": "Şahsen sebebini öğrenmek niyetinde değilim. Bulaşmayalım."}
+{"key": "f0a610fe85b82074", "tr": "Etrafından dolanabiliriz. Onun takip edemeyeceği daha küçük nehirlerde kal yeter."}
+{"key": "32841f1f8a7228d6", "tr": "Ve görünmemeye çalışın. İstemediğimiz bir dikkat çekmeyelim."}
+{"key": "8da603195aaf6c3b", "tr": "Fransızlar böyle bir gemiyi neden karanın içine kadar getirsin ki?"}
+{"key": "8d8e9008442a689e", "tr": "Savaş sonuna yaklaşırken çaresiz kalıyorlar. Ateş gücü elde etmek için her şeyi yaparlar."}
+{"key": "67692eb6ea27c185", "tr": "Kaptan Cook'a saygısızlık olmasın ama o hanımefendinin ateş gücü bugüne kadar gördüğüm herkesten fazla."}
+{"key": "05b07f3ebb2f146d", "tr": "Pek benim tarzım sayılmaz."}
+{"key": "eb3ebdf019c42deb", "tr": "Ah, ama Fransızların kendine has bir cazibesi vardır. Sana hiç Madame Reinette'in hikayesini anlattım mı? GERÇEK adı o değildi ama... Neyse, sırası değil. Demem o ki, karaya çıkabileceğiniz güvenli bir yer biliyorum. Yelkenler fora! Plan ne peki? Kaleyi bombalayacak mıyız?"}
+{"key": "1a3b305ecc2a91ef", "tr": "O kaleye öyleceodosya dalmak aptallık olur."}
+{"key": "46b9ba09d78314d1", "tr": "Aynen, neyle karşı karşıya olduğumuzu bilmemiz lazım. Onu ben halledebilirim."}
+{"key": "d888a3e4ea95d404", "tr": "Doğru..."}
+{"key": "526f82f2bea4650d", "tr": "Demir atacak güvenli bir yer bulalım."}
+{"key": "21ebbdb6589e8480", "tr": "Kaleye gideceğim. Adéwalé'nin orada ne aradığını öğreneceğim. Morrigan'ı yakın tut, Gist."}
+{"key": "cd01dbbc0143b372", "tr": "Peki efendim. Yakın tutacağım ve gözüm gibi bakacağım."}
+{"key": "dc1b1e1f819b26ff", "tr": "İyi şanslar, Shay."}
+{"key": "73201dce576242c9", "tr": "Kendi şansımı kendim yaratırım Üstat Kenway."}
+{"key": "136bba3b7d131016", "tr": "Demek Tapınakçılar peşimden köpeklerini saldı. Bileğini sınama vakti, Shay."}
+{"key": "e3daaf97570345fc", "tr": "Kaçıp gidiyor. Keşke durup benimle dövüşse!"}
+{"key": "84fed706d1dcbaa3", "tr": "Adéwalé seninle kendi kurallarına göre kapışıyor, savaşı kendi seçtiği alana çekiyor. Kendi gemisinde de en rahat olduğu konumda."}
+{"key": "65bdd1cda161582a", "tr": "Havan toplarına dikkat edin! Yoksa eve yüzerek döneceğiz!"}
+{"key": "fbdb7b6aab18e05f", "tr": "Bu nehir tehlikeli derecede daralıyor."}
+{"key": "e57cfff14cf71bca", "tr": "Merak etme efendim! Shay bundan daha beter kazıklardan kurtardı bizi! Önümüzdeki göl de çıkmaz sokak. Adéwalé kaçamayacak."}
+{"key": "6260c9b36f0f6057", "tr": "Şansımız yaver gitti doğrusu! Kervan gemisi artık bizi takip edemez."}
+{"key": "1345d421fa329763", "tr": "Adéwalé gemisini karaya oturttu!"}
+{"key": "c74c48db7b83ae8f", "tr": "Yenilikçi bir taktik."}
+{"key": "974b135092872998", "tr": "Mürettabatını kurtarıyor."}
+{"key": "f848014b85c0988e", "tr": "Hayır, son bir direniş gösteriyor. Onu hayal kırıklığına uğratmayalım. Ben yüksek bir yere çıkıp dikkat dağıtacağım. Başka bir yol bul. Peşinden git, Shay. Ben etrafından dolaşacağım. Takip et onu, Shay. Köşeye sıkıştırmaya çalışacağım."}
+{"key": "8dbd3757c1f94834", "tr": "Haytham Kenway."}
+{"key": "4cb5e33d5b124f6f", "tr": "Av köpeğiniz nerede, Tapınakçılar Büyük Üstadı? Peşime ikinizi birden takacağıma göre epey bir gürültü koparmış olmalıyım."}
+{"key": "24b89ebf10b67164", "tr": "Öyle, çok uzun süredir başımızın belası oldun!"}
+{"key": "79393b36d44ac775", "tr": "Ben babanla omuz omuza savaştım, Haytham. Ne hale geldiğini görse utanırdı."}
+{"key": "e61950e389b03d2f", "tr": "Öyle mi? Babamın utanma duygusu olduğundan haberim yoktu."}
+{"key": "ff1ae64319c30a5c", "tr": "Baban hakkında kötü konuşma, delikanlı! Onun olduğu adamın yarısı bile olursan dua et."}
+{"key": "4891b12764d101de", "tr": "Nimet veya lanet, ben kendi başıma bir adamım. Yetti mi, ihtiyar?"}
+{"key": "83905457535b0502", "tr": "Bu ihtiyar seni erkenden mezara sokacak, Haytham!"}
+{"key": "2f7fb381cb09bfaa", "tr": "Daha genç adamlar denedi ama başaramadı."}
+{"key": "200cebe8c0b063d2", "tr": "Çabuksun, delikanlı! Ama pek de zeki değilsin! Gel! Gel! Hain olarak öleceksin!"}
+{"key": "a3c6c7e593ad0e59", "tr": "Beni affet, Adéwalé."}
+{"key": "3d14178134395797", "tr": "Af dilemeye cesaret mi ediyorsun, çocuk? Cehennem senin gibi hainleri kollarını açarak karşılar."}
+{"key": "c962e7a7c1c3204b", "tr": "O zaman doğru olanı yaptığımı bilerek gururla giderim."}
+{"key": "0d4964564dbf455d", "tr": "Fark etmez... Aşil zaten ihtiyacı olan şeyi aldı."}
+{"key": "a65e9ad4cc84c82b", "tr": "Gerekirse onu savunan herkesi teker teker öldürürüm. Başarılı olmasına izin veremem."}
+{"key": "9f6d4e701467e1c0", "tr": "Sen... bir canavara dönüştün, Shay."}
+{"key": "bc800d8e333ffbf3", "tr": "Belki de dönüştüm."}
+{"key": "9c19636ddea25f0a", "tr": "Gel."}
+{"key": "71a6ba59895a5811", "tr": "E, bir sonraki rotamız nereye?"}
+{"key": "0cde20ce3daa95dc", "tr": "Bu Lawrence Washington kıçını nereye demirlerse."}
+{"key": "25cd6f7d84baa46c", "tr": "Liam, sonunda işin havasına giriyorsun!"}
+{"key": "d5c7c740ca1a1799", "tr": "O bir Tapınakçı ve siyasetçi, sevilecek ne yanı var ki?"}
+{"key": "6789db4bff892aa6", "tr": "Güzel! Demir al!"}
+{"key": "3a6919ef4fe52f10", "tr": "Chevalier ne hakla bize emirler yağdırıp duruyor? Biz de onun gibi Suikastçıyız."}
+{"key": "6c0c9c870d7e1639", "tr": "Ondan daha tecrübeli ve buraların sularını daha iyi biliyor, Shay. Bu yüzden buraların sorumlusu o."}
+{"key": "dd485bfc513ed3d0", "tr": "Şey, Çiftlikte de bana emirler yağdırıp duruyor. Toprağı benden iyi bilmek için domuz gibi trüf mantarı avcısı falan mı?"}
+{"key": "15fdf9946110057b", "tr": "Biraz saygı göster, Shay."}
+{"key": "4e43d4bf44996f86", "tr": "Asıl o bana saygı duymalı, Liam! Ben de herkes kadar başımı belaya sokuyorum."}
+{"key": "8dafd388468d14a6", "tr": "Evet, görünüşe göre iki kat fazla... Ama mesele de bu zaten, Chevalier geri planda duruyor ve karar vermeden önce düşünüyor. Tecrübesi bu hakkı kazandırdı ona."}
+{"key": "8c8876a43f3b1db8", "tr": "Merak ediyorum, ne zaman uyanacağıma veya harekete geçeceğime karar verebilmem için acaba ne kadar tecrübe edinmem gerekecek! Yemin ederim Liam, bazen çocukken daha olgun olduğumuzu hissediyorum. Zorlukla uyur, et dilenciliği yapardık ama en azından nereye ve ne zaman olacağına kendimiz karar verirdik."}
+{"key": "6d04669496460c3f", "tr": "Tapınakçılar bu eserlerin doğasını anlamak istiyor. Casusları New York'taki pek çok doktorla ve diğer alim kişilerle görüştü."}
+{"key": "9eafe00fb2f5f826", "tr": "Ayrıca sorularla birçok kabileye de yanaştılar."}
+{"key": "57ed1e922303c4cb", "tr": "Evet, o El Yazması'nı her yerde gösterip durdular. Hiç kimse tuhaf yazıları okuyamıyor ya da görüntüleri anlayamıyor. Yine de bir adımız var."}
+{"key": "2c27e27293e6312d", "tr": "Lawrence Washington'ın El Yazması'nı gönderdiğini öğrendik."}
+{"key": "35d3041574e63ca6", "tr": "Lawrence Washington... İş adamı, Virginyalı siyasetçi ve üst düzey bir Tapınakçı."}
+{"key": "1aea3cb45871a14c", "tr": "Ah evet, yakın zamanda Batı Hint Adaları'ndan döndüğünü duymuştum. Adamlarımdan biri kâhyasının tuhaf bir paket aldığını görmüş."}
+{"key": "59bfbd85fa4298e1", "tr": "O halde o paket kendisine vakit kaybetmeden teslim edilecek. Shay, bunun ne olduğunu çöz ve Washington'ı bul. Ve bunu yaptığında... öğrenebildiğin her şeyi öğren."}
+{"key": "0fcad6af5f148c3a", "tr": "Morrigan'ı hazırlayacağım."}
+{"key": "c3f2f34e8d9dd0b9", "tr": "Şansımız yaver giderse o gemi bizi doğrudan ona götürür."}
+{"key": "df7499dedf192644", "tr": "Kendi şansımı kendim yaratırım, Liam. Ve Washington'ın şansı tükeniyor."}
+{"key": "4707c4fdc04e69db", "tr": "Öyle."}
+{"key": "717b9d251fca9f65", "tr": "İşte orada! Pekala beyler, sessiz olma vakti!"}
+{"key": "3e42c31dea276637", "tr": "Lawrence Washington güçlü bir iş adamı, bir köle taciri ve önde gelen bir Tapınakçı. Yaklaşık bir yıl önce izini kaybetmiştik. Yakın zamanda Barbados'ta olduğunu öğrendim ama bunu doğrulayamadım. Şimdi..."}
+{"key": "30f98fc0528f92e9", "tr": "Şimdi de eserlerin çalınmasında bir parmağı olduğunu düşünüyorsun, değil mi?"}
+{"key": "c8e0711ae2b67646", "tr": "Bunu ondan beklerim. Haiti, Barbados'a kısa bir yolculuk mesafesinde ve kolonilere dönüşü kesinlikle eserlerin varışıyla aynı zamana denk geliyor. Tapınakçıların bu kolonilerin kontrolünü ele geçirmesine izin veremeyiz. Ne olursa olsun, Lawrence Washington hayatta kalmamalı."}
+{"key": "40c756c1947f351b", "tr": "Hayatta kalmamasını sağlayacağım."}
+{"key": "a012550ef9c36869", "tr": "Bir abluka, Kaptan! Bu hiç iyi olamadı. Shay, o gemiyi karadan takip etmelisin."}
+{"key": "040fdadb59c13dd2", "tr": "Öyle yapacağım. Morrigan'ı başka bir yoldan dolaştır."}
+{"key": "98ba8b573e4805d6", "tr": "Pekala, Kaptan. O geçidi takip et ve Washington'ı bul."}
+{"key": "90617e11f81e50cf", "tr": "Ne abluka ama."}
+{"key": "0064505655afa935", "tr": "Ve söylediklerimi unutma, Shay. Washington ölmeli."}
+{"key": "9715a3ec773498c7", "tr": "Bu paketin içinde ne var? Kaptan bize bunun kırılgan olmasından başka bir şey söylemedi."}
+{"key": "30f906c5f36543d3", "tr": "O zaman senden başka bir şey bilmene gerek yok."}
+{"key": "cc507abbaf1e36df", "tr": "Hadi ama, at bir kemik!"}
+{"key": "c16fc57098131718", "tr": "Neden bildiğimi düşünüyorsun ki?"}
+{"key": "1da4bbadcd228522", "tr": "Şimdi bu da ne? Tüfek mi?"}
+{"key": "032e85093dc07448", "tr": "Seni oradaki!"}
+{"key": "fe364db4d046a4f4", "tr": "Olduğun... yerde... kal..."}
+{"key": "2dee01db8ced9f66", "tr": "Bu nasıl olur? Hiç ses çıkmıyor. Hediye için teşekkürler, Usta Washington. Bu tuhaf bir sürpriz oldu, tam olarak beklediğim gibi değil. Şimdi Washington'ı bulup onu sorgulamalıyım..."}
+{"key": "2b80922b3aa81073", "tr": "Şahane parti, değil mi ama?"}
+{"key": "cbf2462b77213598", "tr": "Kesinlikle. Usta Washington yine kendisini aşmış."}
+{"key": "a35648a1b4086c89", "tr": "Yine de epey solgun görünüyor. Üstelik öksürüğü de her zamankinden kötü."}
+{"key": "3772129cc638664f", "tr": "Davetiye lütfen."}
+{"key": "cddd1b90bb85d606", "tr": "Buyurun. Herhangi bir sorun çıktı mı?"}
+{"key": "03f36feb3a3448e0", "tr": "Henüz değil. Ve işlerin böyle kalmasını umuyoruz."}
+{"key": "d28ae5c360ede192", "tr": "Önce Washington'a ulaşmam lazım. Sonra eserleri dert ederim."}
+{"key": "933420a6025195c1", "tr": "Kardeşer, yatakta olman gerektiğine emin misin?"}
+{"key": "92d1b54b6abd6a9a", "tr": "İyiyim, George."}
+{"key": "30523d8a53bb3d73", "tr": "Benim hatırım için iyi bir ev sahibi ol. Şarap mahzenine git ve misafirlerimiz için özel bir şey al."}
+{"key": "af40d92656fefd6b", "tr": "Gideceğim. Beyler."}
+{"key": "262970b23ad60e2b", "tr": "Kardeşim, sorunlu bir diyardaki parlak bir nokta. Bu hayattan göç etmeden önce tek bir ricada bulunabilirsem, lütfen onu rahat bırakın. Tapınakçı davasının dertleriyle hiçbir ilgisi olmamalı."}
+{"key": "5c88a64614a94480", "tr": "Hepimiz bu duyguya saygı duyuyoruz, efendim."}
+{"key": "822f2a38c72d5157", "tr": "Teşekkür ederim, baylar. Usta Smith, yolculuğa çıkmaya hazır mısın?"}
+{"key": "96d818a7a75ad8a2", "tr": "Evet, efendim! Cevaplarla döneceğim."}
+{"key": "eb535ef9f702ca29", "tr": "Usta Wardrop, sen de aynı şekilde el yazmasıyla meşgul müsün?"}
+{"key": "ce5d91884a57ee87", "tr": "Evet, efendim. Yakında ne anlama geldiğini öğreneceğiz."}
+{"key": "c20c7ffa2e031a1c", "tr": "O halde izinlemenizi rica ediyorum."}
+{"key": "90498c5c9f354dd6", "tr": "Washington ayakta zor duruyor. Onun hakkında haklı olsan iyi olur Liam, yoksa ölmek üzere olan bir adamı katledeceğim."}
+{"key": "546cba0e175cf3c9", "tr": "Çok geç kaldın, Suikastçi."}
+{"key": "cc4792466e061b6c", "tr": "Tapınakçıların planlarını mahvetmek asla geç değildir, Usta Washington."}
+{"key": "151f9065059ffcf9", "tr": "Aa, aa... ama benim planlarım çoktan devreye girdi. Hatta seni buraya çekmem... müttefiklerime kaçacak zaman kazandırdı. Sonumu çabuk getirdiğin için... teşekkürler."}
+{"key": "880666fd9a3c164f", "tr": "Asıl sen asıl planını deşifre ettiğin için teşekkürler, seni kurnaz yılan."}
+{"key": "a8be5d90e7ccadbe", "tr": "Kahretsin, acele etsem iyi olacak. Morrigan'a varmalıyım! Liam, umarım gemiyi yanaştırmışsındır! O bir gemi havanı mı? Hiç adil değil!"}
+{"key": "28c6a4f8fa2ba6d9", "tr": "Lawrence Washington öldü."}
+{"key": "1c9519bec86e9633", "tr": "Hayal kırıklığına uğramış görünüyorsun."}
+{"key": "9d0a8f5e0cdddfc4", "tr": "O adamın hasta tipine bakılırsa, zaten bir aya kalmaz ölürdü. Üstelik diğer iki Tapınakçı kaçtı. El Yazması ile Kutup'u araştırıyorlar."}
+{"key": "c3f9bfc0b2acb4fb", "tr": "Eserler yanlarında mıydı?"}
+{"key": "6e0a17fa615391e9", "tr": "Bilmiyorum... Belki de... Emin olamıyorum."}
+{"key": "cf1bd719b04dd362", "tr": "O halde Kardeşlik adına doğru olanı yaptın. Nesneleri sonra buluruz. Neşelen, Shay. Tapınakçılar arasında böyle bir kaosa sebep olduğumuz nadir görülür."}
+{"key": "fd0801e7f6185d16", "tr": "Belki. Ama Washington'ın laflarından, bu kayıp pek de umurlarında olacakmış gibi görünmüyordu."}
+{"key": "b035403e30370055", "tr": "E, o da senin böyle düşünmeni isterdi zaten."}
+{"key": "437c0dc9c11c1be1", "tr": "Patronun nerede?"}
+{"key": "785e23a09796c03b", "tr": "Asla söylemem! Beni öldürür!"}
+{"key": "f44bac8d43ee3f00", "tr": "Eğer söylemezsen, o seni öldürecek."}
+{"key": "8f6092698ede0a8b", "tr": "Şu büyük malikanede. Bahçesi olan hani."}
+{"key": "d9c45f1d31636cd4", "tr": "Gidelim mi?"}
+{"key": "2bd484368f116c40", "tr": "Gizli Bıçağın olduğunu söylememiştin."}
+{"key": "f0944094716cd5b3", "tr": "Bir tek kendininkini sandın herhalde?"}
+{"key": "05fb2b0974f3605e", "tr": "Şey, evet, sanırım... Onu nereden buldun?"}
+{"key": "933be40eaded7cfc", "tr": "Kardeşlik tarafından bağışlandı."}
+{"key": "c6725b107e0e18d1", "tr": "Anlıyorum..."}
+{"key": "8ed2217fe7a91e0d", "tr": "Görevimiz başarıyla tamamlandı. Ordu her an harekete geçmeli."}
+{"key": "d4f02f0c457a6d92", "tr": "Güzel. New York'ta bu suçlularla kendimiz başa çıkacak kaynaklarımız yok. Biraz şansla, onlardan bir defa ve for tüm kurtulabiliriz."}
+{"key": "407d6eef423994d8", "tr": "Şimdi, yılanın kafasını keselim..."}
+{"key": "857e0313b723ec6c", "tr": "Komutanım! Onaylıyoruz, kadın içeride."}
+{"key": "08b91f8ffd295329", "tr": "Mükemmel. Onu dışarı çıkarma vakti!"}
+{"key": "66934332480f0650", "tr": "İçeri girip Hope'u kendim alacağım."}
+{"key": "06de3a7a28a2d6fe", "tr": "Pekâlâ."}
+{"key": "9ea314bd649bb013", "tr": "İhtiyacımız olan her şey bizde. Şimdi... Chevalier beni bekliyor. Hope."}
+{"key": "a9c87c03f7ad15bc", "tr": "İyi yolculuklar."}
+{"key": "344c87f9827b88ff", "tr": "Göründüğün iyi oldu. Böyle bitmesini istemezdim, Shay."}
+{"key": "f1dd27b55660af29", "tr": "Büyüleyici bir heriftin doğrusu."}
+{"key": "70dd62b2c2f00138", "tr": "Beklediğimden daha fazla dayandın, Shay."}
+{"key": "83272fc1712b157c", "tr": "Bu ne... zehir... kalbimi yavaşlatıyor... Ben... hareket etmeliyim! İşte bu! Hareket etmek kalbimin atmasını sağlıyor. Hope'u bulmalıyım... Antidotu al! Durursam ölürüm. Hareket etmeliyim. Hareket etmeye devam etmeliyim!"}
+{"key": "9e382f1bd2dd58e7", "tr": "Asla pes etmiyorsun, değil mi Shay? Önemi yok. Zehir seni öldürecek."}
+{"key": "561a20519c71fa9e", "tr": "Yine geç kaldın, Shay..."}
+{"key": "ac327a046668b0ac", "tr": "Hope, bunu yapmak istemezdim."}
+{"key": "10756f4e33528df9", "tr": "Bunu yapman için seni ben eğittim. Bundan aşağısını beklemiyordum zaten."}
+{"key": "508bbef87f96bb70", "tr": "O zaman neden"}
+{"key": "85e447331882bd72", "tr": "Liam'a kaçması için zaman kazandırmak... Yaklaşık Chevalier Öncüler sahrasına doğru yola çıkmak üzere..."}
+{"key": "c17089dfb919c4ba", "tr": "Onu durduracağım."}
+{"key": "1f8bb73734099798", "tr": "Geldiğini görecek. Yazık... Çok potansiyelin vardı..."}
+{"key": "9288016d1460c255", "tr": "Albay Albany'de bekliyor... Sırada ne yapmamızı istediğini merak ediyorum."}
+{"key": "c1bc793bd5c0c353", "tr": "Biz mi? Ben sadece Monro'ya uğrayacaksın sanmıştım, orduya yazılacağımı değil."}
+{"key": "91178a98111e5d7a", "tr": "Hiç de değil, Shay! Ama Albay'ın ideallerine hayranım ve bunların gerçekleşmesini istiyorum."}
+{"key": "386c34c9dbd9e87a", "tr": "Ne tür idealler?"}
+{"key": "4cf90c47bbeff3ca", "tr": "Güvenli sınırlar, müreffeh çiftlikler, adil ticaret... Bu zavallı kolonilerde bunlara ihtiyacımız var."}
+{"key": "e2d800b27c097474", "tr": "Kulağa kibirli bir ütopya gibi geliyor."}
+{"key": "1fd165ec363bec7e", "tr": "Öyle sayılır! Gerçekleşmesine yardım etmek ister misin?"}
+{"key": "71fa8bc29c708c1d", "tr": "Albay Monro ilgi çekici bir adam ve kesinlikle onurlu görünüyor. Albany'ye doğru yola çıkacağız. Ondan sonra bakarız."}
+{"key": "f5491cb09195e059", "tr": "Harika! Tam yol ileri, çocuklar!"}
+{"key": "29b4da0623aa9914", "tr": "Sağlığın yerinde görüyorum?"}
+{"key": "b75a19937eb595ae", "tr": "Ehh, kaptanımız sayesinde."}
+{"key": "b977af18996f387a", "tr": "Güzel bir gemi, Usta Cormac."}
+{"key": "b2e56a96d758000a", "tr": "Teşekkür ederim, Albay Monro."}
+{"key": "3ede7458c55b14d2", "tr": "Usta Gist, komplocularımız ve yeni silahları hakkında daha fazla şey öğrendin mi?"}
+{"key": "3aec696b38cd39be", "tr": "Tek bildiğimiz, operasyon üslerinin nehrin aşağılarındaki bir Fransız kalesi olduğu."}
+{"key": "a0d6bbfdab75fbe5", "tr": "Biraz fazla yakınımızda değil mi?"}
+{"key": "2a5f9d640070f433", "tr": "Eğer Fransızlar topraklarımıza bir kale kurduysa büyük ihtimalle saldırıya hazırlanıyorlar. New York yanıp kül olabilir. Bize katılır mısın, Usta Cormac?"}
+{"key": "c0429e249569f71c", "tr": "Aynen. Yeterince masum öldü zaten."}
+{"key": "d65625d23535e4a1", "tr": "Gemimizi geliştirmemizi öneririm. The Morrigan iyi ama biraz daha malzemeyle durdurulamaz bir şey olabilir. Hem yakında bildiğim bir Fransız karakolu var..."}
+{"key": "9d4d04143a637545", "tr": "Kulağa hoş geliyor."}
+{"key": "f2755d02b41868af", "tr": "Fransızlar orada ne haltlar karıştırıyor? Sadece toprak işgali mi?"}
+{"key": "99e9b5ff6773df12", "tr": "Coğrafi olmaktan çok ekonomik bir saldırı. Serserilerden bazıları kolonilerin düşmanları tarafından finanse ediliyor. Yerel yetkilileri baltalamak niyetindeler."}
+{"key": "70081279acd8c1fe", "tr": "Sivillerden çaldıkları temel ihtiyaç malzemelerini on katı fiyata sattıklarını duymuştum..."}
+{"key": "e1d8feb25c4981df", "tr": "Derisi yüzülen hep gariban olur zaten. Albay, sen ve Gist epey coşmuş görünüyorsunuz. Suda bir şey mi var, yoksa viskide mi?"}
+{"key": "a3f2902f07524556", "tr": "Şimdi neden böyle söylüyorsun, Usta Cormac?"}
+{"key": "5869c266d6a8bba2", "tr": "Sanırım Shay, insanlığa dair niyetlerimiz konusunda şüpheci."}
+{"key": "6d5d317eb7a70901", "tr": "Anlıyorum ama gerek yok. Sadece bu kolonilerin güvenli, gelişmiş ve amacı olan bir yer olmasını istiyorum."}
+{"key": "0ba29c6580a1afb6", "tr": "İlginç, zengin adamların burayı kâr kapısı yapmak istediğini sanıyordum."}
+{"key": "14e2dfc96dd0dfde", "tr": "Ben zengin bir adam değilim, Usta Cormac... Para amaç değil, sadece amaca giden bir araçtır."}
+{"key": "958d9ebd224e8bec", "tr": "Sen öyle san. Bence bir kart oyununun sonunda paradan tatlısı yoktur."}
+{"key": "e2026c8dca42a197", "tr": "Aferin Shay! Şimdi o malzemeleri kullanarak The Morrigan'a daha fazla ateş gücü kazandıralım. O kaleye yaklaşmadan önce daha güçlü toplara ihtiyacımız olacak. Çalışmaları ayarlamak için kamarana git."}
+{"key": "bad3f8fe5e0b15be", "tr": "Şahane! O kale ve savunucuları The Morrigan'ın önünde titreyecek!"}
+{"key": "501b5cb0c0a55502", "tr": "Gemin harika durumda, Usta Cormac. O kale pek direnç gösteremez."}
+{"key": "9906ba97e9574a21", "tr": "Umarım suratsızlar biraz direnç gösterir, yoksa günümüz sıkıcı geçecek."}
+{"key": "cc14f2a28409a4a6", "tr": "Asla savaş dileme, Usta Cormac. Ömrümüzün geri kalanına yetecek kadar savaş var etrafta."}
+{"key": "2fd999ac7570e147", "tr": "Ayrıca kalenin komutanını bulursak Fransızlar teslim olur, değil mi?"}
+{"key": "c96564671637e078", "tr": "Kesinlikle, mantıklı bir strateji. Ama önce kalenin savunmasını yıpratmalıyız. Yoksa yaralı bir ayı gibi taşa basıp beklerler."}
+{"key": "d08ac123de2e0010", "tr": "Hedefimiz orada, Shay! Dokuz taş oyunu gibi devir onu."}
+{"key": "e2622351540f46fb", "tr": "Kulelerini vurarak başla."}
+{"key": "e628c389f1ff53af", "tr": "Albay ne diyorsa o!"}
+{"key": "cdc4cdff241241e3", "tr": "Harika! Şimdi kale komutanını bul!"}
+{"key": "21c70c12472993f8", "tr": "Le Chasseur..."}
+{"key": "2188b79b23a37325", "tr": "Shay! Çok uzun zaman oldu. Özel bir görevde miydin?"}
+{"key": "f3f80ea4b343eda5", "tr": "Evet, Achilles'ten."}
+{"key": "220d8e7c9b46dee4", "tr": "Ne kadar ilginç! Ben de."}
+{"key": "faf6ca6306a0d065", "tr": "Bunu bana yaptırma, Le Chasseur!"}
+{"key": "8fbe64db5b7c667c", "tr": "Neyi yapmayayım, seni öldürmeyi mi? Bunun senin uzmanlık alanın olduğunu sanıyordum."}
+{"key": "2489d3801dd519d3", "tr": "İkimiz de çekip gidebiliriz."}
+{"key": "57548fec1cf3db21", "tr": "Ah ama o zaman Kardeşlerine hâlâ yaşadığını söylerdim. Beni öldürmek zorundasın, Shay."}
+{"key": "273ed8294a86a98b", "tr": "İşinde hep iyiydin, Shay."}
+{"key": "5677f692013b9034", "tr": "Sen de öyleydin. Söyle bana, iç bölgelerde ne arıyorsun sen?"}
+{"key": "8b9cf96c18a8e1fa", "tr": "Özel silahlar... Koloni yetkililerine karşı kullanılacak zehirli gazlar. Ben sadece bir kuryeyim."}
+{"key": "4c01a9377427f4f2", "tr": "O halde son teslimatın hızlı olur umarım."}
+{"key": "fcbf8abefa565eef", "tr": "Le Chasseur haklıydı... B-başka çarem yoktu. Suikastçılar yaşadığımı öğrenirse peşime düşecekler."}
+{"key": "f97bae81e2ceb953", "tr": "Sen o kaleyi indirmekle meşgulken ben de hazineye rastladım."}
+{"key": "b8fa78f7dce8bbaa", "tr": "Yapma ya..."}
+{"key": "209ccd96fdb0591d", "tr": "İnanılmaz bir şeydi... Her neyse, diğer şeylerin yanı sıra çeşitli Fransız ticaret yollarını gösteren haritalar ve çizelgeler buldum."}
+{"key": "0037f57c4d2579cc", "tr": "Ne düşünüyorsun, Gist?"}
+{"key": "8c1f59f070b2cb26", "tr": "Belki de onları şey için kullanabiliriz, Kraliyet Donanması'na yardım etmek... ve ceplerimizi doldurmak için. Bu haritaları kamarana sakladım kaptan, kullanmak istersen diye."}
+{"key": "fd38fd19b607ed26", "tr": "Albay sana teşekkür ediyor ve tebriklerini iletiyor, Shay. New York'a geri döndü. Ama endişeli görünüyorsun."}
+{"key": "1589d1e480816506", "tr": "D-doğru şeyi yapıp yapmadığını hiç merak ediyor musun, Gist? Doğru yolu mu seçtin?"}
+{"key": "ea3dd8e3885af1f6", "tr": "Ah, eskiden ederdim evlat ama artık etmiyorum. Albay'la tanışalı beri... Neyi sorgulayacağız ki? Fransızlar topraklarımıza çökmüş durumda. Onları söküp atmanın vakti çoktan geldi bile!"}
+{"key": "8c3a2a8f528be928", "tr": "Elbette, haklısın Gist. New York'a geri dönelim."}
+{"key": "5ff7a9d890ac24f3", "tr": "Aynen, Kaptan."}
+{"key": "cd41246ed5824d90", "tr": "Usta Cormac! Seni bu kadar çabuk tekrar göreceğimi beklemiyordum."}
+{"key": "1564058afb7be0b2", "tr": "De la Vérendrye'in seyahat planlarını buldum ama namussuz bir tür şifre kullanmış. Çözemiyorum. Belki senin şansın yaver gider?"}
+{"key": "777a35aea589ca49", "tr": "Ne kadar tuhaf... Çok eski bir şifre bu. Daha önce bir kez görmüştüm. Sana bir harita çizebilirim..."}
+{"key": "78aa88e04dceb185", "tr": "Ya da... bana eşlik edebilirsin. De la Vérendrye'i bulmama yardım et."}
+{"key": "37d3413335114a0d", "tr": "Acil bir durum desene. Pekala. Tekrar birlikte yelken açacağız."}
+{"key": "48215a2b6111bdb2", "tr": "Dostumuz de la Vérendrye ile geçmişten bir  tanışıklığınız var sanırım."}
+{"key": "a300dac79dcc49f8", "tr": "Anında nefret etmeyle dolu bir tanışıklık. Böyle bir alçağı bağırlarına basan... dostlarıma güvenmemem gerektiğini bilmeliydim."}
+{"key": "d50eb30f29999b7a", "tr": "Aman Tanrım, bu adam böyle bir düşmanlık uyandıracak ne yapmış olabilir ki? Onu sadece bilinen dünyanın sınırlarını genişleten bir kaşif ailesinin üyesi olarak tanıyorum."}
+{"key": "22bc38b575f5c250", "tr": "Onunla yaptığım kısa görüşmelerden yola çıkarak aksi bir insan olduğunu söyleyebilirim."}
+{"key": "3c976c88c9e34794", "tr": "Bu, çekilmez bir orospu çocuğu demenin kibarcası."}
+{"key": "5d9add69a49a7cfa", "tr": "Peki ya eylemleri sözlerinden üstün mü?"}
+{"key": "f6b784dbc6972867", "tr": "Tarih hak verecektir diye tahmin ediyorum sevgili Cook."}
+{"key": "0421d2eac314f01f", "tr": "Tarih kitaplarına geçen eylemler her halükarda. Kaptan Cook, ne kadar güneye seyahat ettin?"}
+{"key": "affa73a5a0d0d6d4", "tr": "Şey, pek değil. Sadece Nantucket civarına falan."}
+{"key": "59cc80a23e4d0b72", "tr": "Oradan bir adam tanıyordum... Ama o başka bir konu. Batı Hint Adaları'na bile gitmedin mi?"}
+{"key": "2c2199c971f11f88", "tr": "Henüz değil. Ama Batı Hint Adaları zaten çoktan haritalandırıldı."}
+{"key": "f41430a386a15773", "tr": "Ah, bir meydan okuma arıyorsun, öyle mi?"}
+{"key": "0da5e4bd94d70af3", "tr": "Şey, açıkçası evet. Becerilerim Newfoundland ve Labrador gibi yeni keşfedilen bölgelere daha uygun."}
+{"key": "523114380bc75a48", "tr": "Diyelim ki bir harita gördüm... Nereden olduğunu söyleyemem."}
+{"key": "1b2b0afaea9f6c08", "tr": "Hassas bir konu mu? Diplomatik belki de?"}
+{"key": "08f266ebbde55148", "tr": "Ne demek istediğimi anlıyorsun. Bu haritada, sanırım hiçbir insanın görmediği topraklar vardı. Şey, en azından bizim İmparatorluğumuzdan hiçbir insanın."}
+{"key": "35b10c31359a9cdb", "tr": "Hiçbir insanın görmediği bir toprak... Merakımı uyandırdın, nerede burası?"}
+{"key": "a4c80a4912953da8", "tr": "Japonya ve Çin'in güneyinde. Madagaskar'ın doğusunda, Lizbon'un Boston'a olan uzaklığı kadar."}
+{"key": "5264cfb2ec7e953e", "tr": "Fakat... orada hiçbir şey yok. Ve o yolculuğa kalkışmak bile sıradışı donatılmış bir gemi gerektirirdi."}
+{"key": "d2166ffd82db73ee", "tr": "Sanırım böyle bir sefere sponsor olabilecek bir grup biliyoruz..."}
+{"key": "37f1a9d89aa4cd36", "tr": "Sana daha sonra anlatırım Kaptan Cook. Bir adam böyle cüretkar bir keşifle adını duyurabilirdi."}
+{"key": "0dd20956fda07c8d", "tr": "Bunu duydun mu?"}
+{"key": "854c2b42d7587eec", "tr": "Top atışı. Sisin derinliklerinden geliyor."}
+{"key": "584a442dd795158d", "tr": "De la Vérendrye olabilir mi?"}
+{"key": "75c97438b19953e5", "tr": "Belki de. Bu gizli bir sefer. Seferlerine tanık bırakmak istemezler."}
+{"key": "55f884e6a94767ab", "tr": "Gemi ahoy!"}
+{"key": "cc6b9aba53c4647c", "tr": "Bir filo, Kaptan. Onları bulduk."}
+{"key": "adcc11b2b9cff74e", "tr": "Umarım çok geç kalmamışızdır. Bize karşı büyük bir dezavantajları var."}
+{"key": "df3f966568b51af9", "tr": "Onlara yetişiyoruz. Morrigan bizi yarı yolda bırakmayacak."}
+{"key": "38fbb4186d40641d", "tr": "Bu kar fırtınası başımıza bela olmak için gönderilmiş."}
+{"key": "7595b1ea48ff0987", "tr": "Bizi uzun süre yavaşlatamayacak. Belki de onları şकिसtürmemize yardım eder."}
+{"key": "3da83d37afaeb057", "tr": "Tutun!"}
+{"key": "12c03a0153b9dffa", "tr": "Bu bir pusu!"}
+{"key": "f51129ec208b90be", "tr": "Gemiyi sabitleyin!"}
+{"key": "8b62f7e60051d061", "tr": "Neredeler lan?!"}
+{"key": "de3623d4deda7a37", "tr": "Havan topu menzilindeler. Bildiğim tek şey bu."}
+{"key": "f54b0de240415a58", "tr": "Bu Gerfaut!"}
+{"key": "741163e1ed69ec53", "tr": "Son ana kadar çekilmezler. De la Vérendrye bizi durdurmak için geride kalmış olmalı."}
+{"key": "96cbaddf14baff00", "tr": "Ve hiç şüphesiz bu işe gönüllü olmuştur."}
+{"key": "02e57589949bf818", "tr": "Onu batırmayın! De La Vérendrye'in haritalarına hâlâ ihtiyacımız var!"}
+{"key": "72a727fd69e6bb30", "tr": "Olduğu yerde kaldı! Avarya için hazırlanın!"}
+{"key": "adc0ca4bb0e4987b", "tr": "Demek beni alt edebileceğini sanıyorsun, çocuk? Nişan almayı uzun süre çalıştım, bu sefer tam on ikiden vuracağım. Yumuşadın Shay! Bir Tapınakçı'nın yapabileceği tek şey bu mu? Aptalca arayışından vazgeç! Bu sularda öleceksin! Kimse adını hatırlamayacak! Benimki bir efsane olacak! Suikastçılar unutulmamanı sağlayacak!"}
+{"key": "32fe622e63940fac", "tr": "Şöyle bakalım lahana çiftçisi, hâlâ Tapınakçılar'ın haklı olduğuna inanıyor musun?"}
+{"key": "dd4b58878a06f5de", "tr": "Sonuna kadar inanıyorum."}
+{"key": "0f828f6b2aa87bb8", "tr": "Seni orospu çocuğu! Achilles ve Liam çoktan kuzeye yöneldi bile!"}
+{"key": "b6af20eca004df02", "tr": "Umut haklıymış... Gerçekten de... iyi bir dikkat dağıtıcı oluyorum."}
+{"key": "c0f67707de010982", "tr": "Yardımın için sağ ol Kaptan Cook."}
+{"key": "416caa11ccf5d82d", "tr": "Rica ederim Kaptan Cormac. Seninle yelken açmak kesinlikle... ilginç."}
+{"key": "e5c5c4cdd7b4d360", "tr": "Bela bizi buluyor gibi görünümde, orası gerçek."}
+{"key": "156281898d100316", "tr": "Doğruyu söyle bana... Daha büyük bir oluşumla mı çalışıyorsunuz? Emirleri doğrudan Majesteleri'nden alıyorsunuz, değil mi?"}
+{"key": "37baeae22d6ffe0e", "tr": "Öyle olsak bile söyleyemezdik."}
+{"key": "38c1d48b70fc74ce", "tr": "Bu haritaları almalısın. De la Vérendrye'in artık onlara ihtiyacı olmayacak. Gelecek seferlere sponsorluk yapılması konusunda seninle iletişime geçeceğiz Kaptan."}
+{"key": "0daa46ebdccf8e1f", "tr": "Çok minnettarım."}
+{"key": "1fbc3aacec66d84e", "tr": "Ugh..."}
+{"key": "97c3a842630344f7", "tr": "Hıh, kendini daha iyi hissettiğine sevindim."}
+{"key": "cda7e2b374ca6664", "tr": "Teşekkürler... Bay Finnegan mıydı?"}
+{"key": "750f27e9d1a8fe49", "tr": "Tanrı aşkına, köyün deliğini mi topladık başımıza?"}
+{"key": "648d49b622d04ab1", "tr": "Barry! Unutma Shay, ben Cassidy, bu da..."}
+{"key": "5a9cea259640cac7", "tr": "Barry."}
+{"key": "687cbac5fdea9e9f", "tr": "Haftalardır hastaydın."}
+{"key": "86d343fcfa96677d", "tr": "Yük olmaktan nefret ederim."}
+{"key": "e5172cb6736f7a54", "tr": "Gördün mü, medeni bir adam kendisi."}
+{"key": "63816a3a4faf68a3", "tr": "Öyle, usta gemici bozuntusu için. Muhtemelen yarı sarhoş bir halde gemisinden düşmüştür."}
+{"key": "fb615866a86a911c", "tr": "Haklı..."}
+{"key": "924f7d9ac71987bb", "tr": "Siz ne istiyorsunuz lan?"}
+{"key": "748fb9c6762cb0de", "tr": "Aaaahhh!"}
+{"key": "bd6a1bb99268f681", "tr": "Neler oluyor lan?"}
+{"key": "97679d14544df777", "tr": "Seni alçak! Nasıl cüret edersin!"}
+{"key": "b66f7ff567cabac4", "tr": "Kes sesini, karı!"}
+{"key": "153078218f243968", "tr": "Ağh!"}
+{"key": "19077cd21afb1fd6", "tr": "Rahat bırakın kadını! Argh!"}
+{"key": "b935283e5518dc87", "tr": "Şimdi derdin ne senin?"}
+{"key": "cd9b975e813bc3d8", "tr": "Karışma lan bu işe, seni aptal!"}
+{"key": "88c88ccf0682d166", "tr": "Aslında karışmayacaktım ama işi kişiselleştirdiniz..."}
+{"key": "af6eed3b07dd0d16", "tr": "Aaarrgghh! Bir daha da yaklaşmayın! Sağ ol, Shay. Gençliğimde olacaktı ki, tek elle haklardım hepsini!"}
+{"key": "a6c453e02c4bbc3e", "tr": "Neden rahatsız ediyordu bu adamlar sizi?"}
+{"key": "857c4d11e4177b95", "tr": "Şİşte, her zamanki gibi. Vatandaşlara zarar vermediğimiz için kendilerine borçlu olduğumuzu düşünüyorlar. Söylediğim not edin, bu çeteler bu şehrin sonunu getirecek."}
+{"key": "34a17731f69767ff", "tr": "Bekle burada. Sana bir şeyim var."}
+{"key": "03e45b771ec3f676", "tr": "Öyle çırılçıplak dolaşarak bir şey yapamazsın... Al, şunları dene. Oğlumuzundu."}
+{"key": "19a2f27a1abfcf0e", "tr": "Sanırım belaya bulaşacaksan bunlara ihtiyacın olacak."}
+{"key": "844347e54f00c4b9", "tr": "Sağ ol."}
+{"key": "191fdb4bb379f801", "tr": "Vay be, tam bir beyefendi oldun ha!"}
+{"key": "cb6af909d62da685", "tr": "Cass!"}
+{"key": "04d1af24b37feaa6", "tr": "Yanımda bir kitap var mıydı?"}
+{"key": "8625add09fa19359", "tr": "Hım... Sadece o garip silahlar."}
+{"key": "c71a0cf749b91c3b", "tr": "İkunuza da teşekkürler. Artık müsaadenizle. Demek El Yazması Atlantik'in dibinde..."}
+{"key": "43ebfc4e551b3ba4", "tr": "Yine sen! Bunun pişmanlığını yaşayacaksın! Finneganlar öldü. Duydun mu? Öldü!"}
+{"key": "646fbc48b46fb23a", "tr": "Başkasının işine burnunu sokmak hoş değil! Yanlış tarafı seçtin! Bunun pişmanlığını yaşayacaksın! Finneganlar da öyle! Arkadaşlarım seninle tanışmak isteyecek!"}
+{"key": "83d3a2b65a69704c", "tr": "Senin ve arkadaşlarının Finneganlarla alıp veremediği ne?"}
+{"key": "27eb9fbb1397a46a", "tr": "Benim bir derdim yok! Patronum gönderdi."}
+{"key": "bfe0cb473bc43bef", "tr": "Öyle mi? Nerede üstü?"}
+{"key": "277ae56329d7290f", "tr": "Kaçırmazsın! O binanın avlusundan hep siyah duman yükselir!"}
+{"key": "fe74275b9151553f", "tr": "Burası bizim avcumuzda, sen de bizim dostumuz değilsin."}
+{"key": "361870bdce6eb3c9", "tr": "Belayı arıyorsan, bela seni bulur."}
+{"key": "8d17749329ac4ca4", "tr": "Buraya ait değilsin. Defol git! Hey! Uzaklaş... yoksa ölürsün!"}
+{"key": "ed6986e398cfcdff", "tr": "Seni! Defol git buradan!"}
+{"key": "74dcfd762943cce0", "tr": "Bu kasaba bizim, delikanlı! Buradan canlı çıkamayacaksın! Kedinin getirdiği şeye bak. Ne duruyorsun? Öldür onu! Sana bir ders vereceğiz! İşimizi karıştırma. Alın bunu, oğlanlar!"}
+{"key": "a979644386a6d729", "tr": "İşinizi kendinize zorlaştırmayın..."}
+{"key": "c51411aa35eac8f1", "tr": "Bu duman işine yarar..."}
+{"key": "67c0d00b8d04fb9e", "tr": "Rahat olun, Üstat Cormac. Biz dostuz. Finneganlar işleri kendi elinize alacağınızdan endişelenmişti. Ben Albay George Monro."}
+{"key": "ce23b71ee8b2a7fc", "tr": "Albay."}
+{"key": "cc1e15f1b8d5f07c", "tr": "Yardıma geldim ama görüyorum ki geç kalmışım. Bu şerefsiz suçlularla ilgilendiğiniz için teşekkürler. New York'un başındaki bir belaydılar."}
+{"key": "ca1c499d9cb4f771", "tr": "Seni ne ilgilendirir? Sizi kızıllar sadece birer ev sahibisiniz. Buradaki kasabalılar geçinebilmek için canıyla uğraşıyor."}
+{"key": "76a159380dd45e09", "tr": "Bu izlenime kapıldığınız için sizi suçlayamam. Yoldaşlarımın bazıları pek yardımcı olmadı. Ama ben farklı bir yaklaşım benimsiyorum."}
+{"key": "a2f4691f5866aeef", "tr": "Öyle mi? Neymiş o?"}
+{"key": "f5067bd01a08bd5a", "tr": "Önemsiyorum. Bu sömürgecilerin güvende ve refah içinde olmasını istiyorum."}
+{"key": "8917c8664777acf6", "tr": "Soylu sözler."}
+{"key": "576e24631230271d", "tr": "Belki de eylemlerim fikrinizi değiştirir, Üstat Cormac. Alın, çaldıklarını geri alın."}
+{"key": "163721c654039f04", "tr": "Şimdi, bu paranın bir kısmını şehrin iyiliği için kullanalım. Farkındayım, bana güvenmek için hiçbir sebebiniz yok, Üstat Cormac."}
+{"key": "2247f2d3542338f6", "tr": "Finneganların dostu olduğunuzu söylemiştiniz."}
+{"key": "72acae60c3fe8cf9", "tr": "Öyleyim. Rahmetli oğulları... benim için çalışıyordu. Tıpkı ona benziyorsunuz."}
+{"key": "e5140a345fc0de8b", "tr": "Nasıl yani?"}
+{"key": "7f22d9930aace1b6", "tr": "O da önemserdi. Ve halk için iyilik yapmak isterdi. O ve ben, dünyayı daha iyi bir yer haline getirmek için bir rüyayı paylaşıyorduk. Sadece hayatta kalmak yetmez. Karınların doyması, sıcak giysiler... Yokluktan kurtulmak özgürlüklerin en büyüğüdür."}
+{"key": "0090b83617d412ec", "tr": "Yönettiğiniz insanlara karşı iyi niyet besliyormuşsunuz gibi geliyor neredeyse."}
+{"key": "2e4a32881584ee21", "tr": "Ben yönetmiyorum, Üstat Cormac. Sadece yardım ediyorum."}
+{"key": "c9d31a038866c20d", "tr": "Bu harabe yapıyı görüyor musun, Üstat Cormac? Onu daha iyi bir hale getirebiliriz. Kentsel dönüşüm yeni bir bilim ama Kıta'da şimdiden etkili olduğu kanıtlanmış bir bilim. Kaynak ayarladım, o binayı geliştirmek için kullan onları."}
+{"key": "ade5437f6ff94280", "tr": "New York'un senin gözetimin altında kalkınacağından şüphem yok, Üstat Cormac. Bu şehir ve vatandaşları için harika şeyler yapabilirsin. Ne de olsa bir insanın bir amaç edinmesi gerekir. Şimdilik hoşça kal, Üstat Cormac."}
+{"key": "7daa40feff907114", "tr": "El Yazması bende."}
+{"key": "ee65823c0337a77b", "tr": "Harika. Hope Sleepy Hollow'da seni bekliyor."}
+{"key": "0d76b3a643469366", "tr": "Sleepy Hollow'da ne var?"}
+{"key": "09645814fdf0173a", "tr": "Benjamin Franklin. Johnson'ın o tuhaf İlk Çağ kutusunu çalıştırması için tuttuğu adam."}
+{"key": "54484f6da5d19d70", "tr": "Plan ne peki?"}
+{"key": "33c59b167dfb9ea1", "tr": "Hope'la buluş, Johnson'ın adamlarından biri gibi davran ve Kutu'yla El Yazması'nı Franklin'e ver."}
+{"key": "8693c702f0296c40", "tr": "Yani bir kuryeyim ha?"}
+{"key": "13c2bd876f09a190", "tr": "Aynen. Bakalım bu Franklin şu lanet Kutunun nasıl çalıştığını çözebilecek mi. Ve onun yanında kal. Ha unutmadan, alabildiğimiz kadarıyla bu adam Tapınakçılardan, hatta Suikastçılardan bile habersiz."}
+{"key": "40b3e64c2d7bde7d", "tr": "Hah, basit bir görevmiş."}
+{"key": "7568024b9f646825", "tr": "Basit bir insan için."}
+{"key": "b728efbf01f1f665", "tr": "Geç kaldın. Hava da huysuzlaşmaya başlıyor."}
+{"key": "320e01d9a58874fd", "tr": "Tek şey o değil, değil mi?"}
+{"key": "43fa386773f5edb4", "tr": "Şey, Üstad Franklin efendim. Adım Shay, bu da ortağım Hope. William Johnson bunları size vermemizi söyledi."}
+{"key": "ca0c25794c6b07da", "tr": "Teşekkür ederim ama korkarım deneyimi ertelemem gerekecek."}
+{"key": "a058e4f0688f6b1e", "tr": "Ertelemek mi? Neden?"}
+{"key": "a95152de010968e8", "tr": "Ordu paratonerlerime el koydu. Kutunuzu canlandırmak için ihtiyacım olan elektriği iletmekte onlar şart."}
+{"key": "3ba32fc4be4d295e", "tr": "Üstad Johnson beklemek zorunda kalmanızı istemezdi."}
+{"key": "735c5fcc729b531c", "tr": "O halde yapabileceğiniz bir şey var belki. Askerler bütün gün ortalıktan eşyaları topluyordu. Paratonerlerimi nereye götürdüklerini söylerlerse onları geri alabilirsiniz."}
+{"key": "b5c82a64458e4069", "tr": "Emrinizdeyim efendim."}
+{"key": "f5d42d0ef3f9c8ae", "tr": "Araştırmana rıhtımın yakınındaki pazardan başla. Ben burada kalıp hazırlıklara yardım edeceğim."}
+{"key": "62b360c1c03e8ff8", "tr": "Bu çekilir gibi değil! Artık neredeyse hiç araştırma yapamıyorum!"}
+{"key": "2e7318b105d96a63", "tr": "Herkesin metaline el konuyor bugünlerde."}
+{"key": "9f18794014cbd2de", "tr": "Evet, evet... Ordu onları eritip silaha dönüştürecek... Kapımızda savaş var."}
+{"key": "f272c2839bda43af", "tr": "Peki, Üstad Franklin, bu nedir?"}
+{"key": "b139cdd5b307ba70", "tr": "Bir Leyden kavanozu. Cisimsel ve reçinesel elektrik biçiminde geçici olarak güç depolar."}
+{"key": "e13927456014db84", "tr": "Öyle mi? Kavanoz dolduğunda onunla ne yapacaksınız?"}
+{"key": "14c02ee922997d7f", "tr": "Ah, bütün kavanozlarımla ne yapacağım! Bu deney için bütün bir enerji depolama sistemine ihtiyacımız var. Birçok birim aynı anda ateşleneceği için adına \"batarya\" diyorum. Çeviri kutunuzu çalışır hale getirmeli."}
+{"key": "bb8805e9131d65ee", "tr": "Çok etkileyici."}
+{"key": "ae97344ed9a0cc96", "tr": "Tanrım, bu çok ağır."}
+{"key": "7976fdfeecb82f72", "tr": "Hava daha da kötüleşiyor. Deponun nerede olduğunu biliyorsun, asker."}
+{"key": "8bb412e9919e0d28", "tr": "Şimdi bakma ama sanırım takip ediliyorum."}
+{"key": "b92e497e2e64338d", "tr": "Hayal gördüğüne eminim ama yine de bir bakacağım."}
+{"key": "145b1cbe9840cb7d", "tr": "Benjamin Franklin'in bahçesindeki o garip şeyleri gördün mü?"}
+{"key": "07886e1fed6f93c3", "tr": "O yerden uzak dururum ben. Adamın şimşekle oynadığını söylüyorlar!"}
+{"key": "d36c794a6fff76c6", "tr": "Şimşek demişken, sanırım fırtına geliyor."}
+{"key": "4f7ece1e415b1099", "tr": "Aynen. Umarım mesaimiz bitene kadar insafa gelir."}
+{"key": "dc99a86315df9bff", "tr": "Hey tatlım, bira içmeye var mısın?"}
+{"key": "7dd7402ce3b45623", "tr": "Tabii, arkadaşlarınla geliyorsan!"}
+{"key": "752993b4ab75b31c", "tr": "Çok ezikçe..."}
+{"key": "3b9bd6501375a87e", "tr": "Sonuncusu da bu mu?"}
+{"key": "1af3cf5e7b972e6d", "tr": "Evet öyle, efendim."}
+{"key": "2aaeed69c242742e", "tr": "Güzel, diğerlerinin yanına koy."}
+{"key": "d79589f750343505", "tr": "Vatandaşlar memnun değil. Biri bugün üzerime çöp attı!"}
+{"key": "e50e78177f18bbca", "tr": "Demek kokunun sebebi o!"}
+{"key": "60f8ff5b8cec4d81", "tr": "Gülme. Komutan böyle devam ederse elimizde bir ayaklanma patlak verecek."}
+{"key": "f0087e1a0b1ca5bc", "tr": "Şey, sahip olduklarımın yarısına el konsa ben de deliye dönerdim."}
+{"key": "e58c8a4d307657cf", "tr": "İhtiyacımız olan demir... çoğunlukla."}
+{"key": "051b72d941f52449", "tr": "Bunu vatandaşlara anlat!"}
+{"key": "6c9cfd107c1703ac", "tr": "Biliyor musun, bu savaşı kazandığımızda içlerinden tek birinin bile bize teşekkür edeceğini sanmıyorum."}
+{"key": "412acf4e79783669", "tr": "Peki bu kadar metalle ne yapacağız?"}
+{"key": "b712f817edf91766", "tr": "Eritiriz galiba. Kılıç, misket tüfeği döveriz..."}
+{"key": "dea94b8f08925d90", "tr": "Ah, şu lanet savaş."}
+{"key": "4d4be56effdb8a01", "tr": "Umarım Kral George yakında takviye birlikler gönderir."}
+{"key": "4f691d558223988c", "tr": "Üstad Franklin'in bu çubuklarla ne yapmayı planladığını merak ediyorum."}
+{"key": "f820cd291ed1b863", "tr": "Bu fırtına kötüleşiyor. Acele edip Franklin'e dönsem iyi olur."}
+{"key": "c929b7f0aea0df04", "tr": "Shay! Tanrı'ya şükür, çabuk ol, çubuklarla bana yardım et."}
+{"key": "72a054f21ee2f301", "tr": "Bu bir harita... Neresi burası?"}
+{"key": "9b25add0d7e91ed0", "tr": "Portekiz. Lizbon, hayatımı üzerine bahse girerim."}
+{"key": "de86105254b9027c", "tr": "Buradan tüy, Shay. Milisler her an burada olur. Kesin soruları olacaktır."}
+{"key": "923f8edc066c2483", "tr": "Ya sen?"}
+{"key": "bd58bf12c873bc6c", "tr": "Ben sadık bir ev sahibiyim."}
+{"key": "27042f4e6eca7d0b", "tr": "Öyle olsun."}
+{"key": "952cd109fec66d3a", "tr": "Yıkıp geçmemi istediğin bir sonraki şehir neresi?! Haiti'de ne olduysa Portekiz'de de o oldu. Büyük bir deprem. Binlerce ölü, lanet El Yazmanız sayesinde!"}
+{"key": "03179357b5b33c36", "tr": "Bu olamaz."}
+{"key": "09e4cdc8d5db4cd3", "tr": "Shay, bir insan deprem başlatalamaz."}
+{"key": "12547444ca87a57f", "tr": "Bu İlk Çağ makineleriyle oynayan bir insan başlatabilir. Kutuyu gördün, Hope. Tapınak o tür bir güçle ana baba günü gibi doluydu. Beni MASUMLARI KATLETTİRDİN!"}
+{"key": "e768e5df305634d4", "tr": "Ne cüretle!"}
+{"key": "67e1fd4cb63e8c27", "tr": "Onu savunuyor musun? Akiil buraya Mackandal'ın Haiti'deki adamını yolladığı gibi yolladı beni. Biliyordu."}
+{"key": "c9f1ee83acd6881f", "tr": "N oluyor lan burada? Durun artık!"}
+{"key": "8d21c4c6f202b010", "tr": "Operasyon hassastı, belki de sen..."}
+{"key": "0b806b07b1c94a85", "tr": "Dünyanın dengesini sarsıyorsun sen. Hangi şehrin mahvolacağına karar verecek kim oluyorsun?"}
+{"key": "addc759351b6a366", "tr": "Buradan dışarı çıkarın onu."}
+{"key": "6c836dcd53d8fba6", "tr": "Liam bunu böyle bırakacağımı sanıyorsa aptalın teki. Achilles'e güvenilmez. Bir daha asla İlk Çağ Tapınağı bulamamalı. Mentor'muş, ailesi ölmüş umrumda değil. Bu kadar deli olmanın mazereti olamaz!"}
+{"key": "b66830950b95c989", "tr": "Yapacak tek bir şey var."}
+{"key": "71e7450d4c7f8965", "tr": "Artık geri dönüşü yok..."}
+{"key": "41da97a34e42cc3f", "tr": "Senden o kadar ümitliydim ki Shay."}
+{"key": "6e60b173b0d4d28c", "tr": "Achilles. Bunu yapmak zorundayım."}
+{"key": "c1d7ae7a83f35f33", "tr": "Tam olarak ne yapıyorsun peki? Kardeşlerinden mi çalıyorsun? Bana ihanet mi ediyorsun?"}
+{"key": "d2199293134167a0", "tr": "Biri bu hatayı telafi etmeli."}
+{"key": "0ef3837be150fe13", "tr": "Telafi etmek mi? Ne yaptığından haberin yok. Bütün kıtanın, belki de bütün dünyanın geleceği o Yazıt'a bağlı."}
+{"key": "083a0a628164a88e", "tr": "Belki. Ama o geleceğe karar verme hakkımız yok."}
+{"key": "ef17c1eaecf32c0d", "tr": "Hak mı? Sorumluluğumuz var bizim!"}
+{"key": "4f2c468ffd81e6d2", "tr": "Masumları öldürmenin ve şehirleri yok etmenin sorumluluğu BİZDE! Bu... güç deliliği. Artık son buluyor."}
+{"key": "8e9cb46476412cd1", "tr": "İnşa ettiğimiz her şeyi yok etmene izin vermeyeceğim!"}
+{"key": "63af80958409d424", "tr": "Suikastçılar! Durdurun onu! Shay'i durdurun!"}
+{"key": "81e767027d1cfa27", "tr": "Havan topları! Kaçın! Kaçın gidin! Chevalier dellendi mi malikaneyi yıkacak! Siper alın! Hareket edin! Defolun gidin! Dikkat edin! De la Vérendrye ne halt ediyor?! Chevalier Shay'i durdurmak için havan topu kullanıyor! Ne düşünüyor bu? Bizi paramparça edecek!"}
+{"key": "a231bdb70fac62da", "tr": "Planlarımızı engelleyemezsin! Nasıl yaparsın bunu Shay? Çıldırdın mı sen? Sana hiçbir şey öğretemedim mi? Laf anlamayacak mısın Shay?"}
+{"key": "b7bbd0f772b62434", "tr": "Kaçıp gitmene izin vermeyeceğim. Kurtulamazsın! Görüyorum seni! Ondan daha hızlı koşman gerekecek!"}
+{"key": "7d7750121e143192", "tr": "Bu kadar yeter!"}
+{"key": "e77185c229a7b69f", "tr": "Yazıt'ı geri ver Shay. Eminim Achilles..."}
+{"key": "845e2f43104b9612", "tr": "Veremem. Bunun bir daha yaşanmasına izin vermeyeceğim. O kadar can gitti... Bir tanesinin lafı bile olmaz."}
+{"key": "7ca7b9cc82c9d0f4", "tr": "Shay!"}
+{"key": "651bb82813433ee4", "tr": "İlk Çağ meselesinde ne alemdeyiz?"}
+{"key": "363250f1c4daa125", "tr": "Gemileri ve ikmal malzemelerini topluyoruz ama net bir hedef olmadan zor oluyor."}
+{"key": "da0601e8844d09f1", "tr": "Benim adamlarım yardım edebilir. Mürettebat için yetecek kadarım var Chevalier."}
+{"key": "b9127086a70371ff", "tr": "Bunu yapabileceğinden emin misin?"}
+{"key": "1d37cde81d308354", "tr": "Ben iyi bir gözlemciyim Mentor. Cihaz kısa sürede hazır olur."}
+{"key": "cb48927f649415f1", "tr": "Çok iyi. Beni bilgilendirmeye devam et."}
+{"key": "ec3cc5d8591b679b", "tr": "Hope'un nereye saklandığını hâlâ bulamadık... ve New York'taki suçluların çoğu artık ona çalışıyor. Büyük Üstad'ı bulsam iyi olacak..."}
+{"key": "2f1a7ed50564d57e", "tr": "İşler korktuğumuzdan da kötü. Suikastçılar İlk Çağ kutusunu çalıştırmanın bir yolunu bulmuş. Şimdiden sefer hazırlığı yapıyorlar."}
+{"key": "5330cfe43a649a10", "tr": "O zaman onları durdurmalıyız."}
+{"key": "2d7670c066314736", "tr": "Hope'un emrinde yüzlerce adam var. Yetkililer ise kılını kıpırdatmıyor."}
+{"key": "8a821362960e1b0f", "tr": "Ya onun adamlarının kılığına girersek? Öyle büyük bir suç işleriz ki o lanet haydutları görmezden gelemezler."}
+{"key": "5a85e3d59bf3998a", "tr": "Harika bir plana benziyor Jack. Uygula bunu. Suikastçıların nereye saklandığını ben öğreneceğim."}
+{"key": "189332bd9f77960a", "tr": "Bana mı öyle geliyor yoksa patron bize belayı arayın mı dedi?"}
+{"key": "be8508662f3d28f3", "tr": "Tadını çıkar Shay."}
+{"key": "1f8f926b20667147", "tr": "Yakala onları Shay! Kıyafetleri lazım bize!"}
+{"key": "d99e75371e26d945", "tr": "Sanırım takip ediliyoruz!"}
+{"key": "939dd4626e210d4c", "tr": "Haklısın! Hadi basalım gidelim!"}
+{"key": "5ab02dc1e2cb3aa5", "tr": "Hadi ama! Ölmek için çok gencim! Acele et seni aptal! Yoksa ikimiz de ölü adamız!"}
+{"key": "0f2a56350128251f", "tr": "Utanç verici bir ikili olmadık ama ha?"}
+{"key": "570f9a8693287e7f", "tr": "Hayır, ben bu işe havalı bir hava katıyorum. Hedef neresiymiş peki?"}
+{"key": "09338a28bc0e248e", "tr": "Askeri maaş ödemesi. Acele etmeliyiz. Paranın tutulduğu kaleye doğru yola çıkan bir alay var bile."}
+{"key": "650a5349f5530690", "tr": "Harika... Ve tahmin edeyim bir planın vardır?"}
+{"key": "8fb57a2e197fbe4b", "tr": "Kalede çok sayıda mahkum var... İçeri gir ve çetenin renklerini dalgalandır. Sen bunu yapınca ben onları serbest bırakacağım."}
+{"key": "2ac3a23db85115d8", "tr": "Suikastçılarla çalışan bir sürü suçluyu mu salacaksın?"}
+{"key": "870875b0032eb6e2", "tr": "Şey, orduyu onlara karşı kışkırtmamız lazım, değil mi? Unutma: Sen bayrağı açacaksın, ben de ortalığı birbirine katacağım!"}
+{"key": "b06743bc20ddc623", "tr": "Silah başı! Kahretsin! Maaşı koruyun! Çok kalabalıklar! Paramızı almalarına izin vermeyin! Savaşın! Savaşın! Al sana! Hücrene dön seni sefil! Hemen teslim ol, ya da öl!"}
+{"key": "2f0126bbab0be065", "tr": "Bu kaleyi dağıtma vakti beyler! Yakalayın! Al sana kızılçatlı! Kale bizim! Geri dönmüyoruz!"}
+{"key": "4f2a9b734f1b7f5f", "tr": "Neler oluyor burada lan?"}
+{"key": "a7bca01ebd850f3d", "tr": "Mahkumlar kaçmış!"}
+{"key": "2106eed47ce04200", "tr": "Dışarıdan yardım almışlar."}
+{"key": "e817666633ec78eb", "tr": "Çok kalabalıklarmış!"}
+{"key": "b61f0ebd833a5687", "tr": "Öyleyse bunu düzeltmemiz gerekecek, değil mi? O suçluların icabına bakmanın vakti geldi de geçiyor bile."}
+{"key": "1d553c8c16c81f02", "tr": "İşe yaradı Jack!"}
+{"key": "e4455545cce0c98a", "tr": "Biraz şansla ordu o lanet haydutları ezip geçecektir."}
+{"key": "ac8a33c96a707b41", "tr": "Albay'dan..."}
+{"key": "13742b91d9bc1397", "tr": "Sevgili Yüzbaşı Cormac, bu mektubun kısalığı için özür dilerim ama artık birbirimize karşı dürüst olma vakti. Tapınakçı davasına olan sadakatini ve becerikliliğini gösterdin, Suikastçı kökenlerine rağmen (ve belki de onlar yüzünden). Suikastçıların aradığı Yazıt bir süredir bendeydi. Adamların seni ıssız bir adada bulduğunda onu geri almıştım. Tamamlamayı başaramadığım bir görev olarak Büyük Üstad'ın kendisi bana anlamını çözmemi emretmişti. Onu sana emanet ediyorum Yüzbaşı Cormac. Senden daha çok güvendiğim kimse yok. Şimdi düşman yerliler ve Fransa Ordusuyla çevrili, hazırlıksız bir garnizon olan Fort William Henry'ye gidiyorum. Takviye kuvvet istedik ama geleceğinden şüpheliyim. Direnişimizin başarılı olacağına dair bir hayalim yok. Hayatımı Britanya Ordusu'na, ruhumu da Anlayışın Babası'na emanet ediyorum. Saygılarımla, Albay George Monro."}
+{"key": "fd96673ef9ffb879", "tr": "Nöbet yerini al Gist! Albay'ın başı belada."}
+{"key": "ab5b7d02079ef837", "tr": "Ne demek başı belada?"}
+{"key": "19c6313c0a641345", "tr": "Fort William Henry'de ve işi çok zor."}
+{"key": "d8c2e3e228fd3b6e", "tr": "Tembel kıçlarınızı kaldırın ulan, haydi! Yerlerinizi alın! Demir alıyoruz! Erken çakırkeyif olduğum için kusura bakmayın Kaptan. Ama tanışalı bir yıl oldu biliyor musun? koca bir yıl! Hayatımı değiştirdin... Hem de çok iyi yönde! Sensiz kutlama yaptım diye affedersin artık."}
+{"key": "7b8f591760df516f", "tr": "Koca bir yıl... Gist, sana bir sorum var. Benim, şey, eski aidiyetimi ne kadardır biliyorsun?"}
+{"key": "8a8d5cb16976ee3d", "tr": "Ha, Suikastçıları mı kastediyorsun? Onu çoktan biliyordum Shay! Sarhoş olabilirim ama kör değilim. Yoksa kafadan kontak bir sirkten kaçtığını falan düşüneceğimi mi sandın?"}
+{"key": "6e7a6fae4c319106", "tr": "Neden hiçbir şey söylemedin?"}
+{"key": "6cea7116c46ed5c3", "tr": "Şöyle ki, Albay karar vermeni, şey, etkilemesin diye konuyu açmamamızı istemişti. Tamamen çıkarsız bir içgüdüyle hayatımı kurtardın, dahası sayısız insanın da yardımına koştun. Bana kalsa seni aylar önce resmi bir Tapınakçı yapardım."}
+{"key": "6d6c7fd73917393d", "tr": "Kime kalmış peki? Monro bir Büyük Üstad'dan bahsetmişti..."}
+{"key": "e3fdb3df81525029", "tr": "Ah, evet. Koloni Örgütü'nün Büyük Üstadı. Onu seversin Shay. Babası da bir Suikastçı'ydı."}
+{"key": "c86dab217b862a24", "tr": "Desene... Anlatacak çok şeyi olmalı."}
+{"key": "e62730f8bea4bb00", "tr": "Fort William Henry'den haberler nedir?"}
+{"key": "52771812454c4b23", "tr": "Garnizon kuşatılmış durumda ve takviye kuvvetler gecikti."}
+{"key": "206e4119dca2acc1", "tr": "General Montcalm Kral Louis için Koloni boyunca ortalığı kasıp kavuruyor, değil mi?"}
+{"key": "afb166365abcb6c8", "tr": "Keşke sevgilisiyle evinde kalmasaydı."}
+{"key": "0226a878cbd6bc4b", "tr": "Onunki mi yoksa Kral Louis'ninki mi?"}
+{"key": "9e4a50091c038d08", "tr": "Fark etmez! Gerçi kralınki daha güzeldir diye tahmin ediyorum."}
+{"key": "d12b6d4350ec6302", "tr": "Aynen, Madame'ın oldukça cazibeli olduğu söylenir."}
+{"key": "9ae6df2c42d1523f", "tr": "Bir O'Murphy Fransız Kralı'nın yatağında mı? İşte şimdi kafayı bulduğunu anladım..."}
+{"key": "4510c0e7f66ab90e", "tr": "Shay! Karşımda seni görmek ne büyük lütuf!"}
+{"key": "31611159e7e6ff78", "tr": "Jack?"}
+{"key": "a434596c88e07f03", "tr": "Albay Monro, General Montcalm'a teslim oldu. Fransızlar ve Abenaki müttefikleri Fort Henry'yi aldı. Johnson buraya takviye getirecekti..."}
+{"key": "3cf4161e5daf7790", "tr": "Başka kimseyi göremiyorum."}
+{"key": "c2a1c4c434244103", "tr": "Abenakiler huzursuz. Teslim şartlarını anlamıyorlar ve Montcalm'ı takmıyorlar. Albay ve adamları bu sabah serbest bırakıldı. Bir pusuya doğru yürüyorlar..."}
+{"key": "e45dc186ee1e85ef", "tr": "Burada bekleyin, Johnson gelirse haber verin. Ben... Ben Albay'ı koruyacağım."}
+{"key": "1fec0558521fab83", "tr": "Belki de nihayet ona olan borcumu ödeyebilirim."}
+{"key": "86aed65549a1026a", "tr": "Umarım çok geç kalmamışımdır!"}
+{"key": "ae0944c422ff9dd5", "tr": "Alın da bunu! Düşmanlarımıza ölüm! Rrrrraaaahhh!"}
+{"key": "b26e944d6ade6e2c", "tr": "İyi iş çıkardınız aslanlar. Yerlerinizi alın!"}
+{"key": "efa5116b2fa4e940", "tr": "Kalanlar da bu kadar."}
+{"key": "efb9163dbfc4bbbc", "tr": "Yüzbaşı Cormac?!"}
+{"key": "49f176a7b58f27a2", "tr": "Efendim, acele etmeliyiz. Adamlarınızdan sağ kalanları Morrigan'a götürmeliyiz."}
+{"key": "c7f575e8087c885a", "tr": "Memnuniyetle Kaptan Cormac. Beni takip edin! Güvenli yol ileride."}
+{"key": "a0d5e7e555cf7634", "tr": "Sorması ayıptır, Fort William Henry'de ne oldu?"}
+{"key": "a28f27888fbfba11", "tr": "Kötü planlama ve daha da kötü bir şans, korkarım ki. Montcalm günlerce bizi topa tuttu."}
+{"key": "084986cf4b731943", "tr": "Lanet fransız."}
+{"key": "9173c14616c698e3", "tr": "Aslında büyük bir onurla hareket etti. Müzakere için adam gönderdiğimizde, umduğumuzdan çok daha cömert bir teklifle döndü. Silahlarımızı ve daha da önemlisi sancaklarımızı tuttuk."}
+{"key": "b3c7c3b6faff509d", "tr": "Sırf bir tuzuya düşmek için ha."}
+{"key": "a19810165e4de620", "tr": "Fransızların bizi savunmasını bekleyecek değilim ya. Sen bekler miydin?"}
+{"key": "7803e259989a4624", "tr": "Hayır, beklemezdim."}
+{"key": "40b3bd486503f89c", "tr": "Tapınakçılara olan sadakatini kanıtlamaya devam ediyorsun Yüzbaşı Cormac. Hayatını benim için tehlikeye atarak..."}
+{"key": "73af427a835d558f", "tr": "Henüz bataklıktan çıkmadık Albay. Sadakatime gelince... Şey, sana bir borcum var, değil mi? Sen... Hayatımı kurtardın... Bana ikinci bir şans verdin."}
+{"key": "5a95bd12350c1e41", "tr": "Bir yıldır birlikte çalışıyoruz. Bu süre zarfında çok büyük hizmetlerde bulundun. Bana karşı olduğunu düşündüğün her ne borç varsa ödendi, öyle değil mi?"}
+{"key": "1ba2ebb275e86668", "tr": "Belki..."}
+{"key": "c1984ea95976c155", "tr": "Yaşıyorsun!? Saldırın!"}
+{"key": "ed8dea66bb2a9d48", "tr": "Siper alın!"}
+{"key": "2bcf721da37d0b8d", "tr": "Bir arada kalın çocuklar!"}
+{"key": "e21007961db7f593", "tr": "Elimden geldiğince çok indiririm."}
+{"key": "47393bcac1225092", "tr": "Pekâlâ Albay. Adamlarını hareket ettirmeye devam et. Ben önden keşif yapıp bir sorun olursa sinyal vereceğim."}
+{"key": "07c4a2209e300d25", "tr": "Mantıklı bir strateji. Çok iyi, adamlarımı yavaşça arkamdan getireceğim."}
+{"key": "4355d628dafffd1b", "tr": "Acele edin! Kesegowaase pes etmeyecektir."}
+{"key": "9cb4d7b5eb540273", "tr": "Kesegowaase mi? Bu adamı tanıyorsun Yüzbaşı Cormac."}
+{"key": "c70b2c3a93eca3d0", "tr": "Evet Albay. O Achilles'in adamlarından biri. Bir Suikastçı... Eskiden benim olduğum gibi."}
+{"key": "e55109b5e4efe763", "tr": "Yani benim bir Tapınakçı olduğumu biliyorlar. Ve şimdi bu Suikastçı senin yaşadığını biliyor."}
+{"key": "fcf0d96fd9439524", "tr": "Ve Tapınakçılarla çalıştığımı. Aptal değilim Albay. Suikastçılar bundan sonra peşime düşecektir. İkimiz de hedefiz artık."}
+{"key": "8bf3debd0ecd0914", "tr": "Bunun bir tuzak olduğunu biliyorsun, değil mi?"}
+{"key": "d9d23a5b405bc6b8", "tr": "Elbette Yüzbaşı Cormac. Ama pek fazla seçeneğimiz yok. Fransız toplarını atlatık, bunu da atlatacağız. Bu taraftan! Gelin, takip edin beni. Çabuk olun!"}
+{"key": "bb0bb779eff5b984", "tr": "Yelkenleri fora!"}
+{"key": "caff7008a10d9d5a", "tr": "Duydunuz Kaptan'ı millet! Buradan tüyüyoruz! Haydi! Haydi!"}
+{"key": "282df78ef7d17a40", "tr": "Shay! Mmmrrraaaaah!"}
+{"key": "a51733da01cc7fde", "tr": "Hayatımı sana borçluyum Yüzbaşı Cormac."}
+{"key": "e1384767ab949805", "tr": "Aynen öyle, Albay."}
+{"key": "ab34fa6a0ac3e3df", "tr": "Konuşacak çok şeyimiz var. Ancak askerlerimle ilgilenmem gerekiyor."}
+{"key": "01494c5295285e92", "tr": "Efendim. Johnson'ın ticaret merkezine kadar size eşlik edeceğim."}
+{"key": "8bd372f8c0cabe34", "tr": "O halde derhal yola çıkıyorum. Yüzbaşı Cormac, orada buluşalım benimle."}
+{"key": "0066585b1dd86c82", "tr": "Ah, Yüzbaşı Cormac. Le Chasseur'den öğrendikleriniz doğrulandı. Buradaki kanun kaçakları taktik değiştiriyor."}
+{"key": "27160768fcd265f9", "tr": "Planları neymiş peki?"}
+{"key": "a9cf18e212ef0301", "tr": "Elebaşları, kendileri için yeni silahlar üretmesi adına Benjamin Franklin'i kiralamış. Çok iyi korunuyor."}
+{"key": "a62ea3221b63fe84", "tr": "Benjamin Franklin... Bilim insanı olan mı?"}
+{"key": "dd02fe3252d25662", "tr": "Duymuşsunuz, güzel. Halk arasında gaz yaymak için ekipmanlar üretiyor. Zehirli gazlar üstelik."}
+{"key": "7de57679597face9", "tr": "Halk mı? Yetkililere karşı kullanacaklarını sanıyordum. Gerçi o da korkunç olurdu ya..."}
+{"key": "4364c09600a016c1", "tr": "Tutukladığımız haydutlar korkunç bir kadından bahsediyor. Bu karanlık planların arkasında onun olduğunu düşünüyorum."}
+{"key": "e0f073c1b56c5c62", "tr": "Bunu araştıracağım."}
+{"key": "33c3219176e5034a", "tr": "Hope... Umarım sen değilsin."}
+{"key": "abf4980a0a4834a2", "tr": "Bugün onu gördün mü?"}
+{"key": "d93d32bd7d9f89f4", "tr": "Yok, günlerdir dışarı adım atmadı."}
+{"key": "0c086f3ed2828029", "tr": "Franklin ne üzerinde çalışıyor?"}
+{"key": "b0d826e108943c22", "tr": "Emin değilim ama kulağa patlayıcı gibi geliyor. Patron, Franklin'in izole kalmasını gerçekten istiyor."}
+{"key": "32382b4061c94607", "tr": "Hıhı. Kimse onun işini bölemez."}
+{"key": "db8ffbe1cd19708b", "tr": "Gerçekten mi?"}
+{"key": "7c2ad746fce2c4e2", "tr": "Shay? Seni tekrar görmek güzel! Arkadaşın Hope dışarıda olduğunu söylemişti."}
+{"key": "ed9db8a2aa35552a", "tr": "Ben... öyleydim. Efendim, deneylerinin sonuçlarını almaya geldim."}
+{"key": "072d3490e4e2fbf2", "tr": "Şey, pekala... Çok iyi zamanda geldin, daha yeni bitirdim prototipin onarımını. Buyur!"}
+{"key": "b3305bdec407e246", "tr": "Philadelphia'ya, ardından da Avrupa'ya gitmeye hazırlanıyordum. Londra'da konferans vermem için davet edildim. Oh! Bayan Hope'u bilgilendirecek kadar kibar olur musun?"}
+{"key": "19e240f3698d3fd5", "tr": "Elbette."}
+{"key": "0bdbcaa8aa814297", "tr": "Tanrım, Hope... Bu aşağılık heriflerle ne karıştırıyorsun sen? Şehri kendi başına mı bela ediyorsun? Ne hale geldin sen?"}
+{"key": "1340295f2bed004c", "tr": "Bir sorun mu var, Yüzbaşı Cormac?"}
+{"key": "294db4e3cc062eb7", "tr": "Yok yok, evet, sadece... eski anılar."}
+{"key": "2ef12f146652feb3", "tr": "Yeni acemelere pişmanlıkları yük olduğunda, bunlardan kurtulmanın en kesin yolunun barut olduğunu söylerim."}
+{"key": "1b6df6ed92bf5187", "tr": "Haklısın, Albay."}
+{"key": "2a5eab5ee2c04921", "tr": "Bu prototip epey güçlü görünüyor. Dikkatli kullan, Yüzbaşı Cormac. İstihbaratımıza göre bu alet bazı tahkimatları yok edebildiği gibi aynı zamanda birden fazla düşmanı da yaralayabiliyor. Onu kullanmanın daha sinsi bir yolu da var. Bu bombalardan bazılarında güçlü bir yatıştırıcı var. Kalabalığın üzerine bir tane atarsan hemen uyuyakalacaklardır. Bu yeni silahı test etmeliyiz. Şu kapıya karşı kullan. O kapıyı yok etmek için bu bombaları kullan. Haydi, Yüzbaşı Cormac, kapıyı vur."}
+{"key": "51c58b9cedbcf7b7", "tr": "Güzel iş. Sanırım bu yeni silahı, onu kullanacak olan haydutlara karşı çevirmeye hazırsın. Yakınlarda tehlikeli bir zehir saklayan terk edilmiş bir fabrika var. Şu anda sadece uyku veriyor... Ama korkarım o kanun kaçakları bunu damıtıyor. Daha güçlü bir formül New York'un çoğunu hastalandırabilir hatta belki öldürebilir."}
+{"key": "7031ff3347d916ce", "tr": "O halde ilk hedefim bu."}
+{"key": "d7fcddee78c35146", "tr": "Dikkatli ol, Yüzbaşı Cormac. Malzemelerin... son derece kararsız olduğunu anlıyoruz."}
+{"key": "737502fad9fa8802", "tr": "Ne kadar iyi."}
+{"key": "99a5f06b505fb8b7", "tr": "Hımm, bununla oynarsam belki de bütün sistemi çökletebilirim."}
+{"key": "88c118a05a775fd7", "tr": "Bu tehlikeli! Dur bunu, seni aptal! Çıldırdın mı sen!? Bunun bedelini ödeyeceksin! Her yer havaya uçacak! Uzak dur! Bu tehlikeli. Hey! Burada ne arıyorsun sen!?"}
+{"key": "3c677468f2e7611c", "tr": "Buradan çıkmalıyım, yoksa ölüden farksız olacağım."}
+{"key": "ae19f1f42a40fc53", "tr": "Ahh. Ne şahane bir yıkım, Kaptan! Dumanı Morrigan'dan bile gördüm!"}
+{"key": "4f693618c7c30341", "tr": "Bu o serserilerin gözünü korkutacaktır. New York şimdilik güvende."}
+{"key": "509dbc8dc1bbe6c5", "tr": "Tüm hürmetimle söylüyorum Albay, bu tür belalardan kurtulmak birkaç patlamadan fazlasını gerektirecek."}
+{"key": "8f37cc976f238f19", "tr": "Oğlan haklı, Albay Monro."}
+{"key": "063e98c5620a4129", "tr": "Shay miydi adın? Tebrikler, New York'tan bir sürü fareyi ateşe vererek defettin. Ben Jack Weeks, bu da William Johnson. Onun adına konuşamam ama seninle tanıştığıma memnun oldum."}
+{"key": "a5960367f5a1af2d", "tr": "Ben de memnun oldum."}
+{"key": "9f95baab59608b79", "tr": "Burası inanılmaz tozlu. Eminim Shay maceralarını bira eşliğinde bize anlatabilir. Hey, ilk tur... Albay'dan, he!"}
+{"key": "e6affeecbddd7f97", "tr": "Sadece biraz kafam karıştı... Gazdan solumuş olmalıyım."}
+{"key": "4a28cfeb56294687", "tr": "Birkaç yudum bira sana iyi gelir. Gel, burada hepimiz dostuz, seninle ilgilenirler."}
+{"key": "38866298cc154f09", "tr": "En yakın büro Mount Vernon'un yakınında. Hope beni bekliyor olacak..."}
+{"key": "5601999449c0d4c9", "tr": "Lizbon neredeyse Londra veya Paris kadar büyük. Bu tek yeri bulabileceğinden emin misin?"}
+{"key": "4b5cebbcdef335b0", "tr": "Apaçık gördüm, Hope. Limanın hemen yakınında bir manastır. Rahibeleri bir iki kez ziyaret etmişliğim olabilir..."}
+{"key": "3b1f981e9a0b1f82", "tr": "Mekana dair mevcut bilgin göz önüne alınırsa, bu görev sana düşüyor. Ne yapılması gerektiğini anlıyor musun?"}
+{"key": "25c486297495cc31", "tr": "Öncü Tapınağı'nı bulmak ve Cennet Parçası'nı ele geçirmek."}
+{"key": "eb6ec661d0f1e109", "tr": "Okyanusu geçmek için sonunda bir gemi bulduk. Merak etme, Morrigan'a New York'ta gözüm gibi bakacağım."}
+{"key": "35628f510cc61897", "tr": "Teşekkürler. Liam ve ben hemen yola çıkacağız."}
+{"key": "3252009120119f56", "tr": "Liam şu an müsait değil. Mürettebatın ve gemin seni bekliyor. Dikkatli ol, Shay. Cennet Parçaları güçlü kalıntılardır."}
+{"key": "99fbbfb301e381ae", "tr": "Ne manzara ama. Ve işte buradayım, Adem ile Havva zamanından kalma bir yadigar arıyorum... Tuhaf günler gerçekten."}
+{"key": "fd72a63df48e109d", "tr": "Bu o olmalı! Öncü mekanı..."}
+{"key": "f4d6408901ee0908", "tr": "Nelerimiz varmış burada?"}
+{"key": "03473f89a784c147", "tr": "Eser!"}
+{"key": "bb34c08c079508a8", "tr": "Tanrı bunu onlara nasıl yapabildi?"}
+{"key": "344f08d153139eda", "tr": "Bunun Tanrı'yla hiçbir alakası yoktu."}
+{"key": "176e5ec095dda037", "tr": "Uzun zaman oldu."}
+{"key": "d634bf7c01467896", "tr": "Achilles."}
+{"key": "c004f6626dd26eeb", "tr": "Adéwalé! Batı Hint Adaları'nda işler nasıl?"}
+{"key": "9843c6083f641eed", "tr": "Korkarım çok kötü, Achilles."}
+{"key": "a4ae27b67a177e90", "tr": "Yüzün bunu konuşmamız gerektiğini söylüyor. Gel."}
+{"key": "f5b14acabc4438a4", "tr": "Misafirimiz kim?"}
+{"key": "0e88f0718119f496", "tr": "O Adéwalé. Batı Hint Adaları'nda kendini ve yüzlerce kardeşini özgürlüğe kavuşturmuş bir köleydi. O adam İnanç'ın yaşayan kanıtı."}
+{"key": "8739cc97c0c2a84b", "tr": "Biraz pratik için bana katılıyorsun."}
+{"key": "30b4184e0d751274", "tr": "Yakında. Önce başka işlerim var."}
+{"key": "2ad34bac91103611", "tr": "Anlat bakalım ne oldu, eski dostum."}
+{"key": "08d1cc9cf113142c", "tr": "Çok korkunçtu, Achilles. Yer sarsıldı ve okyanus dalgaları Port-au-Prince'in üzerine yıkıldı..."}
+{"key": "806baa6755fb8ee8", "tr": "Kaç kişi öldü?"}
+{"key": "4a198576967372a1", "tr": "Binlercesi. Sağ kalan tek bir aile bile olmadı."}
+{"key": "0de15627ecd81137", "tr": "Böyle bir zamanda dünyevi meseleleri açmaktan nefret ediyorum ama Mackandal'ın adamı deprem vurmada görevini tamamladı mı?"}
+{"key": "e9665e21412a24de", "tr": "Bilmiyorum. Vendredi bulunamadı. Güçlü bir Maroon'du, Mackandal'ın en iyi öğrencilerinden biri."}
+{"key": "54fbd7d1ee6ec930", "tr": "Çok yazık. Demek mekanı bulup bulamadığını bilmiyoruz."}
+{"key": "e6638f47cbbd6131", "tr": "Öyle. Ama eğer dalgaların altında bir tapınak vardıysa, hala ayakta olduğundan şüpheliyim."}
+{"key": "8ac19ef74eec5c42", "tr": "Ya yolu gösteren eserler?"}
+{"key": "dd21e1852d1575a4", "tr": "Çalındı. Tapınakçılar kaos sırasında içeri girdi. El Yazması'nı ve Öncü kutusunu ele geçirdiler. Denizde peşlerine düştüm ama New York'a vardıklarında izlerini kaybettim."}
+{"key": "cde6f857c0e3971f", "tr": "Sırada ne yapacağımızı düşünmeliyiz."}
+{"key": "6a3f19223c77b7c9", "tr": "Adéwalé biraz önce endişeli görünüyordu. Liam'ın seni beklediğini duydum... Gördün mü onu hiç?"}
+{"key": "8e37d8c419af30c9", "tr": "Duyduğuma göre Hope seni arıyormuş."}
+{"key": "e9981ca0ea704fda", "tr": "Çok geciktin."}
+{"key": "fb6d9cf9a5d224e3", "tr": "Hope! Neyi kaçırdım?"}
+{"key": "e7ab074a58b15c3f", "tr": "Sadece eğitimin ilk saatini."}
+{"key": "59e9568962aac6f6", "tr": "Biz hep eğitimdeyiz, Kesegowaase!"}
+{"key": "73ab41f844b0ec6c", "tr": "Ve etmeye de devam edeceksin."}
+{"key": "1a79f08c6e112d63", "tr": "Boşuna nefes tüketme. Shay kedilerin tasmalardan nefret ettiği kadar gelişmekten de nefret eder."}
+{"key": "fa690b82061edfd2", "tr": "Hey!"}
+{"key": "691a3b45f4fb6bd5", "tr": "Yazık, çocuğun o kadar çok potansiyeli var ki... Ama o kadar az disiplini var."}
+{"key": "7769495697a71d7c", "tr": "Pekala, pekala! Ne yapmamı istersin?"}
+{"key": "9bbcb0717067307a", "tr": "İyi oynadın."}
+{"key": "c04d20c1d5f9aea1", "tr": "Teşrif edebildiğin için zamanlama harika."}
+{"key": "73dec427898f8cae", "tr": "Bir kadını bekletmek en son isteyeceğim şeydir."}
+{"key": "b7f3859722f6c049", "tr": "Ben burada bir kadın değilim, sakın unutma! Senin öğretmeninim... ve senden üstünüm."}
+{"key": "8868047531998ece", "tr": "En azından bir kısmı doğru. Ne yapacağız peki?"}
+{"key": "53d5f9c7c85f4a18", "tr": "Bir hayatı sonlandırmanın sayısız yolunu keşfedeceğiz. Siz ikiniz! Kendinize faydalı bir şey çıkarın ve Shay'i izleyin. Fark edilmeden öldürebilir misin?"}
+{"key": "3baab1d2405b4ec6", "tr": "Bir köşenin arkasından saldır ve hedefin ona neyin çarptığını asla anlamasın. Ah, klasik samanlık. İçinde saklan, sonra hedefin yaklaşınca ona sürpriz yap. Yüksekliği kullan, Shay. Havadan infaz etmek en etkilisidir. Alçakta kal ve çalıların arasında ol. Sabırlı olursan hedefini vurabilirsin."}
+{"key": "02abba68ab3a2647", "tr": "Harika form, Shay. Güzel iş. Şaşırdım doğrusu. Kendini nasıl idare edeceğini biliyorsun."}
+{"key": "b099e6930f4f2f13", "tr": "Beklediğimden daha iyisini yaptın. Becerilerin gerçekten gelişti mi, Shay? Aman, hemen havalara girme. Başka işlerin yok mu? Kimse geç kalmanı hoş karşılamaz. Ve sen hep geç kalırsın... Sana öğrettiklerimi unutma. Sabırlı ol. Sessiz ol. Seni asla fark etmesinler. Seninle sonra görüşürüz, Shay. Akşam yemeğinde belki? Seninle konuşmayı çok isterim Shay, ama zamanı değil. Şimdi gitsen iyi olur. Diğerleri bekliyor olacak."}
+{"key": "55a4946b761a491b", "tr": "Evet, bugünkü meydan okuma ne?"}
+{"key": "0e0ccfc7613fdc85", "tr": "Dimdik ve isabetli ateş etmek. Al, bunları kullanabilirsin."}
+{"key": "2017ae9b04e21eb5", "tr": "Bunlar senin..."}
+{"key": "6f96c22d3443da0f", "tr": "Şey, başarılı olmak için biraz şansın olsun istedim. Hadi. Bu hedefleri vur. Acele etmene gerek yok... Ama çok da değil, bundan sonra başka işlerimiz var."}
+{"key": "4027f515418b7748", "tr": "Mermi doldur!"}
+{"key": "8833d9c1776fb4a2", "tr": "Herkes duran hedefleri vurabilir. Bakalım koştururken nasıl yapacaksın."}
+{"key": "aedbf0b7744af130", "tr": "Hadi ama! Acele et! Mermi doldur! Neredeyse bitti!"}
+{"key": "bc78e69d831f4f15", "tr": "Aferin, Shay. Böyle devam et. Fena gitmiyorsun, Shay. Ama diğerlerinin seni üzmesine izin verme, kötülüklerinden değil ama bunu asla belli etmezler. Bu iyiydi, Shay. Yarın devam edeceğiz... Sonra konuşuruz, Shay. Bu akşam bira içelim. Chevalier'in kafanı bulandırmasına izin verme. Zamanla alışır... Şimdi gitsen iyi olur..."}
+{"key": "2e8698a28c757238", "tr": "Shay. Beni takip et. Sınır bölgesinde hayatta kalmayı öğrenmenin zamanı geldi."}
+{"key": "3f96600701144ef0", "tr": "Şimdiye kadar idare edebildiğimi düşünüyorum."}
+{"key": "16c77e6578363583", "tr": "Belki, ama sana öğretebileceğim daha çok şey var."}
+{"key": "a5bc5360d4c1018f", "tr": "Bekliyorum..."}
+{"key": "d04140d25fc726c5", "tr": "Avlanma vaktidir. Avı bulmak için tüm duyularını birleştir."}
+{"key": "ff6d98304d877b19", "tr": "Öldürmek anlamsız olmamalı. Doğanın bize verdiklerini kullanmalıyız."}
+{"key": "8e923617928bca98", "tr": "Güzel. Şimdi doğadan aldıklarını kullanma zamanı."}
+{"key": "5325229f5e1793f7", "tr": "Bunlarla tabancalarını yakınında tutabilirsin. Umarım diğer öğretmenlerine daha fazla beceri sergilersin. Gelecek sefer geç kalma. İyi iş çıkardın, Shay. Sana öğrettiklerimi unutma. Bugünlük ders bitti, Shay. Şimdilik hoşça kal. Achilles'in sana göstereceği bir şey daha var."}
+{"key": "770e607624d68926", "tr": "İyi"}
+{"key": "1057c8ada0f73eff", "tr": "Eğitimin nasıl gidiyor?"}
+{"key": "420322c74fb1d126", "tr": "Shay! Bayağı usta bir nişancı olmuşsun diyorlar."}
+{"key": "a5e54067547fe008", "tr": "Cömert bir hediye. Teşekkür ederim, mentor."}
+{"key": "c3b0759a7d12d872", "tr": "Gemim bekliyor, Achilles. Haiti halkı malzemelerinden iyi bir şekilde faydalanacaktır. Kaybedilenleri geri alacağına güveniyorum."}
+{"key": "76f75e6129fe3013", "tr": "Kaybedilen mi?"}
+{"key": "6421a41b845f55bb", "tr": "Tapınakçılar iki değerli eser çaldı. Antik bilgeliğin yazılı olduğu bir el yazması ve sahibinin onun dilini anlamasını sağlayan bir kutu."}
+{"key": "e7aeceac9f3001b1", "tr": "Tapınakçıları bu kıyıya kadar takip ettim ama korkarım gerisi sana kalıyor dostum..."}
+{"key": "cd6a73e01cb39772", "tr": "Hoşça kal, Adéwalé."}
+{"key": "9a330180c6f1e3a3", "tr": "Eserleri kim kontrol ederse Atalar'ın güç alanlarına erişebilir. Onları geri almalıyız, yoksa kimse güvende olamaz."}
+{"key": "b89fc5643f5e14f1", "tr": "Albay bana onurlu bir adam gibi geliyor. Doğru olanı yapmak isteyen biri... Ve belki de haklı. Olanlardan sonra... Yaptıklarım yüzünden... Geçmişi değiştiremem ama belki burada benim için bir gelecek vardır. Ve belki, sadece belki, bu sefer doğru olanı yapabilirim. Finnegan'ların yanına dönmeliyim. İyi olduğumu bilsinler."}
+{"key": "4f50722b27bbaadb", "tr": "Shay! Albay Monro olanları bize anlattı!"}
+{"key": "8b1d4a48711a99d3", "tr": "Seni gidi seni, tam bir aptalsın. Ama yine de sağ ol."}
+{"key": "6d94841727cb43d3", "tr": "Kaptan Cormac. Yeni yeni yataktan kalkmışken sizi rahatsız ettiğim için üzgünüm."}
+{"key": "0e0b8ebe811a0bf2", "tr": "Hayır, ben- tıkılıp kalmaktan bıktım usandım zaten."}
+{"key": "51d8567a467a47d6", "tr": "O halde belki arkadaşımın beladan kurtulmasına yardım edebilirsiniz? Garip silahlar geliştiren bir suçlu yuvası keşfetmiş."}
+{"key": "0c78da973ebdd5eb", "tr": "Şunlara bakın. Havai fişek kadar gürültülü ve parlak mermiler. Şöyle baş başa kalabilirsek..."}
+{"key": "65d04d94a08be7bf", "tr": "Adı Christopher Gist ve başı büyük belada olabilir. Korkarım bu alçaklar onu köpek gibi asacaklar."}
+{"key": "bc08e62a8b4df4f7", "tr": "O kanun kaçaklarının başka bir kurban almasına izin vermeyeceğim."}
+{"key": "962c9d144e0b9236", "tr": "Güzel. Alçaklar eski Arsenal Kalesi'ne yerleşmiş durumdalar. Albany'de acil işlerim var. Lütfen Kaptan Gist'e bana orada katılmasını söyleyin."}
+{"key": "e0d52efaaf5e0fea", "tr": "Duydun mu hayatım? Eski kale'de bir adamı asıyorlarmış!"}
+{"key": "66d3d3bd719dae06", "tr": "Aman ne güzel, bunu kaçırmak yazık olurdu!"}
+{"key": "e3103e7a930a02c3", "tr": "Bu sinsi herif hakkımızla çaldığımız şeyleri aşırdı! Haydi ona bir boy boylama vakti gösterelim!"}
+{"key": "4a1ed27337c57ef2", "tr": "Öldürün onu!"}
+{"key": "e96e12566228bbda", "tr": "Asılsın şerefsiz!"}
+{"key": "85e56b7cd5a3258a", "tr": "Cehenneme gidin hepiniz!"}
+{"key": "38e97e9710ce12f8", "tr": "Bu serseriler Finnegan'ların başına bela olan çeteyle aynı..."}
+{"key": "073d55264afdae1f", "tr": "Christopher Gist? Ben Shay Cormac."}
+{"key": "872cbfa24feca9c9", "tr": "Memnun oldum! Ama... Mahsuru yoksa burada ne arıyorsun acaba?"}
+{"key": "be6ff5d416118f5d", "tr": "Albay gönderdi."}
+{"key": "3a18fadad71b3e50", "tr": "Aha!"}
+{"key": "a9c7593220a7990e", "tr": "Aferin Shay! Kendi inlerinden söküp attın resmen!"}
+{"key": "07c2bc52dcf9635e", "tr": "Şey, kendime yeni bir yerleşecek yer arıyordum da..."}
+{"key": "430a393124c37eae", "tr": "Kapıya hemen ismini yazdırma! Gemilerinde birkaç kişi kalmış olabilir. Bak, kuşları hemen şurada yuvalanmış."}
+{"key": "050372fe3fd1be00", "tr": "The Morrigan! Ne arıyor orada o? O benim gemim dostum. Kusura bakma ama o gemiyi o pisliklerden geri almalıyım."}
+{"key": "6933b0d1d89b188f", "tr": "Bekle. Bunu tek başına yapmana izin verecek değilim galiba."}
+{"key": "9407cde1d3a685a4", "tr": "Eğer yapabiliyorsan yardım et o zaman."}
+{"key": "c7dda2160c3d9a3f", "tr": "Aklını başından çıkarma Shay. Suçlular her yerde ve birçoğu tam birer kanun kaçağı gibi görünüyor."}
+{"key": "4510273c3ff26d73", "tr": "Ve beni iyileştiren insanlara tacizde bulunuyorlar."}
+{"key": "ffa44c352d2817a8", "tr": "İyi insanlara benziyorlar."}
+{"key": "1fb6dd284ad82600", "tr": "Öyleler. Belki tanıyorsundur? Barry ve Cassidy Finnegan."}
+{"key": "bfad2bf42d4372c4", "tr": "Hiç tanışmadım ama oğullarını biliyordum... Dikkatli ol şimdi... Bu serseriler her yerde olabilir. Gürültü çıkararak onları dışarı çekebilirsin."}
+{"key": "ac45c9a0a2124723", "tr": "Oho, bundan çok daha iyi bir fikrim var..."}
+{"key": "9d4baecb80aeba1b", "tr": "Vay be! Bu meseleyi halletmekten çok daha fazlasını yapabilecek gibisin. Bak ne diyeceğim, aceleyle yola çıkman gerekirse diye teknene bir mürettebat bulacağım."}
+{"key": "edd336774305c41c", "tr": "Güzel gemi. Ve sözümün eri olarak ona bir mürettebat buldum. Yalnız bir pozisyonu boş bıraktım. Söyle bakalım Shay, bir süvarin var mı?"}
+{"key": "3f8086263a6c733b", "tr": "O... çoktan çekip gitti."}
+{"key": "83e0becd41139ab5", "tr": "O zaman bu göreve ben talibim Kaptan!"}
+{"key": "6059d13ace7baf8f", "tr": "Aramıza hoş geldin."}
+{"key": "5654c48dacf6793f", "tr": "Birinci süvarin olarak bir sonraki rotamızı önerebilir miyim? Albay rapor vermemi bekleyecektir."}
+{"key": "e0b532419d0de428", "tr": "Aklımdan geçenler de buydu. Albay Monro Albany'de olacağını söylemişti."}
+{"key": "e08aef19080b45da", "tr": "Harika!"}
+{"key": "3c546c285fd483f5", "tr": "Shay Cormac. Duyduğuma göre Tapınakçıların Atalar arkeolojisi konusundaki yeni dâhisi sensin."}
+{"key": "e7c557868e6027ab", "tr": "Uzman falan değilim efendim. Sadece Suikastçıların o lanet olası yerlerle neler yapabileceğine şahit oldum..."}
+{"key": "cd58d0486947ce6c", "tr": "Yıllardır Atalar'ın izini sürer cennetleri araştırıyorum. Gördüklerini bana anlat."}
+{"key": "3115ffd948168bda", "tr": "Şey, hem Suikastçıların hem de Tapınakçıların Cennet Parçaları'nı aradığını biliyorum. Güçlü silahlar, zihin kontrol eden Elmalar, ama bu sefer durum farklı. Bir elma bulamadık ama... bir ağaç bulduk. Bu Tapınaklar dünyayı kökler gibi bir arada tutuyor. Onları rahatsız edersen Haiti yıkılır ya da... Lizbon. Veya El Yazması'nın gösterdiği herhangi bir yer."}
+{"key": "9f3a97edcdc415f1", "tr": "Ve Suikastçılar körü körüne bu yapılara zarar mı veriyor?"}
+{"key": "9f9bfca97654b95c", "tr": "Aynen öyle. Ve onları durdurmazsak şehirleri yok etmeye devam edecekler."}
+{"key": "aa4252a5296f5787", "tr": "Anlıyorum... Louisbourg kalesi yakınlarında Suikastçı faaliyetleri olduğuna dair istihbarat aldık. Kraliyet Donanması'ndan subay James Cook ile buluşacağız. Kendisi yakın zamanda stratejik açıdan değerli bir rütbe elde etti. Haritalar Gist'te."}
+{"key": "a45e9362eb0902b0", "tr": "Pekâlâ. Kısa sürede yola çıkacağım."}
+{"key": "e96f0711be2259e0", "tr": "Albay Monro senden çokça bahsetti Shay. Aramızdaki en iyisi olabileceğine inanıyordu. Hayal kırıklığına uğratmayacağını umuyorum."}
+{"key": "a872bc8e893596ab", "tr": "Öyle bir niyetim yok efendim."}
+{"key": "747237b8f22843ae", "tr": "Gist, Büyük Üstat'ın Kaptan Cook ile neden bu kadar ilgilendiğini biliyor musun?"}
+{"key": "6298af71bff9651a", "tr": "Şey efendim, kendisi çok zeki ve hırslı biri. Denizcilik bilgisi eşsiz! Ve Halifax'taki en sevdiğim barmene güvenecek olursam, o da kendi devasa savaş gemisinin kaptanı olmuş bile. Ayrıca gizli kodları çözme konusunda da bir uzman... Böyle bir yeteneğe sahip bir adam kesinlikle davamız için büyük bir kazanım."}
+{"key": "94bd3662b37bf80b", "tr": "O zaman Tarikatımıza memnuniyetle kabul etmemiz gereken türden biri ha?"}
+{"key": "77ecf67a6bff8fe6", "tr": "Şey... Arkadaşımdır kendisi ama, herif aşırı dürüst olma gibi sinir bozucu bir huyu var ve kurnazlığa dair hiçbir şey bilmiyor. Gizli işleri gizli tutmayı biraz zorlaştırıyor, özellikle de kafası kodları çözmeye bu kadar basarken. Onu bir müttefik olarak gör ama yanında ne dediğine dikkat et."}
+{"key": "659de089d3e86a29", "tr": "Anlaşıldı."}
+{"key": "c507d2601c772cae", "tr": "Louisbourg bu savaşta kilit bir nokta olabilir diye duydum. Kraliyet Donanması o kaleyi alabilirse, Saint Lawrence'a kadar yolumuz tamamen açık demektir."}
+{"key": "5db752b3100c3edd", "tr": "O zaman sıra Quebec ve Montreal'e gelir... Rüzgâr tersine dönüyor."}
+{"key": "7459edf58b6f55e9", "tr": "General Wolfe o korkak Montcalm'ın anasını ağlatacak."}
+{"key": "da875a0fca92fd4a", "tr": "Fort William Henry'den beri bunu dört gözle bekliyordum."}
+{"key": "c0f1485b616aefe4", "tr": "Bu lanet savaş bitince, sonunda bu lanet kıtaya düzen getireceğiz!"}
+{"key": "7e543b7e177a89e5", "tr": "Korkarım bundan daha fazlası gerekecek dostum."}
+{"key": "ada3cdd8d3d28aaf", "tr": "İşte orada! HMS Pembroke. Kaptan James Cook'un gemisi."}
+{"key": "a6ec1157feaa8617", "tr": "Çok güzel gemi."}
+{"key": "e88c1813109c8281", "tr": "Devasa bir savaş gemisi. Tam teçhizatlı. Morrigan'ı yanına yanaştırmalıyız, Üstat Kenway kesinlikle bekliyordur."}
+{"key": "9e1584976decd41f", "tr": "Gemimize hoş geldiniz baylar."}
+{"key": "83d16431a231f7c1", "tr": "Seni tekrar görmek güzel Kaptan."}
+{"key": "1d818d8975a90b34", "tr": "Kaptan Shay Cormac. Kaptan James Cook."}
+{"key": "f93a577cd21df04f", "tr": "Tanıştığımıza memnun oldum."}
+{"key": "58f6736271661750", "tr": "Memnuniyet benim efendim."}
+{"key": "941da49520eb1965", "tr": "Kaptan Cook epey endişe verici bir stratejiyi açığa çıkardı, ki bu sanırım kendi istihbaratımızı da doğrultuyor."}
+{"key": "328f0a34827a1c17", "tr": "Öyle, biz daha konuşurken bir Kraliyet Donanması filosu Louisbourg'a doğru yola çıktı bile. Ancak Fransızlar ona karşı önleyici bir saldırı planlamışlar. Eğer bu saldırıyı başlatırlarsa..."}
+{"key": "3981672bc36249a1", "tr": "Bunun olmasına izin veremeyiz elbette. Baylar, Louisbourg Savaşı bu savaşı nihayet sona erdirecek dönüm noktası olabilir."}
+{"key": "4589132208adac6a", "tr": "Sizimi bilmem ama ben savaştan bıktım."}
+{"key": "34f0371d86258df7", "tr": "O halde direksiyona geçmenizi öneririm Kaptan Cormac? Sanırım gerçek bir... ateş gücüne sahip bir gemiyi yönetmek hoşunuza gidecektir."}
+{"key": "2e12ecda4b8f8c0a", "tr": "Sanırım öyle yapacağım Kaptan."}
+{"key": "b200cd197af9ce0c", "tr": "Wolfe, Kraliyet Donanmasının üç tümenine önderlik et."}
+{"key": "addd02780b511a4a", "tr": "Komutanları kim?"}
+{"key": "ca023818d284209f", "tr": "Tümgeneral Amherst'ün kendisi, ...'den döndü."}
+{"key": "69ab05f7858d81cb", "tr": "Savaşla ilgilenmeye mi başladın Shay?"}
+{"key": "db46be4c4e6000f4", "tr": "Seni hayal kırıklığına uğratmak istemem efendim."}
+{"key": "19501b8534bb04d2", "tr": "Vuruldular!"}
+{"key": "917297eac20b4ca7", "tr": "Siktir! Kimsenin geçmesine izin ve-re-meyiz!"}
+{"key": "75a814273e6af8c0", "tr": "O gemileri durdurmamız şart Kaptan. Savaşın sonucu buna bağlı olabilir."}
+{"key": "d009f0df672f050b", "tr": "Kendi havan toplarını iyi kullan Shay. Başarılı olacaksak hayati önem taşıyacaklar."}
+{"key": "71e9a333af6651b5", "tr": "Tanrım! Yangın gemileri! Eğer içeri sızarlarsa filomuzu darmadağın ederler!"}
+{"key": "faea4e2df08b31a8", "tr": "O zaman bunun olmasına izin vermesek iyi olur."}
+{"key": "c9471e5877f0054f", "tr": "O gemiyi tanıyorum efendim. Bu Experto Crede."}
+{"key": "a404a791cb8bf8c6", "tr": "Adéwalé! Başka önceliklerimiz olduğu için ne kadar da şanslı."}
+{"key": "7584ea3bdc1e3406", "tr": "Aynen öyle, şu yangın gemilerinden kurtulmalıyız."}
+{"key": "59c0bf1fdbe76a92", "tr": "Daha fazla yangın gemisi!"}
+{"key": "a1d4844ef27e3178", "tr": "Üstat Kenway haklı bence Kaptan. Havan topları şu an çok işimize yarayacaktır."}
+{"key": "10be0b12a8632c17", "tr": "Bir yangın gemisi dalgası daha Kaptan! Havan toplarımızı ateşlemeliyiz Kaptan. Tam önümüzdeler! O yangın gemisini batırmalı ya da önlerinden çekilmeliyiz!"}
+{"key": "6a0276687d24b699", "tr": "Daha fazla düşman gemisi efendim! Ve daha çok yangın gemisi!"}
+{"key": "af7de286df389945", "tr": "Bu işin çıkışı yok. Belki de geri çekilmek daha akıllıca olur."}
+{"key": "0443d11f1cbe00a1", "tr": "Savaşla akıl her zaman yan yana gelmez Kaptan. Daha bitmedi beyler! Topların başına!"}
+{"key": "f62384d16acc3be6", "tr": "İşte Kraliyet Donanması! Yolu tam zamanında açtık Kaptan Cormac."}
+{"key": "14441e9bb86d52b9", "tr": "Savaşın gidişatı değişiyor!"}
+{"key": "d84d741251575920", "tr": "Güzel patladı ama değil mi?"}
+{"key": "4b49e988865a33c5", "tr": "Kutlama yapmak için çok erken. Adéwalé hâlâ dışarıda."}
+{"key": "ed854c125e323c8e", "tr": "Onunla dans etmek için başka bir şansımız olacağına eminim Üstat Kenway."}
+{"key": "cd2836a241334208", "tr": "Üstat Cormac! Hangi rüzgâr attı sizi buraya?"}
+{"key": "3f859deaa3482a8f", "tr": "Gemimi ikmal etmek için durmuştum ki yetenekli Kaptan Cook'un burada olduğunu duydum. İki çift laf edebilir miyiz?"}
+{"key": "ea96440d6e77d063", "tr": "Her zamanki gibi emrinizdeyim."}
+{"key": "9dc943be9e270255", "tr": "Birini arıyorum. Kaptan Louis-Joseph Gaultier, Chevalier de la Vérendrye."}
+{"key": "47d1471c2c073b31", "tr": "Kşif. Kendisini ve şanlı ailesini duymuştum."}
+{"key": "80390e5002cd1bfc", "tr": "Onu görmem lazım."}
+{"key": "ce4cb298079ec217", "tr": "Ah, ona selamlarımı ilet! Ya da iletme... Birkaç gün önce Anticosti yönüne doğru yelken açtı."}
+{"key": "b2fbe6587e47722f", "tr": "Hse... Öyle mi."}
+{"key": "f40bf3bd46b1375d", "tr": "Dikkatli olmanızı öneririm."}
+{"key": "700bd46a2b54b904", "tr": "Önceden de oralardaydım."}
+{"key": "51f6a0b147ce9362", "tr": "O zaman size iyi şanslar dilerim. Başka bir yardıma ihtiyacınız olursa ... yakınlarından geçiyor olacağım."}
+{"key": "86f1aea41ac7393e", "tr": "Büyük Üstat memnun Shay. New York'ta yaptıkların... Şey, düzenin yeniden sağlanması artık sadece an meselesi."}
+{"key": "d7cb8efde8be104c", "tr": "New York hiçbir zaman \"düzenli\" olmamıştı Gist... Hope da gittiğine göre, belki..."}
+{"key": "b5b401875675091c", "tr": "Kolay olmamıştır senin için evlat. Ama yapman gerekeni yaptın."}
+{"key": "1004e6b97726adad", "tr": "Kendime bunu söyleyip duruyorum..."}
+{"key": "302ae760136d3d8f", "tr": "New York'taki Suikastçilerden nerdeyse tamamen kurtulduk ve o cadı seni tahtadan bir paltoya sokmaya çalışmamış gibi değil. Başka çaren yoktu."}
+{"key": "3e4fe8eb722f8f29", "tr": "Kaderimi Tapınakçılarla birleştirmeyi seçtim."}
+{"key": "d50d7aa7e523bc38", "tr": "Ve yaptığına sevindik Shay. Kim bilir, yapmasaydın kendini Üstat Kenway'in kılıcının ucunda bulabilirdin."}
+{"key": "ebc86cafcca1d77f", "tr": "Ya da seninkinin!"}
+{"key": "ccb5bec198f80c41", "tr": "İşte ruh budur! Bak Shay, Hope'u öldürerek hem kendini ve New York'un yarısını Suikastçilerin zehirlerinden kurtarmadın, hem de bundan sonra izlememiz gereken yolu öğrendin. Artık işimiz basit: Bir grup aklı evvel katilin başka bir şehri yok etmesini engellemek. Sıradan bir gün işte."}
+{"key": "249a7bc1658c8ffc", "tr": "Uzun bir gün, Gist."}
+{"key": "c8c3a9017ee4bf47", "tr": "Saygısızlık etmek istemem bayım ama o merhume bayandan ne öğrendiniz?"}
+{"key": "8b575324512d862d", "tr": "Sandığımdan bile kurnazmış. Bütün dümeni Liam'a Chevalier'ye dönmesi için zaman kazandırmaktı. Çoktan yeni bir Öncül tapınağına yelken açmış olmalılar."}
+{"key": "16d92c7fe011cf82", "tr": "Sonuna kadar kararlı! İtiraf etmeliyim ki bu kafası karışık kızı takdir ediyorum."}
+{"key": "6e2870302ffe4b2a", "tr": "Ben etmiyorum. Suikastçiler deli saçması arayışlarından vazgeçmeyecekler. Bir Cennet Parçası bulmayı kafaya koymuşlar... Özellikle de Kardeşliğin yarısı öldükten sonra."}
+{"key": "22d4ed1503f142af", "tr": "Batıya giden alternatif bir rota olabilir!"}
+{"key": "dcb67e1c7b5067e2", "tr": "Anticosti gemi enkazlarıyla meşhurdur. Muhtemelen kimsenin böyle tehlikeli sulara cesaret edemeyeceğini düşünüyorlar."}
+{"key": "02a3035d96f79dd2", "tr": "Aptallar ve deliler dışında kimse cesaret edemez herhalde? O buzdağlarına dikkat et Kaptan."}
+{"key": "f8429e83b158dd61", "tr": "Bu adam huzurunuzda utanç içinde duruyor. Açgözlülük karakterini yozlaştırdı ve ekmeğimizi tehlikeye attı. Kendi yasalarımızdan başka hiçbir yasaya boyun eğmeyiz. Ve o yasalar, her ihanetin en ağır cezayla karşılık bulmasını emreder. Bu da hepinize hatırlatma olsun! Kurala uyun! Şimdi görevlerinize dönün!"}
+{"key": "03de008705549d2c", "tr": "Mills asılmayı hak etmişti. Onu açık etmeseydik buralar kırmızı formalılarla dolardı."}
+{"key": "cd7ca57a92c9f041", "tr": "İnsana bu adada daha başka ne kadar hain olduğunu düşündürtüyor doğrusu."}
+{"key": "b1d93937a4b294dc", "tr": "Birilerinin bu bedeli ödemesi an meselesiydi. Kaptan, o Fransız gittiğinden beri öfke kusuyor."}
+{"key": "b9445a7f8a9ad623", "tr": "O herife hiç güvenmemiştim zaten."}
+{"key": "474378a27eace84a", "tr": "Bu belgeler lanet olası sembollerden ve saçmalıklardan başka bir şey değil. O Fransız iblis her zaman sır tutmayı severdi. Ama büyük bir hazinenin yerini bulmuş. Eminim."}
+{"key": "498f8929cc088c3f", "tr": "Morrigan'a dönsek iyi olacak."}
+{"key": "d60983129a294ece", "tr": "Lanet olsun! Bulunmuşuz!"}
+{"key": "69d844b9645df9ae", "tr": "Ağır hasar alıyoruz bayım!"}
+{"key": "503089c5209d80fd", "tr": "Sıkı durun! Kaptanı bekliyoruz!"}
+{"key": "3439ba4387921aa2", "tr": "Gitmeliyiz Shay!"}
+{"key": "fe7f381aaed927d9", "tr": "İtiraz eden kim! Yelkenleri açın! Acele edin!"}
+{"key": "706a78b071a5d79b", "tr": "Alt edildik bayım!"}
+{"key": "b4e6fd3babb467f2", "tr": "Kraliyet Donanması!"}
+{"key": "47368d70fd3a91ea", "tr": "Buna hâlâ alışamadım. Kral George'un adamları o korsanların icabına bakar! Bizim verecek kendi savaşlarımız var."}
+{"key": "3cefa3d7a3a6db4d", "tr": "Beklediğimden çok daha ucuz yırttık ama aradığımızı aldık."}
+{"key": "0aeac75bcc08da39", "tr": "O zaman de la Vérendrye'in gemilerinin nereye gittiğini biliyoruz?"}
+{"key": "c7ba2e1a1f34b444", "tr": "Pek sayılmaz. Ama öğrenmenin bir yolu var. Bu haritaları yorumlaması için Cook'a ihtiyacımız olacak."}
+{"key": "2ce02a1ba8b7f719", "tr": "O hâlde Newfoundland kıyılarına doğru yelken açmalıyız."}
+{"key": "39d0f7ece0565959", "tr": "Üstat Kenway."}
+{"key": "9955bed3261ef171", "tr": "De la Vérendrye öldü. Koordinatlara sahibim. Suikastçilerin nereye gittiğini biliyorum."}
+{"key": "89a38a830a49b9e1", "tr": "O hâlde acele edelim."}
+{"key": "23ed553aabc5f0cf", "tr": "Achilles ve Liam'ın Öncül tapınağını bulduğunu mu düşünüyorsun?"}
+{"key": "4b74d6ddda0b04c2", "tr": "Dünya hâlâ yerinde duruyor. Eğer ortaya çıkarsalardı, dünyayı şimdiden harekete geçirmiş olurlardı."}
+{"key": "0f362b60c8a616e6", "tr": "Ne kadar da nazikler."}
+{"key": "4e3c82695acd074a", "tr": "Hâlâ vaktimiz olmalı. Üstat Gist, sen burada kal. Ben Shay'e eşlik edeceğim."}
+{"key": "5421f998ddadf175", "tr": "Efendim? Saygısızlık gibi olmasın ama bunun akıllıca olduğuna emin misiniz?"}
+{"key": "be3bfd389ef1d439", "tr": "Büyük Üstat olarak bu Öncül meselesini sonuna kadar araştırmalıyım. Ve Achilles'in Kardeşliği'nin ölümüne şahit olmalıyım."}
+{"key": "2caa5a89eabbefa6", "tr": "Suikastçiler bir deprem tetiklerse, en azından acı çekecek çok fazla insan yok."}
+{"key": "5780587274e76d47", "tr": "Eski dostlarının bir Öncül tapınağını yok etmesine izin vermeye niyetim yok."}
+{"key": "bda06d3fc8f0b417", "tr": "Şu lanet olası soğuk olmasa burası çok güzel olurdu."}
+{"key": "914eb018dcd8c889", "tr": "Dikkatli bas... Buzun bazı yerleri bayağı ince."}
+{"key": "e41fc7f470ceaf72", "tr": "Achilles yanına hatırı sayılır bir mürettebat almış."}
+{"key": "7884a4050c27a31d", "tr": "Hepsini bu koşullarda hayatta beklediğini sanmıyorum."}
+{"key": "e6cae1a841059a83", "tr": "İç karartıcı. Ama yine de sayıca üstünler. Göz önünde olmayalım, gereksiz kavgalardan kaçınalım."}
+{"key": "972faa4082f27b30", "tr": "Suikastçilerin seni tanıyamaz bile. Gel, salonlarına girelim."}
+{"key": "5209cba45914c8f1", "tr": "Hadi Shay! Ben başka bir yol bulacağım."}
+{"key": "bfa2d8c70b0e9589", "tr": "Elma bu mu?"}
+{"key": "d1dac19ee997cd85", "tr": "Hayır! Hiçbir şeye dokunma. Shay haklıydı."}
+{"key": "7fa4c5a1d46b4709", "tr": "O ne bilecekmiş?"}
+{"key": "ac4fed735232286c", "tr": "Benden çok şey bildiği kesin."}
+{"key": "620cc3f13c8a47ae", "tr": "Sonunda anladın Achilles. Burası dünyayı kontrol etmek için bir silah değil, bir arada tutmak için yapılmış bir yapı. Beni dinlemiş olsaydın tüm bu felaket önlenebilirdi!"}
+{"key": "71dc65cd345b0049", "tr": "Sonuna kadar itaatsiz."}
+{"key": "7bc45778a2bbce4e", "tr": "Evet, bunun üzerinde çalışıyorduk..."}
+{"key": "8e0b9e49368368fc", "tr": "Haklı ya da haksız Shay, Kardeşliğe, Achilles'e ve bana ihanet ettin."}
+{"key": "bda8737f7c15ad17", "tr": "Bunu sırtından vuran adam söylüyor."}
+{"key": "d1765f2740cca74c", "tr": "Çiftlikte mi? O Chevalier'ydi. Ben ıskalamam!"}
+{"key": "41ab6b59a1f09f60", "tr": "Liam, yapma!"}
+{"key": "d47dd4ed74191fc0", "tr": "Şu lanet El Yazması ile Kutuyu buraya kadar getirmek zorunda mıydın Liam?"}
+{"key": "e290ad2f660bec3d", "tr": "Atalar Kutusu güvende Shay. Chevalier halletti onu. Asla bulamayacaksın!"}
+{"key": "b7e1fdebb327282b", "tr": "Hope'un cesedini buldum Shay!"}
+{"key": "54b85f0725b993d5", "tr": "Özür dilerim!"}
+{"key": "6485d494e1238578", "tr": "Sen miydin? Söyle bana!"}
+{"key": "431dda7c276e4836", "tr": "Zorundaydım!..."}
+{"key": "53d373ec2f18ad33", "tr": "Hayır... Sen seçtin!"}
+{"key": "af5a9713bc10d165", "tr": "Pes et Shay! Şansın tükendi! Soğuk bir mezar seni bekliyor! Buradan çıkamayacaksın seni piç kurusu! Bunu bize nasıl yaparsın? Hope'u nasıl öldürebilirsin?!"}
+{"key": "6cdd6f18dd04adc1", "tr": "Bu... şanstı."}
+{"key": "acbe2795dd3a8d15", "tr": "Sana kaç kez söylemem gerekiyor Liam? Kendi şansımı kendim yaratırım."}
+{"key": "a8db1cf6e59dd18d", "tr": "Ve bunu nasıl yaptın seni piç? Suikastçileri bitirdin. Tanıdığın... herkesi sattın... En büyük düşmanlarımızla... birleştin. Hem de ne uğruna?!"}
+{"key": "00aa821bbc48717d", "tr": "Dünyayı kurtarmak için."}
+{"key": "792ab42afb757402", "tr": "Umarım o dünya... güzel bir yerdir."}
+{"key": "9390298f3fb0c5b1", "tr": "Hayır!"}
+{"key": "dd0a28636c9ce526", "tr": "Neden olmasın?"}
+{"key": "e7f187b72927fc06", "tr": "Achilles artık zararsız! Takipçisi olmayan bir Üstat. Merhamet gösteremezsek nasıl bir dünya yaratmış oluruz? Hem artık bu Atalar alanlarının ne olduğunu anlıyor. O olmazsa Suikastçiler aramaya devam edebilir."}
+{"key": "0d3920192983a5a3", "tr": "Haklı noktalar."}
+{"key": "0bb0bd4709e54cd7", "tr": "Burada olanları asla unutmayın."}
+{"key": "85939c4820b1f9d8", "tr": "Unutmayacağım... Ama dünya unutacak."}
+{"key": "c5078afc62753bf2", "tr": "Peki şimdi ne olacak?"}
+{"key": "170085b479ef8df0", "tr": "Üstat Gist Suikastçilerden geriye kalan izleri silmekle görevlendirilecek. Tabii ki Üstat Weeks ve diğerleri de ona yardım edecek."}
+{"key": "445bb59fc9e09b67", "tr": "Achilles her şeyini kaybetti. Çiftliğinden çıkmaya cesaret edemez."}
+{"key": "02dd5a7518179386", "tr": "Edemez... Shay, Atalar alanları arayışımız sona ermiş olsa da o Kutuyu istiyorum. Onu Tapınakçı Tarikatı ve benim için bulacaksın."}
+{"key": "b61b06c2636524ea", "tr": "Şu an dünyanın herhangi bir yerinde olabilir... Bulması yıllar sürebilir."}
+{"key": "b2e9e42c27be9d1c", "tr": "Bir ömrünü alabilir. Bu zorlu göreve hazır mısın?"}
+{"key": "5fadcdef82ed913b", "tr": "Bayan Abigail ve küçük Connor da öldüğüne göre Çiftlik artık çok kasvetli."}
+{"key": "0bc2091a8b14ea1b", "tr": "Öyle. Achilles'in ağladığını gördüm."}
+{"key": "8c2694e37a8faf8b", "tr": "Neden ağlamasın?"}
+{"key": "56841d93682650a7", "tr": "Mesele şu ki... üzgün görünmüyor. Öfkeli görünüyor. Bu insanı huzursuz ediyor."}
+{"key": "0574fbd6cadf76c2", "tr": "Kayıpla boğuşuyor. Hepimiz öyleyiz."}
+{"key": "a65a20c0a3d31209", "tr": "Biliyorum. Ama aylar oldu... ve bu lanet El Yazması ile kutuyu aramaktan başka pek bir şey yapmadık!"}
+{"key": "c394aba7b1645165", "tr": "Le Chasseur'ün kutuyla ilgili bir ipucu var. Saint John's'ta onunla ve Chevalier'le buluşacağız."}
+{"key": "bc9aab4b3d87a549", "tr": "Chevalier de mı? O zaman neşelenme umudum yok demektir. Achilles eserlere kim sahip olursa büyük güç barındıran alanlara erişebilir dediğinde ne demek istemişti?"}
+{"key": "e5c951829d836282", "tr": "Kendim de tam anladığımdan emin değilim Shay. Adéwalé ile bu konuda uzun uzun konuştuk. Kutunun, şey, kelimeler veya görüntüler yansıtacak şekilde etkinleştirilebileceğine inanıyor..."}
+{"key": "0fd11ae3a3e861ca", "tr": "Bir... ne gibi?"}
+{"key": "b9b4f7b0f5b40099", "tr": "Ne demek istiyorsun?"}
+{"key": "ffdd10ffac4d6a42", "tr": "Bilirsin, Peder Connolly'nin kilisenin bodrumunda gösterdiği sihirli fener gösterileri gibi. Kutunun içinde bir mum vardı sanırım. Önüne bu küçük cam levhalardan koyuyordu. Sonra duvara Roma'daki katedraller gibi parlak ve gerçeğe yakın görüntüler yansıtıldığını görürdük!"}
+{"key": "ecb18735eb7088f3", "tr": "Ah evet. Sanırım öyle... Tek farkı el yazmasının garip dilini de tercüme etmesi. Levha Latince bir pankarta aitse onu İngilizce olarak görürdük."}
+{"key": "9528290668e3cb24", "tr": "Bu nasıl mümkün olabilir ki?"}
+{"key": "8b37347280748786", "tr": "Kimbilir. Cennet Parçalarının nasıl çalıştığını asla tam olarak anlayamayacağımızdan korkuyorum."}
+{"key": "de5a7ef3fd75bd06", "tr": "Dünyanın neresinde en güzel kızlar var?"}
+{"key": "a962e998ec640d8e", "tr": "Sanırım güzellik anlayışına bağlı. Korfu'dan bir kızla İspanya'dan bir kız dağlar kadar farklıdır ama ikisi de sevimli olabilir."}
+{"key": "0d132f6bb6b1d0b8", "tr": "Görüyorsun ya, böyle düşünceler bir insana bilge ünü kazandırır."}
+{"key": "d6cd06ba09cc8731", "tr": "Evet, sağ ol."}
+{"key": "29b28dc6ed439d53", "tr": "Ben sadece Havana derdim. Oradaki kızların kalçaları ve göğüsleri gürdür ve onları sergilemekten utanmazlar! Tabii bu memleketimizdeki kızlara bir hakaret değil."}
+{"key": "c09cc2094d955158", "tr": "Sanırım..."}
+{"key": "e34775162d4d9c34", "tr": "Galway'in kızları en güzelleri bence, dürüst ve mütevazı, bira içmen için sana her zaman ödünç para vermeye hazırlar."}
+{"key": "0564141a4c35f19b", "tr": "Bir de Lizbon'da tanıştığım hizmetçiler var. Manastıra gitmeleri kaderlerinde yazılıydı, kara gözlü ve iyi huyluydular. Keşke Portekizce bilseydim... Gecelerimizi çok fazla konuşarak geçirdiğimiz söylenemez ama."}
+{"key": "f67129f5021d2e6d", "tr": "Böyle düşünceler bir insana tamamen farklı bir ün kazandırır."}
+{"key": "6c596deef09cecbf", "tr": "Neredeyse vardık Kaptan. Le Chasseur bizi bekliyor olmalı."}
+{"key": "ee71c00c5131e70e", "tr": "Ve Chevalier."}
+{"key": "81d8135832d4641a", "tr": "Ah, Atalar kutusuna dair bir ipucu için küçük bir bedel."}
+{"key": "0c00f2b3ed6d1eff", "tr": "Chevalier! Gemine ne oldu?"}
+{"key": "6de9aec8a74e1374", "tr": "Kendimi biraz belaya bulaştırdım. Üç gemiyi ve tüm mürettebatı sulu mezarlarına gönderdim, Le Gerfaut da neredeyse onları takip ediyordu."}
+{"key": "87d98b645af4cd05", "tr": "Umarım senin kaderin daha iyi olmuştur Le Chasseur."}
+{"key": "ee35f88cca7ba641", "tr": "Öyle oldu. Kaynaklarım Samuel Smith'in o garip kutunun nasıl çalıştırılacağına dair cevaplar aramak için köşe bucak gezdiğini bildirdi. Az önce Avrupa'dan döndü."}
+{"key": "4c35a4cf00987835", "tr": "Şimdi nerede?"}
+{"key": "8d00d13f97aaad02", "tr": "Yelkenlisini onarıyor. Acele edersen onu... orada yakalayabilirsin."}
+{"key": "d4465e300da4bd6e", "tr": "Şu çizimleri hatırlıyor musun? Şansına, bir mühendise gemin için o harika silahı yaptırdım. Usta Puckle'ın topu bir topçu tugayından daha çok atış yapar, hem de iki kat daha hızlı."}
+{"key": "af65d732b674f37e", "tr": "Çok sağ ol!"}
+{"key": "c95b2a8123ede4a3", "tr": "Kapşonlu dostlarım için her şeyi yaparım."}
+{"key": "2780b8eef998d6ea", "tr": "Kaptan?"}
+{"key": "1b85557253253f10", "tr": "Bu yolculukta sana katılacağım."}
+{"key": "2ef34513c9591cec", "tr": "O halde koyulalım mı, baylar?"}
+{"key": "332ed3c907ec379b", "tr": "Keyfin oldukça yerinde, Shay."}
+{"key": "aac8b49a4b9ddc34", "tr": "Neden olmasın? Yeni bir silahım var ve yakında onu kullanma şansım olacak. Hem Tapınakçılar genelde iyi korunur, eminim o Smith herif de istisna değildir."}
+{"key": "84cc471012b9112d", "tr": "Ben de kendime vazife bilip bazı geliştirmeler sipariş ettim. The Morrigan'ın artık buzun kendisini bile kesebilecek bir koçbaşı var."}
+{"key": "10a2e42795f32ab6", "tr": "Böyle bir teknolojiyi duymuştum ama hiç iş başında görmemiştim."}
+{"key": "ff0882f99fd64db9", "tr": "Peki ya Smith? Yakınlarda mı?"}
+{"key": "89f3e116811d8698", "tr": "Aynen, tam bu sularda yelken açıyor. Ve muhtemelen Atalar kutusu onda."}
+{"key": "08b5d09315422ccd", "tr": "O zaman bulalım onu!"}
+{"key": "26cf4c590c36cf9e", "tr": "İşte orada!"}
+{"key": "e418928b06a213f3", "tr": "Zamanlama harika. Şans tanrıçası hep senin yüzüne gülüyor."}
+{"key": "aef11de601ad1e3d", "tr": "Bizi gördü. Peşine düş!"}
+{"key": "968a460609ce219a", "tr": "Ama ateş etmek yok! Kutuya zarar vermemeliyiz ya da onu denize kaptırmayı göze alamayız."}
+{"key": "ab1b88193d6881f5", "tr": "Dikkat et seni aptal herif! Kutuyu mahvedeceksin!"}
+{"key": "862bb907aa7fe23e", "tr": "Bu hurda daha hızlı gidemez mi?"}
+{"key": "5afd50bdfc98b847", "tr": "En azından benim gemim hâlâ yüzebiliyor, Chevalier."}
+{"key": "296e67010e007760", "tr": "Hedefimiz akıllı adam ama burası ona göre değil."}
+{"key": "389b16e13ca0b750", "tr": "Samuel Smith Tapınakçıların haznedarıdır. Bu sularda ne arıyor, aklım almıyor."}
+{"key": "f745d8122a92e4e8", "tr": "Belki de biriyle buluşmaya gelmiştir... Ya da senin korsanlara çarpmıştır. Gemisini onarıyor, yani kesin bir şeyler olmuştur."}
+{"key": "6e9ccf6f88256e18", "tr": "Müttefiklerimden biri ona saldırsaydı, haberim olurdu."}
+{"key": "a4e9e83c23bc0945", "tr": "Uzun bir yolculuktan yeni döndü. Onu yakalamak için tam sırası."}
+{"key": "c6eef5401ad5bfa4", "tr": "Smith Tapınakçıların servetinin çoğunu elinde tutuyor, değil mi? O aradan çekilirse..."}
+{"key": "fa4bb2661d82aa6a", "tr": "Washington Atalar kutusunu ona emanet etti. Muhtemelen hâlâ ondadır."}
+{"key": "fd2a6280844a252e", "tr": "Shay haklı. Önce kutu."}
+{"key": "590769e28bea0460", "tr": "Yani onu batıramayız. Gemisine çıkmak ya da karaya oturmaya zorlamak zorundayız."}
+{"key": "44c4164d030517f2", "tr": "Yeter! Burası oyun yeri değil, lahana üreticisi!"}
+{"key": "5902a3d4c3ef2d89", "tr": "Atalar kutusunu kaybetmeyi göze alamayız kaptan!"}
+{"key": "cb400010bcd4c719", "tr": "Bak, kaptan! Buzu yarıyor!"}
+{"key": "d90b6eb5c3a00814", "tr": "Görünen o ki böyle bir koçbaşına sahip olan bir tek sen değilsin Shay."}
+{"key": "13c428d9eefb53e3", "tr": "Umarım bizimki de en az onunki kadar iyi iş görür."}
+{"key": "5aeed908e3574271", "tr": "İşe yaradı! Yol temiz!"}
+{"key": "56f66523f991573d", "tr": "Şansın yine yaver gitti. Ama kendini tebrik ederek vakit kaybetme. Smith kaçıyor."}
+{"key": "8c21b52dec0e09d0", "tr": "Envoyez ces diables en enfer! Smith kaçmamalı!"}
+{"key": "9ae4e52f4b30d6d8", "tr": "Smith'in gemisini göremiyorum!"}
+{"key": "66480557244980b9", "tr": "Önce şu angaryalardan kurtulalım. Onu buluruz."}
+{"key": "0077027847b4f99f", "tr": "İşte Smith! Yine hareket ediyor!"}
+{"key": "7dc5ff20d02ccb28", "tr": "Şüphesiz mahvoluşunu izlemeyi umuyordu."}
+{"key": "984165f1adfe7514", "tr": "Onu hayal kırıklığına uğrattığıma memnun oldum. Ve hâlâ menzilimizde."}
+{"key": "63ac4cc101ed96ea", "tr": "Bu ne lanet bir şey?"}
+{"key": "39bfe6fe2554b0f9", "tr": "Başka bir Tapınakçı taktiği. Okyanusun koca bölümlerini alevleriyle kaplayabilirler."}
+{"key": "4f7d9cba7bc7c227", "tr": "Dikkat et Shay. Kül olabiliriz."}
+{"key": "4473537ebf991575", "tr": "Bu sadece son çare yapılan umutsuz hamlelerden başka bir şey değil. Onu köşeye sıkıştırdığımızı biliyor."}
+{"key": "49a1679e7495c0c1", "tr": "Ve şimdi nereye gittiğini biliyoruz. Ulanın burada bir kampı var."}
+{"key": "c2b071dbc0cdf342", "tr": "Onu karadan takip edin! O kıymetli kutunun yakınında geminin silahlarını ateşlemeyi aklınızdan bile geçirmeyin!"}
+{"key": "b230c92d84c9cb2a", "tr": "Bunu hallederim."}
+{"key": "c0ea7ef723027a85", "tr": "Sonun bu olacak Suikastçi! Bunun için pişman olacaksın! Ne yaptığını bir düşün Suikastçi! Kardeşliğin seni kullanıyor!"}
+{"key": "cd28c0cab68450cb", "tr": "Öldürün onu! Biri durdursun şunu! Ne duruyorsunuz? Bitirin işini!"}
+{"key": "19c37a32b712dc9d", "tr": "Bu olamaz... Hayır! Bunun ne olduğunu biliyor musun bile?"}
+{"key": "cc2ccdde08fe3088", "tr": "Kadim bir eser, Önce Gelenler'den kalma bir hazine."}
+{"key": "54602ac8d66162b2", "tr": "Evet... Önemi yok... Bütün Avrupa'nın en büyük bilim insanları bile... bunu... çalıştıramadı..."}
+{"key": "77dda35a58d375db", "tr": "Şimdi tek ihtiyacım olan El Yazması ve her şey gün yüzüne çıkacak."}
+{"key": "c41f68f0fb4c6a01", "tr": "Korsanlar! Bulduk onları kaptan!"}
+{"key": "cf3720fabab268ca", "tr": "Daha ılık iklimlerde kalmalıydılar. Savaşa hazırlanın! İşte geliyorlar! Yanlardan kuşatmalarına izin vermeyin!"}
+{"key": "b1152a130711c3ea", "tr": "Aferin beyler! Ama ikinci gemiye dikkat edin, yoldaşının intikamını almaya çalışacaktır."}
+{"key": "d80a1ae0091491e1", "tr": "Aynen efendim! Oldukça sinirli görünüyor."}
+{"key": "0cc90166031ae108", "tr": "Yolundan çekilin! Parçaya bölüneceğiz!"}
+{"key": "ff1f97b08868d984", "tr": "Versay Kraliyet Sarayı... On Altıncı Louis ve Marie Antoinette ikamet ediyor."}
+{"key": "72ea0399ea681805", "tr": "Ne büyük bir görgüsüzlük."}
+{"key": "27f026d046c6724f", "tr": "İyi şanslar, sersefil."}
+{"key": "b825f0d06dee5a6f", "tr": "Ah, Shay. Krallığın karşısına çıkmaya kesinlikle hazır görünüyorsun! Belki de Kral Louis'nin kendisi seni kabul eder."}
+{"key": "39d4be09a66575bb", "tr": "Bu pantolonun bile beni kralın odalarına sokacağından şüpheliyim. Zaten buraya sadece iş icabı biriyle görüşmeye geldim."}
+{"key": "ffa72c1fbb721bf6", "tr": "Evet, bugün burada bir grup tüccar olacağını duymuştum. Belki daha sonra bilimsel gösterimi izlemeye gelirler!"}
+{"key": "20f85b158394af73", "tr": "Gerçekten gelmeliler, belki bir şey öğrenirler. Orada olacaklarına çok güvenmesem de. İzninizle Master Franklin. Tekrar teşekkürler."}
+{"key": "3b6b20648e76081b", "tr": "Şimdi Charles'ı bulma zamanı... ve o lanet kutuyu."}
+{"key": "4c21675ce52ab62a", "tr": "İşte o! Charles Dorian."}
+{"key": "185f964149b82570", "tr": "Üzgünüm efendim, saray şu an ziyaretçilere kapalı. Lütfen yarın gelin."}
+{"key": "bc465c870ef1cf6c", "tr": "Ama şu an bir toplantıda olmam gerekiyordu."}
+{"key": "900a42540df590b7", "tr": "O halde çoktan içeride olmalıydın. Geri gel ve yününü yarın sat."}
+{"key": "9cc4577d6a3d0071", "tr": "Onun şansına, içeri girmenin başka bir yolunu bulabilirim."}
+{"key": "6d012720ae935f29", "tr": "Elmalarını çalarken yüzlerini gördün mü?"}
+{"key": "41bbb964070ad937", "tr": "Ben Arno."}
+{"key": "3f122fd6ff97ebdc", "tr": "Élise."}
+{"key": "3db80a584dc255e6", "tr": "Babamla geldim buraya."}
+{"key": "5d0f8e0b629b2c62", "tr": "Ben de öyle. Kral ile önemli işleri var."}
+{"key": "17f5357280f7a3b1", "tr": "Şimdi ne yapacağız?"}
+{"key": "23aa57f4d4539554", "tr": "Beyler, bu eseri hayatım pahasına koruyacağım. Arno? Nereye kayboldun? Oğlum, Arno... Belki onu görmüşsündür? Etrafta küçük bir oğlan çocuk gördün mü? Oğlumu arıyorum. Arno! Neredesin? Arno? Arno? Oyunu bırak, Arno. Artık dışarı çıkma vakti."}
+{"key": "6880e3384647b656", "tr": "Seni! Sen hainsin."}
+{"key": "f32c3f84848ac388", "tr": "Sadece eski işimi bitiriyorum."}
+{"key": "d3b53467f1c85a71", "tr": "Eski... Connor ve Suikastçıları... Amerikan Devrimi Tapınakçı işini altüst etti."}
+{"key": "8b8d4bcd267b8a9e", "tr": "O halde belki de kendi devrimimizi başlatırız."}
+{"key": "e721469c646fd2c5", "tr": "Tarikatımızın ilkelerinin ve savunduğumuz her şeyin arkasında duracağız. Sırlarımızı asla paylaşmayacak, işimizin gerçek doğasını ele vermeyeceğiz. Ölüm pahasına da olsa böyle yapacağız. Bu benim yeni inancım. Ben Shay Patrick Cormac, Sömürge... Amerikalı tarikatın Tapınakçısıyım. Artık daha yaşlıyım ve belki de daha bilge. Bir savaş ve bir devrim bitti, bir diğeri başlamak üzere. Anlayışın Babası hepimize rehberlik etsin."}
+{"key": "2ae5aef70e88c4fc", "tr": "Bu da ne?"}
+{"key": "6ff353b3c40ed4c8", "tr": "Anılarda bir aksaklık... Daha fazla veri var gibi görünüyor. Tamam sersefil, seni şimdilik koltuktan çekip çıkaramam. Bunu sonuna kadar izlemek zorundasın... Bu çok tuhaf... Bu anılar gördüğümüzden yaklaşık 20 yıl sonra gerçekleşiyor gibi."}
+{"key": "7caec9c089324650", "tr": "Emin misin?"}
+{"key": "2ff1d68bddb2af2a", "tr": "Kesinlikle. Bu şu demek... Shay o düşüşten sağ kurtulmuş olmalı!"}
+{"key": "7fd56e1d4b737a90", "tr": "Eğer sandığım adamsa, demek... Devam et."}
+{"key": "76c789c3a90a41b3", "tr": "Veriler parçalanmış... Bu anı eksik... Ne yapabileceğime bir bakayım. Dinle beni. Shay'in neyin peşinde olduğunu bulmalıyız. Bu anı biraz bozuk görünecek ama bu anıyı sıralamanın seni öldürmeyeceğinden yüzde doksan eminim."}
+{"key": "78b643018ae524fb", "tr": "Pekala sersefil, Shay'in nerede olduğunu ya da orada ne yaptığını bilmiyoruz. O yüzden gözün ve kulağın açık olsun."}
+{"key": "b59f43c06ef8f9b8", "tr": "Shay'in bu yere gelme sebebini bilmek istiyorum."}
+{"key": "4ff1a5d16987d744", "tr": "Adamı duydun. Hadi hareket!"}
+{"key": "ce38f74ec458332b", "tr": "Öyle mi? Buldunuz mu onu?"}
+{"key": "150569a5aac4c2d3", "tr": "Evet, Benjamin Franklin Notre-Dame'da. Elimizi çabuk tutarsak yakalayabiliriz."}
+{"key": "d0966e7a34107fac", "tr": "Kendi ellerinizle oynamayı bırakın! Hadi gidelim!"}
+{"key": "92c7b0179c4a869c", "tr": "Benjamin Franklin... Shay'in peşinde olduğu kişi bu."}
+{"key": "0840207c39da6d7f", "tr": "Franklin İngiltere ve Fransa'ya seyahat etmişti. Ve o adam Notre-Dame dedi... Shay Paris'te olmalı! Şimdi bana ne olduğunu göster!"}
+{"key": "e62134de3b8b3598", "tr": "Tehdidi ortadan kaldırın. Franklin'i koruyun."}
+{"key": "4fc633ea45ff0a40", "tr": "İşte burada! Yakalayın şunu!"}
+{"key": "8f2b2f963b881f62", "tr": "İmdat! Biri yardım etsin!"}
+{"key": "6f623bbd52c02713", "tr": "Bu sefer elimizden kaçamayacak!"}
+{"key": "85fc17f7069acd39", "tr": "Siktir!"}
+{"key": "bc3f7f7fd709c907", "tr": "Ne oldu?"}
+{"key": "ce54f596af737ecc", "tr": "Elimizdeki tüm veri bu. Bu anıyı daha fazla inceleyemiyoruz... şimdilik. Shay ölüp de yirmi yıl sonra Fransa'da ortaya çıkmış olamaz. Bir şeyi kaçırıyoruz. Shay'in anıları Bulut'un her yanında parçalar halinde saçılmış durumda, virüs yüzünden sunucular bozuldu, bu yüzden Shay'in hayatının tamamına aynı anda erişemeyiz."}
+{"key": "c72a6694f177474e", "tr": "Kahretsin! Burada ne oldu böyle?"}
+{"key": "03c6027ddfcbcfa0", "tr": "Kesegowaase!"}
+{"key": "67be70133facddea", "tr": "Demek çok geç kaldık."}
+{"key": "cfbfb3faede766bd", "tr": "Hayır. Fort Frederick yakınlarda, Albay'ın onu tutabileceğinden eminim."}
+{"key": "092e7aa8fe01bc42", "tr": "Kaptan'ı duydunuz çocuklar! Acele edin!"}
+{"key": "4a884fc37395b4b3", "tr": "Ben yokken ona iyi bak, Gist."}
+{"key": "35e48f7fe9467844", "tr": "Dışarı çıkın!"}
+{"key": "2efd4214c3496232", "tr": "Burası benim evim! Kalıyorum!"}
+{"key": "f1325b90bee3a4c0", "tr": "Çıkın çıkın, neredesiniz?"}
+{"key": "5ef395396bd1711b", "tr": "O hayır, içeride kalıyorum... Albay Monro'nun dediği gibi. Evet efendim... dediği gibi."}
+{"key": "ffe6282d0553383c", "tr": "Burada ne arıyorsun sen?"}
+{"key": "a1c6f3e96e1b8380", "tr": "Kaleye gitmeliydim..."}
+{"key": "001ac3c0237e0030", "tr": "Nereye gittiğini sanıyorsun sen?"}
+{"key": "d3bbcada16e9236f", "tr": "Uzak dur benden!"}
+{"key": "293e14e6b5ca7bb6", "tr": "İşte bu kadar, çocuklar! İçeri, çabuk! Saldırın! Salldııııııırın! Rrrrraaaahh! AAAaaaaaahhhhh! Mwrrrraaaaaah!!"}
+{"key": "6e4304a2ff4f61f2", "tr": "Şu gediği barikatla kapatın!"}
+{"key": "c42e6c40349cbbba", "tr": "Emredersiniz komutanım!"}
+{"key": "288977e2d2dfb69e", "tr": "Daha fazla girmelerine izin vermeyin! Saldırın! Saldırın!"}
+{"key": "a7ffc98b1ad6a8f7", "tr": "Daha fazla mühimmat, komutanım!"}
+{"key": "80a3e77fedeb2e47", "tr": "Güney duvarını takviye edin!"}
+{"key": "61be19f428a2303b", "tr": "Serbest atış!"}
+{"key": "c3a9314d96fad23f", "tr": "Her yerdeler!"}
+{"key": "41e726cbae531fdc", "tr": "Pozisyonlarınızı alın!"}
+{"key": "63b3a4347d58c28a", "tr": "Bu Kesegowaase'in işi, değil mi?"}
+{"key": "53648362223260a8", "tr": "Öyle olduğuna inanıyorum ama o iblisi henüz görmedim."}
+{"key": "a74116c53aa14615", "tr": "El Yazması. Sen..."}
+{"key": "ca41297af1e8ba57", "tr": "Onu koru. Morrigan'a götür. Bu bir emirdir."}
+{"key": "69ec21bd8bef108a", "tr": "Bana emir verecek sen kimsin? Rütbem seninkinden yüksek."}
+{"key": "5252c2e534d339d0", "tr": "Ben senin ordunun bir parçası değilim, Albay. Sen dönene kadar savunmayla ben ilgileneceğim."}
+{"key": "ffc7fdb96c43ec1c", "tr": "Yan! Tapınakçı köpeği! Beni yenebileceğine gerçekten inanıyor musun, hain?"}
+{"key": "ebb79989a626458d", "tr": "Seni biz iyi eğittik... hain."}
+{"key": "0de3a0cfc6772308", "tr": "Kesegowaase... Böyle olmak zorunda değildi."}
+{"key": "a0bbd0c796094a61", "tr": "Zorundaydı. Sen bir düşmansın. Achilles senin öldüğünü görecek."}
+{"key": "5f3dabfc9db9f714", "tr": "Yaptığı şey yanlış!"}
+{"key": "0fbce35ab5617f84", "tr": "Yargılamak sana mı kaldı? Tapınakçılar başarısız olacak. Sen başarısız olacaksın. Monro... çoktan... öldü."}
+{"key": "f73137d930c31d18", "tr": "Liam..."}
+{"key": "f747a5ca772148b1", "tr": "Argh!"}
+{"key": "ef5abbbb5ecac2ff", "tr": "Albay rıhtımlara doğru gidiyordu!"}
+{"key": "1848bc3e63d80843", "tr": "Baltalı koca bir adam Albay'ı kovalıyordu!"}
+{"key": "8c73e30ac98c8d0d", "tr": "Yangın yayılmadan alevleri söndürün! Albay! İçeride mahsur kaldı! Yardım edin! Albay'ı kurtarın!"}
+{"key": "3daf14f4ff303d57", "tr": "El Yazması... Bir Suikastçı onu aldı..."}
+{"key": "3ac0bd53c0a1fe65", "tr": "Liam. Onu geri alacağım. Yemin ederim!"}
+{"key": "770d8c7d9f18e77e", "tr": "Tarikatımızın ilkelerini ve savunduğumuz her şeyi korumaya yemin eder misin?"}
+{"key": "e346798207f9484d", "tr": "Ediyorum."}
+{"key": "63359b7118a00cf2", "tr": "Sırlarımızı asla paylaşmamaya ve işimizin gerçek doğasını ifşa etmemeye yemin eder misin?"}
+{"key": "ce18acfa9375d110", "tr": "Ve bunu şimdiye kadar ve ölüme kadar yapmaya... bedeli ne olursa olsun?"}
+{"key": "a764ae59a8c9bcbc", "tr": "O halde seni aramıza kabul ediyoruz, kardeş. Artık bir Tapınakçısın, Yeni Dünya'nın müjdecisisin. Anlayış Babası bize yol göstersin."}
+{"key": "1b4a91c675c83f05", "tr": "Anlayış Babası bize yol göstersin."}
+{"key": "e08d32fa13a2896d", "tr": "İşte orada, kaptan! Fırtına Kalesi!"}
+{"key": "d9ec77e52fba1b31", "tr": "Söylentiler gerçeği abartmıyormuş. Tam bir dev."}
+{"key": "1da140a07ecfeee4", "tr": "Havan toplarıyla ateş ediyor, kaptan!"}
+{"key": "c433d54c566dabc8", "tr": "Onu indirmek istiyorsak canavara daha fazla yaklaşmalıyız!"}
+{"key": "668ab844ddd29d6d", "tr": "Bordasından gelen atışlardan kaçınmalıyız, kaptan! Orada çok fazla gücü var!"}
+{"key": "cc4238a4e91bab6d", "tr": "Tanrım! İstilaya uğrayacağız!"}
+{"key": "44c7f22a3cb46191", "tr": "Zorlukları daha önce de yendik, Gist. Yine yeneceğiz."}
+{"key": "95ef9e2d6251bc59", "tr": "Bu fırtınada savaşmak delilik! Dostu düşmandan ayıramıyorum!"}
+{"key": "cce70a24f8da097d", "tr": "Onlar da ayıramıyor. Şansımız varsa birbirlerini yok ederler."}
+{"key": "1994e8664b90e6dd", "tr": "Nereye?"}
+{"key": "0225b6d1a0ae12a5", "tr": "Tapınakçı işleri bizi nereye götürürse."}
+{"key": "0ceb03db5fa4ee47", "tr": "Liam, plansız yola çıkmak sana göre değil."}
+{"key": "d5f214fe9523b9e4", "tr": "Planlı ya da plansız, kendi savaş alanımızı biz seçeriz. Hem hey, denizdeyken en rahat halimiz değil miyiz?"}
+{"key": "ed62aab3f7564971", "tr": "Haklısın. Hadi yelken açalım."}
+{"key": "ace9b134a3e9ddab", "tr": "Elimizde tek bir ipucu var, Shay. Umarız bizi eserlere yaklaştırır."}
+{"key": "6b575c6a200bfcea", "tr": "Yani Achilles bu görev için seni mi görevlendirdi?"}
+{"key": "b240e0cb0f580764", "tr": "Hayır. Seni görevlendirmem için beni görevlendirdi. Mackandal'dan çalınanı bulmalısın, Shay. Öncü kutusunu ve El Yazması'nı geri almalısın. Bu senin görevin."}
+{"key": "4ae4c0e83d461c14", "tr": "Peki ya seninki ne?"}
+{"key": "6663ea5288b2c4bd", "tr": "Kıçını kolla."}
+{"key": "358d12500c397ab3", "tr": "Achilles bana pek güvenmiyor, değil mi?"}
+{"key": "81ea2898628934a8", "tr": "Zaman ver, Shay. Bunu onun için, bizim için yap ve güvenini kazanmaktan çok daha fazlasını yapacaksın."}
+{"key": "d765f6873915b291", "tr": "Liam, Achilles'in ne hakkında yazdığını biliyor musun? Onu ofisinde sürekli kağıtlarına eğilmiş halde görüyorum."}
+{"key": "6f301cede1376083", "tr": "Kayıtlar ve hesaplar tutuyor, Cennet Parçaları hakkında bilinen az şeyi inceliyor... Ve tabii ki diğer kıtalardaki Suikastçılarla yazışıyor."}
+{"key": "faa0f6e74e4fc71c", "tr": "Tabii ki mi? Liam, herkesin senin bildiklerini bildiğini varsayma konusunda tam bir eşek olabiliyorsun."}
+{"key": "1099b9378a899965", "tr": "Achilles Avrupa'daki ve başka yerlerdeki mevkidaşlarımıza aşina olmamı istiyorsa elimden bir şey gelmez."}
+{"key": "0e97129f297d5790", "tr": "En sevdiği evladı gibi konuşuyorsun."}
+{"key": "5d2bc980b4c56ed2", "tr": "Connor onun gözbebeği ve tek evladı."}
+{"key": "b9be2fd3e79e3e25", "tr": "O halde Achilles'in varisisin. Malikaneyi Connor miras alabilir ama sen Üstat olacaksın."}
+{"key": "dde50da71db310d8", "tr": "Bakarız."}
+{"key": "b400174fff7e462f", "tr": "Ne dersin de buyur, Suikastçıların Veliaht Prensi."}
+{"key": "ff2b4885d0523ccb", "tr": "Bana bir daha öyle dersen seni okyanusa atarım!"}
+{"key": "e01eeb9b0343d9a7", "tr": "İnan bana, o ıstakozları Fransa'da yok satacaksın. Ah, lahana çiftçisi de teşrif etti. Tam vaktinde. Merak edilen el yazmasıyla ilgili bir ipucumuz var."}
+{"key": "001b2842f3a4becd", "tr": "Onu okuyabileceğinden şüpheliyim."}
+{"key": "08999ab9dfc4ea39", "tr": "Kimse okuyamaz, seni aptal. Tapınakçıların bu kadar uzun sürmesinin sebebi bu zaten. Ama müttefiklerimizden biri çalışmalarına şöyle bir göz atmış."}
+{"key": "6e68fcd6b7393c2e", "tr": "Bir korsan mı?"}
+{"key": "119c09a05df09b33", "tr": "Korsanlarla çalışan bir casus. Anticosti'ye yelken açıyoruz. Yüzen lağım çukuru dediğin o gemi için iyi bir sınav olacak."}
+{"key": "094e84388274f951", "tr": "Korsanlar ne kadar güvenilir?"}
+{"key": "3e36e6adec8960f7", "tr": "Onları birer kardeş olarak görüyorum, Shay. Zamanı geldiğinde bize destek olacaklar ve Tapınakçılarla savaşmamıza yardım edecekler. Bir de Rosbifler Tapınakçıların iplerini elinde tuttuğunu bir anlayabilseydi."}
+{"key": "8863b82cb46eac8d", "tr": "Tapınakçılar Kolonilerde gerçekten kontrolü ele mi geçirdi?"}
+{"key": "beaaf78da849f653", "tr": "Tam olarak değil ama nüfuzları dört bir yana uzanıyor."}
+{"key": "aeac20419d4bee31", "tr": "Peki ya buluşacağımız casus?"}
+{"key": "1ed321d32332456c", "tr": "Le Chasseur hakkında endişelenmene gerek yok. Kardeşliğe sadıktır. Hem bakarsın, hem Fransız hem de İngiliz donanmalarında \"arkadaşları\" da vardır ve buralarda dönen dolaplar hakkında senin öğrenmeyi umabileceğinden çok daha fazlasını bilir."}
+{"key": "c15d9c24e51a0f50", "tr": "Söyle bakalım Liam, bana Adéwalé hakkında ne anlatabilirsin? Adamı bariz bir şekilde takdir ediyorsun."}
+{"key": "d3f2f13f42e4efcf", "tr": "Aynen öyle. Onunla bir kez çalışmak onuruna erişmiştim. Davamız için o kadar çok şey yapmış başka kimseyi tanımadım... ama bundan çok daha fazlası var."}
+{"key": "0db08355c1e01b86", "tr": "Adéwalé Kardeşliğe katılmadan önce bile bir efsaneydi. O bir korsandı; Batı Hint Adaları'nın baş belası! Sakallı Ejder, Woodes Rogers ve Calico Jack Rackham gibi isimlerle düşüp kalkmıştı."}
+{"key": "30f7ef5057490124", "tr": "Calico kim?"}
+{"key": "96d55dab9a51b7b2", "tr": "Ah, bir kitap oku, olur mu?"}
+{"key": "3fdb7b9a565fadde", "tr": "Yaklaşık 20 yıl önce Adéwalé bir Tapınakçı konvoyunun önünü kesip gizemli bir paket çalmıştı. Port-au-Prince'e gitmiş ve paketi davamıza sadık olduğuna inandığı bir kadına emanet etmişti."}
+{"key": "b4b86498c0ff0c06", "tr": "Tahmin edeyim, sadık değilmiş mi?"}
+{"key": "10455c459a6136aa", "tr": "Ah, sadıktı. Hem de nasıl. Paket sonunda Haiti Kardeşliği'nin Üstat'ı François Mackandal'ın eline geçti."}
+{"key": "7590c181fe5177d6", "tr": "Nedir o? Paketten bahsediyorum."}
+{"key": "99a8d6c83f21a1b2", "tr": "Peşinde olduğumuz kutunun ta kendisi. Bu teknenin nelere kadir olduğu hakkında hâlâ pek bir şey bilmiyoruz. Neden Morrigan'ı kendi denginde bir avla sınamıyoruz ki?"}
+{"key": "32396a434c03be01", "tr": "Düzgün ateş edip edemediğimi test etmek istiyorsun sadece, değil mi okul müdürü?"}
+{"key": "0ea25f17c8e76df4", "tr": "Şartlar uyuyorsa..."}
+{"key": "48a15403d9eaf476", "tr": "İşte, Kaptan! Bir İngiliz gemisi ve başı belada gibi görünüyor."}
+{"key": "1db46f3426a50906", "tr": "Çok da iyi olmuş. Belki de denizin dibine yaptığı yolculuğa yardım etmeliyiz."}
+{"key": "50c888c518d7b57d", "tr": "Çok acele etmeyelim. Kraliyet kargosuyla dolu. Dürbününle bir bak, kendi gözlerinle gör."}
+{"key": "08a22ecfc3e86fec", "tr": "Güzel manzara. Kral George'un ceplerini hafifletmek için harika bir gün derim."}
+{"key": "730284b4a84a2ece", "tr": "Dikkatli ol. Birkaç atış onu sakatlamaya yeter. Fazla hasar alırsa bütün mürettebatla birlikte suya gömülür. Ve bütün ganimetle birlikte."}
+{"key": "ba762a3407dc83ad", "tr": "Mürettebat neye uğradığını şaşırmadan gemiye çıkıp yağmalayabiliriz."}
+{"key": "d88aade07f93be83", "tr": "Kaptan, ateş etmeyi kes! Batırmak istemiyoruz! Vakti geldi, gemiye biniyoruz! Günlerini göster onlara, Kaptan!"}
+{"key": "2787440a942dc4cf", "tr": "Hadi bakalım aslanlar! Ganimet bizimdir! Morrigan için!"}
+{"key": "8f83507429aecdcb", "tr": "Burayla Anticosti arasındaki denizler haşindir, Kaptan. Daha ileri gitmeden önce Morrigan'ı güçlendirmeliyiz. Yakınlarda bir liman başkanı var. Yeni servetimizi geliştirmelere harcayabiliriz."}
+{"key": "4538a89dc49d7b3c", "tr": "Haiti'de bir Kardeşlik olduğunu bilmiyordum."}
+{"key": "9fea32bcdc29bf25", "tr": "Evet, François Mackandal onların üstadı. Suikastçılarının çoğunu Maroonlar arasından toplar."}
+{"key": "73773d4e00b36067", "tr": "Kaçak köleler ve çocukları yani, değil mi?"}
+{"key": "e782cbe83ff4f381", "tr": "Öyleler. Yine de yazık. Korkunç şartlardan kaçıp o depremde öldüler."}
+{"key": "46115982504816b5", "tr": "Ama... Haiti bir Fransa sömürgesi, değil mi?"}
+{"key": "1473759aef9eb5f3", "tr": "Öyle, öyle."}
+{"key": "2039e456d9c42039", "tr": "Ve burada Suikastçılar Kral Louis'ye yardım ediyor. Ama Haiti'de Fransızlar, Suikastçılar tarafından serbest bırakılan kölelerin sahibi."}
+{"key": "ad4d8ef946d2eef0", "tr": "Bizim mücadelemiz siyasi sınırların ötesindedir, Shay. Anticosti çok uzakta olmamalı. Bizi rotada tut, Kaptan."}
+{"key": "accecf9984fc63d0", "tr": "Yeri burası mı? Balıkçılardan ve takımlarından başka bir şey görmüyorum."}
+{"key": "04e9966f866b86ef", "tr": "Aynen, Percé ve balıkçılık at başı gider ama işimizi fazlasıyla görür. Bu sularda ilk balık avlayanlar Fransızlardı ama Kral George her geçen yıl daha fazlasında hak iddia ediyor. Yerliler arada derede kaldı."}
+{"key": "54303be3b9f996f0", "tr": "Biraz altın alsan iyi olur. Boş cüzdanla pazarlık yapmak seni çok uzağa götürmez."}
+{"key": "a57ad6dd945ca520", "tr": "Anticosti rotamıza devam etmeliyiz, Kaptan."}
+{"key": "a10b5c9847f2f5c7", "tr": "Kesinlikle. Le Chasseur bizi bekliyor."}
+{"key": "4c78e47dbb657491", "tr": "Burayla Anticosti arasındaki denizler haşindir, Kaptan ama Morrigan bu meydan okuma için yeterince sağlam görünüyor."}
+{"key": "6ff298b412d71d48", "tr": "Gemi var, gemi!"}
+{"key": "c916d7ae1cd430ec", "tr": "Percé'den daha fazla balıkçı."}
+{"key": "680075d56d90ebb0", "tr": "Düşman gemileri!"}
+{"key": "d357479abd4e0b9d", "tr": "Balıkçı teknesini batırıyorlar!"}
+{"key": "89331b24c78dcf1a", "tr": "O balıkçıların kendi sularına saptığına inanıyor olmalılar."}
+{"key": "5691d5bdfc98799d", "tr": "Bu korkaklar bedelini ödemeli!"}
+{"key": "2c00ad76fc500ae7", "tr": "Şuna bir baksana, tam Anticosti yolumuzun üstünde duruyorlar. Ne dersin, her birini dibe gönderelim mi?"}
+{"key": "2147a42867021833", "tr": "İlk defa seninle aynı fikirdeyim, Shay."}
+{"key": "c83fab08626b43aa", "tr": "Daha garip şeyler de oldu."}
+{"key": "577f5946d443fa9d", "tr": "O halde devam edelim. Artık Anticosti Adası'na çok uzak değiliz."}
+{"key": "6af2e1c77cef3b00", "tr": "Casus arkadaşımız bizi bekliyor olacak mı?"}
+{"key": "66ee374cd3b82529", "tr": "Evet. Umarım Le Chasseur'ün El Yazması hakkında daha fazla bilgisi vardır."}
+{"key": "479ba4ed617b98b1", "tr": "Belki de her şeyi bizim için çözmüştür."}
+{"key": "0afe363ae58f25b1", "tr": "Belki de ben Roma İmparatoruyum."}
+{"key": "0e44c7461149948a", "tr": "Selam, Sezar! Deniz havası, açık gökyüzü... Okyanustaki bir adam kadar özgür olamaz hiç kimse. Ne dersin, Liam?"}
+{"key": "80978a936ffe25f3", "tr": "Burada bir sebepten bulunuyoruz, Shay. İşine bak."}
+{"key": "4ace4f0024e4d6cd", "tr": "İçine derin bir nefes çekip tadını çıkaramayacaksan özgürlüğün ne anlamı var ki?"}
+{"key": "303b92940cce5718", "tr": "Tapınakçılar bu kıtaya katran gibi yapışmış durumda. Onları söküp atana kadar rahat etmeyeceğim."}
+{"key": "3bc20c71c46d57f7", "tr": "Bana öyle geliyor ki etrafta sinsi sinsi dolaşmak yerine onlarla erkekçe konuşmalıyız."}
+{"key": "4b57276703752060", "tr": "Ve onlar postallarını boynuna bastırırken gülümseyip iyi günler de diler misin?"}
+{"key": "05704b64fd061651", "tr": "Elbette hayır."}
+{"key": "f806e331c170b43c", "tr": "Onlar dünyayı ve içindeki herkesi kontrol etmek isteyen katil piçler. Bunu asla unutma."}
+{"key": "cddbc705972b6ce9", "tr": "Ve bizim bununla hiçbir ortak yönümüz yok, tabii ki."}
+{"key": "862e3037ffd089bf", "tr": "İşte orada. Anticosti. Le Chasseur orada olmalı... Ve biraz şansımız varsa o El Yazması'nı nerede bulacağımızı biliyordur."}
+{"key": "14651ca735b3709d", "tr": "Gemiyi buraya demirle, Kaptan. Anticosti Adası'na vardık."}
+{"key": "5471249511f8bd66", "tr": "Önden git, Shay. Sizinle kaljede buluşacağız."}
+{"key": "3584ac6f29aa776d", "tr": "Buradaki rom berbat!"}
+{"key": "68446aa6f047ca0a", "tr": "Bakayım... Bu rom değil, hayat suyu bu!"}
+{"key": "e0d7ede168b8c2b2", "tr": "Şeytan bunun neresinde?"}
+{"key": "c60aac4fce685ecd", "tr": "Viski."}
+{"key": "dd3bb604cd1d5fdc", "tr": "Şey, buradaki viski de berbat."}
+{"key": "7e7e036a7a57d539", "tr": "Marie'yi özledim. Onun gibi sadık ve iyi bir kalbi bulmak zor."}
+{"key": "dbb10b0a24d8b66d", "tr": "Onunla nerede tanıştın?"}
+{"key": "dd16f6fa14574e7d", "tr": "Üçüncü düğününde. Ziyafete sızmıştım."}
+{"key": "030771b474521c32", "tr": "Desene sadece ziyafete sızmamışsın!"}
+{"key": "0286168a90b6c248", "tr": "Neden ortalıkta bu kadar Kraliyet Donanması gemisi var acep?"}
+{"key": "03539d5125ee4d82", "tr": "Sanırım onlara meydan okuyacak daha çok Fransız gemisi olduğu için."}
+{"key": "558d5614b83cdbf3", "tr": "Sence kimin daha çok gemisi vardır?"}
+{"key": "db2465843c827559", "tr": "İngilizlerin, kesinlikle. Ama çok dağınıklar."}
+{"key": "2e69c2eb156e2adb", "tr": "İspanyollardan daha mı çoklar peki?"}
+{"key": "1e87bd618df8303d", "tr": "Söylemesi zor. Ama İspanyollar güneyde kalıyor. Burası onlar için çok soğuk."}
+{"key": "f1e2ff8bb3cb972d", "tr": "Onları suçlayamam doğrusu."}
+{"key": "d3b2d32ffb217fb6", "tr": "Vay Beelzebub'un taşakları adına, o duvara ne olmuş öyle? Sanki biri top atışı yapmış."}
+{"key": "9fbc2275548c386c", "tr": "Donmuş topraktan taş kazmaktan nefret ediyorum. Onarmak asırlar sürecek."}
+{"key": "11dd2bc5d17c5c03", "tr": "Demek öyle, Louis-Joseph, kürk ticareti nasıl gidiyor?"}
+{"key": "bbabfba28d778feb", "tr": "Ailemizin tabağına et koyacak kadar iyi değil."}
+{"key": "29e3e67ab806cd93", "tr": "Eğer et istiyorsan, daha fazla İngiliz yelkenlisine baskın yap. Fıçı dolusu taşıyorlar!"}
+{"key": "0c3afbafdadea8db", "tr": "Öyle ya, İrlanda'daki çiftlikleri bolca et veriyor, değil mi? Oh ne ala yönetim, yerlilerin yapabileceğinden çok daha iyi."}
+{"key": "bb4df0a7f0bfcb21", "tr": "Şuna bir bak. Bu planları bir Kraliyet Donanması savaş gemisinden \"ödünç aldım\". Daha önce gördüğüm hiçbir şeye benzemiyorlar."}
+{"key": "0171fb44f58ca6ab", "tr": "İyi! Daha güçlü silahlar işimize yarar. Le Chasseur, seni müttefikimiz Shay Cormac'la tanıştırayım."}
+{"key": "4e76f819a4db7dc1", "tr": "Beyler, bir haberim var... Aradığınız El Yazması'nı aynı gemide gördüm. Tanımadığım egzotik bir dille yazılmıştı ve çizimlerle doluydu. Bir afyon rüyasından fırlamış bitkiler ve hayvanlar."}
+{"key": "00092008fbcf4070", "tr": "Hiç harita yok muydu? Hayır, hayır... hiç harita yok muydu?"}
+{"key": "ff7aede6b5eda05a", "tr": "Yoktu. Bir tür şifre olabilir ama ne ben ne de o İngilizler bir şey anlamadık."}
+{"key": "3295e8ed67e18c87", "tr": "El Yazması şimdi nerede?"}
+{"key": "c3b9bdf837da4654", "tr": "Onu getiren adam, Washington adında birinin kendisini gönderdiğini söyledi."}
+{"key": "6f6db6676938ca09", "tr": "Bu adı biliyorum, önemli bir Tapınakçı değil mi?"}
+{"key": "718ea21ce4f31d18", "tr": "Öyle, Lawrence Washington'ın Tapınakçıların gerçekleştirmesine yardım ettiği büyük hırsları var. Shay, geri dönüp onu bulalım. Sana da teşekkürler, bayım."}
+{"key": "79c43c41f96ef6bd", "tr": "Anladım. Shay Paris'te gayet iyi. Sana bir tarih bile buldum. 1776."}
+{"key": "0dbdec86813f1546", "tr": "Bu tarihte Franklin, Fransa'daki Amerikan büyükelçisiydi."}
+{"key": "0033bd2a66d1d283", "tr": "Bayanlar ve baylar, Bay Otso Berg: Profesyonel katil ve amatör tarihçi."}
+{"key": "c587a4c8bddee860", "tr": "Durun! Ne yapıyorsunuz? Benim sizinle bir alıp veremediğim yok!"}
+{"key": "fc7de0b6f1908243", "tr": "Seni kültürsüz domuz, bataklık sömürgeni terk etmemeliydin!"}
+{"key": "ba39c6f5eef1073a", "tr": "Evet, Boston'a geri dön!"}
+{"key": "ca0496e6d6e50b57", "tr": "Philadelphia, aslında..."}
+{"key": "288d155b3396d6e1", "tr": "Oh! Demek komedyen de aynı zamanda?"}
+{"key": "ace8a7af16bdbf59", "tr": "İmdat! İmdat!"}
+{"key": "4fff3e244be69070", "tr": "Shay, sen misin? Ne kadar oldu? Şey, nisan ayını unuttum. Teşekkürler dostum, teşekkürler! Ama... Paris'te ne arıyorsun?"}
+{"key": "ba4d24242e593786", "tr": "Tüm saygimla bayım, konuşmanın sırası değil. Hâlâ tehlikedesin."}
+{"key": "d793b6dd043f95fb", "tr": "Evet, ben... aileme dönmeliyim."}
+{"key": "e255f806fc75577c", "tr": "Ah, teşekkürler Shay. Lütfen, beni bekle. Sadece ailem güvende mi diye bakmak istiyorum."}
+{"key": "bf5fb10e04477699", "tr": "Nasıl... Nasıl yaptın bunu? Epey... şanslıydı."}
+{"key": "d6316bdefda9b754", "tr": "Kendi şansımı kendim yaratırım, Üstat Franklin. Tahmin edeceğin üzere."}
+{"key": "c37b02dfc452d24d", "tr": "Öyle doğrusu dostum. Yine de bugün yardımların olmasın... Şey, sana minnettarım Shay. Senin için yapabileceğim bir şey var mı? Bu... şey, kibarlığının karşılığını ödemek için?"}
+{"key": "e46251c09e55879f", "tr": "Aslında var. Bir iş... tanıdığıyla buluşmam lazım. Bundan iki gün sonra Versailles Sarayı'nda olacağını duymuştum."}
+{"key": "a5fbf3e2fdfc1cba", "tr": "Ve kraliyet sarayına herkesi öylece sokmuyorlar. Pekala. Ne yapılabilir bir bakarım."}
+{"key": "69849b29b0bea3e6", "tr": "Bıçağımı masumların etinden uzak tutacağım. Kalabalığın arasında saklanacağım. Suikastçi Kardeşliği'ni asla tehlikeye atmayacağım. İnancın ilkeleri bunlardır. Eskiden yaşadığım ilkeler. O zamanlar genç bir adamdım. Yedi Yıl Savaşı başlamak üzereydi. Geleceğin bana neler getireceğini hayal bile edemezdim... Ve ödemeyi seçeceğim bedeli de... Adım Shay Patrick Cormac. Bu benim hikayem..."}
+{"key": "0782483b4330dcb2", "tr": "Kabul et, neredeyse yakalıyordum seni!"}
+{"key": "4b3f9ce70fc443be", "tr": "Neredeyse demek hiçbir şey demek değildir, Shay. Hem ayrıca, hayır... bu sadece şanstı."}
+{"key": "84b1282b51646701", "tr": "Kendi şansımı kendim yaratırım, Liam."}
+{"key": "69a88afdf26e9f9f", "tr": "Ah, yıllardır bunu söylüyorsun ama elinde pek bir şey yok. Yoksa beladan kurtulmak için hepsini harcadın mı?"}
+{"key": "5bb81d530cb22184", "tr": "Şey biliyorsun, bela sürekli peşimden gelir."}
+{"key": "d0a51701335187d5", "tr": "Hadi geri dönelim. Gelin! Kaptan de la Vérendrye ve mürettebatı bir belaya bulaşmış olmalı. Kaçakçılarla buluşmanın hayra alamet olmayacağını kim bilirdi ki?"}
+{"key": "5d84c1c6f50fe8fe", "tr": "Hala neden burada ne yaptığımızı bana söyleyemediğini anlamıyorum."}
+{"key": "321e5e54af8c6968", "tr": "Çünkü Chevalier sana söylememeye karar verdi."}
+{"key": "2f8531d171345d59", "tr": "Arkadaş olduğumuzu sanıyorduk, Liam."}
+{"key": "c98231554cc07e44", "tr": "Öyleyiz ama bu iş meselesi. Seni ilgilendirmez, Shay. Sana çok mu hızlı geliyorum?"}
+{"key": "66b3f200908ea336", "tr": "Düşüp kendini incitirsin diye sadece seni gözetliyorum."}
+{"key": "fe01aa0a91636952", "tr": "Acele et! Chevalier'yi bekletmesek iyi olur."}
+{"key": "1625aea3d2c52222", "tr": "Siktir! Nerede bu amına koduğumun aptalları? Toparlanın beyler! Bu adadan bir çıkış yolu bulacağız. Yaralarınıza bakın, evlat."}
+{"key": "7849b3cdef0f5d19", "tr": "Sizi o— Siz ikiniz neredeydiniz lan?"}
+{"key": "9e30f46555515391", "tr": "Avlanmadaydık. Burada ne oldu?"}
+{"key": "507fb8beb8cb4622", "tr": "Adamlarım bazı İngiliz deniz köpeklerinin saldırısına uğradı!"}
+{"key": "952143eae523f0c0", "tr": "Kaptan Joseph, hani hep dediğin gibi onlarla tek başına dövüşemez miydin?"}
+{"key": "77b7d76a6e99833f", "tr": "O, Kaptanı Louis-Joseph Gaultier, Chevalier de la Vérendrye. Ve eğer herhangi bir eğitimin seni gerçek bir Suikastçi yapabileceğini düşünüyorsan hayal görüyorsun demektir. Bunun ne anlama geldiğini biliyor musun musun bari? Antik ve gururlu bir geleneğin sorumluluğunu taşımak demek. Mentor'una sorusuz sualsiz itaat etmek demek. İnsan ırkı için özgürlüğü başka nasıl garanti edeceğiz?"}
+{"key": "48f123d5bc071a43", "tr": "Güzel laflar bunlar Chevalier ama şu an pek özgür hissetmiyorum."}
+{"key": "7f56cbc8ff2a69a1", "tr": "O zaman biraz ders al, urgh!"}
+{"key": "65f4cb046babd961", "tr": "Gel, gel! Sana biraz görgü öğreteyim, velet. Bana böyle bir saygısızlık etmeye nasıl cüret edersin! Seni sorumsuz sefil! Seni aptal! Seni beyni çürümüş lahana çiftçisi!"}
+{"key": "81487f2141751a90", "tr": "Beyler, durun! Ortak bir düşmanımız var ve sanırım yakınlarda."}
+{"key": "8c2e987d2d8bb398", "tr": "Kraliyet Donanması gemime saldırdı ve adamlarımı kaçmaya zorladı! Mahsur kaldık ve daha da kötüsü, buluşmamız gereken kaçakçılar esir alındı."}
+{"key": "c7a86339579af053", "tr": "Shay ile ben o kaçakçıları kurtaracağız, sen de yaralılarınla ilgilen."}
+{"key": "b584a6db97624e46", "tr": "Bunları al, ihtiyacın olacak. Dikkatli bas, Shay. Kraliyet Donanması bizim için hazır olacaktır. Eğitimini hatırla."}
+{"key": "c9fa0f43b58dcb37", "tr": "Onlara ders vermeye hazır mısın?"}
+{"key": "8cafd6ea3b14c1ad", "tr": "Şansları yok."}
+{"key": "1911b3977ed4264c", "tr": "Nerede şimdi arkadaşların, seni lağım faresi?"}
+{"key": "4c874e295a74a579", "tr": "Fena değil."}
+{"key": "1e0eeedf90cc0c3c", "tr": "Ben beynini patlatmadan önce konuş! Onları bulup geriye kalanını gömmelerine izin vereceğiz."}
+{"key": "a3cd08c5ca6879a1", "tr": "Gözünüzü dört açın, çocuklar. Dostları hala buralarda bir yerde."}
+{"key": "df3fc8b82cf4eb23", "tr": "Yine başladı."}
+{"key": "ea97566be23dcf55", "tr": "Çok teşekkürler, asılacağımı sanmıştım!"}
+{"key": "b3cb3b18b256c6a7", "tr": "İyi avlar, çocuklar!"}
+{"key": "0c5754d6175b975b", "tr": "Ateşe verin!"}
+{"key": "8088c0ae9bc52c9a", "tr": "Şu Fransız gemisini batırın!"}
+{"key": "7c7bffbf42014bc1", "tr": "Senin dengin değil!"}
+{"key": "7249dee1537a24ac", "tr": "O herifleri senin için saklıyordum."}
+{"key": "26d32c581a8633ee", "tr": "Çok düşünceli."}
+{"key": "ca8cdb195bd4d50e", "tr": "Belki de tamamen işe yaramaz değilsin, Shay."}
+{"key": "c2a4303530af7cfe", "tr": "İşe yaramaz demişken, o kafasızların artık bu gemiye ihtiyacı olmayacak."}
+{"key": "9dc8eb9f17e22251", "tr": "Bu tekne mi? Bu bok yığını mı? Onu istiyorsun Shay, o senindir. Şimdi beni gemime geri götür."}
+{"key": "162b6129d55cc897", "tr": "Chevalier'yi duydun. Bu gemi senindir, Shay. Hadi, geç dümenin başına."}
+{"key": "dd35b8a7c539e5ad", "tr": "Kurtardığın adamlardan bazıları bize katılmayı kabul etti. İyi bir mürettebat olacaklar."}
+{"key": "5dbe35e8189d3279", "tr": "Kaptanlarından pek emin değilim ama benim yanımda Kardeşlik'teki en deneyimli denizci sensin, Shay. Zaten bir gemiye daha ihtiyacımız var, şu acınası olana bile."}
+{"key": "ae7d12d7e85b369c", "tr": "Benimki oldu yani? Kendi gemim."}
+{"key": "9215799d9fc58ad4", "tr": "Kendi çöp yığının, evet."}
+{"key": "5ed96b4d1a24ead7", "tr": "Ah, biraz boya ve birkaç yeni topla yedi denizdeki herhangi bir gemi kadar harika görünecek."}
+{"key": "f043b83f06aed764", "tr": "Başlayalım mı, Kaptan?"}
+{"key": "cb4b667230b398d1", "tr": "Aynen öyle, dostum!"}
+{"key": "4a3eb83c40476a83", "tr": "Aptallar..."}
+{"key": "a74873333aed64b7", "tr": "Bir enkaz ama hala yüzüyor. Ve adı da Morrigan."}
+{"key": "720020b1276a7009", "tr": "Morgane... Bilge Merlin'in mahvedan o aptal peri kraliçesi. Oh oh... tam sana göre, Shay."}
+{"key": "ef592f87be031591", "tr": "Morrigan eski bir tanrıçaydı, Savaş ve Karanlığın kraliçesidir. Düşen savaşçıların ruhlarını toplardı. Gerçekten de mükemmel."}
+{"key": "350fad8da4bef6bb", "tr": "Tanrım! Gemim! O piç kuruları! Onu batıracaklar!"}
+{"key": "7db2e7f315c65fe0", "tr": "Hadi Morrigan'ı teste tabi tutalım, Kaptan Shay."}
+{"key": "ac5679e957bbfbe3", "tr": "Savaşa hazırlanın, aslanlar!"}
+{"key": "5569b89262ff2bac", "tr": "Durdur onları, evlat! Parçalıyorlar gemiyi! Bir şey yap! Gemim!"}
+{"key": "75d333bc823c0f7b", "tr": "Görünen o ki bu gemi savaşa hazır. Le Gerfaut'dan geriye kalanlara döneceğim. Eve uzun bir yolumuz var ve yapılacak tamiratlarımız var."}
+{"key": "d083665c233fa728", "tr": "Gönülden şarkı söyleyin, çocuklar. Chevalier bizden memnun!"}
+{"key": "62afdc9e483334ac", "tr": "Hangi rotayı ayarlamamı istersin, Shay?"}
+{"key": "366c1f3bcde46342", "tr": "Akıl Hocası'na rapor verme vakti geldi, siz de aynı fikirde değil misiniz?"}
+{"key": "390c7fee77c40287", "tr": "Hikmetli sözler, Kaptan. Hikmetli sözler."}
+{"key": "3441749bad1705b8", "tr": "Öncü kutusu bende. Smith ölü."}
+{"key": "5ee76ec9252676df", "tr": "Aferin, Shay."}
+{"key": "1821b3585934cfd5", "tr": "Chevalier nerede?"}
+{"key": "61a32ac7be95a9a9", "tr": "Le Gerfaut'ya dönüyor. Korkarım kutlamayı onsuz yapacağız."}
+{"key": "1b109ef173297470", "tr": "Kutlayacak hâlde değilim, Liam... Bu eserleri geri almamız gerektiğini biliyorum ama ne pahasına? Samuel Smith... Kılıcını doğru düzgün tutamıyordu bile. Onu öldürmek..."}
+{"key": "80ea8bc4ba2d5f41", "tr": "Gerekliydi."}
+{"key": "cdc29937887188ad", "tr": "Ama..."}
+{"key": "a9b1a854ca229d6f", "tr": "Aması maması yok! Smith tehlikeli bir adamdı, bir Tapınakçı. Ve daha da kötüsü, Öncü kutusu onda vardı. Kendinle gurur duymalısın, Shay."}
+{"key": "f9cb282bd0953559", "tr": "Şimdi Albany'ye gitmeliyiz. Lawrence Washington'ın El Yazması'nı verdiği adam, James Wardrop orada olacak. Kesegowaase, James Wardrop'un pek çok kabile sürüp attığını rapor etmişti. Sayısız katliamın arkasında onun olduğuna dair kanıtımız var. Kolonilerdeki en kurnaz ve acımasız adamlardan biri. Amaçlarına ulaşmak için kanunun lafzını kullanır, kanun ona boyun eğmediğinde ise yasa yapıcıları ona boyun eğdirir. Sözümü unutma, Shay: James Wardrop bir bürokrat ve yaptıklarının başkalarını nasıl etkilediği umurunda bile değil."}
+{"key": "bf3c8a0cf5d01be6", "tr": "Albany'de işim yok efendim, sadece ziyarete geldim. Kız kardeşim burada yaşıyor."}
+{"key": "c10d25445e044096", "tr": "Ve ne kadar kalmayı planlıyorsun?"}
+{"key": "63f13a1e1ac32d58", "tr": "Sadece birkaç gün."}
+{"key": "cf054544d2156159", "tr": "Lütfen burada bekleyin."}
+{"key": "692a1f0933d8a88e", "tr": "Buraya o kadar çok asker yerleştirilmiş ki. Bütün bunlar siyasetçileri korumak için mi?"}
+{"key": "e22620c9180f63ff", "tr": "Öyle. Buradaki boş laf ...kinden bile fazla."}
+{"key": "090fb205afd2b020", "tr": "Nerelisin efendim?"}
+{"key": "c0d50e4ee9ac1e92", "tr": "Trenton."}
+{"key": "a5ef1aad1a586dcb", "tr": "Ve burada ne işin var?"}
+{"key": "2156bca0537a8a3d", "tr": "Seni ilgilendirmez."}
+{"key": "148dffa79d6ac6fb", "tr": "Saygısızlık gibi olmasın efendim, ama ilgilendirir."}
+{"key": "d04c2ec3f09eb333", "tr": "Buradasın. Kongre hâlâ oturumda. George Washington ve milislerinin Jumonville yönetiminde Fransız birlikleri var. Fransızlar buna savaş sebebi diyor."}
+{"key": "598af0265220f1d4", "tr": "George Washington. Lawrence'ın küçük kardeşi mi?"}
+{"key": "95db55b32e0fea9f", "tr": "Evet, ta kendisi... Lawrence Washington'a gelecek olursak, onu ortadan kaldırdığından beri James Wardrop rütbe atladı. Tüm Tapınakçı kaynakları artık onun emrinde."}
+{"key": "12fb8490e90a649f", "tr": "El Yazması ne olacak?"}
+{"key": "c002f16f6c8d0f54", "tr": "New York'taki kaynaklarım Wardrop'un onda olduğunu doğruluyor. Ayrıca Kongre'de, ağır koruma altında burada olduğunu öğrendim."}
+{"key": "7f43e85a8d6b7337", "tr": "Shay, Wardrop'u bul, o El Yazması'nı al."}
+{"key": "6be5d513cebf5d02", "tr": "Bu yer Tapınakçı birlikleriyle dolu... Liam ve ben kaçamadığından emin olacağız."}
+{"key": "d6b376f2eaa6e3ee", "tr": "William Johnson'ın burada olduğunu duydum."}
+{"key": "f3e7f4eac4a3c751", "tr": "O da kim?"}
+{"key": "10c65641b822cf92", "tr": "Şey, o bir tüccar ve bir süre Altı Kabile Savaşçılarının Albayıydı. Sanırım artık New York'taki asker toplama işlerinden sorumlu. Ayrıca kolonilerin her yerinde toprakları ve ticaret postaları var. Ve Fort William Henry'yi o inşa etti."}
+{"key": "a903c4cd934d83b4", "tr": "Hiç duymadım."}
+{"key": "4a27f210d4dc6a45", "tr": "Peki bu Kongre'yi bu kadar önemli kılan ne?"}
+{"key": "f2caeb14702d0355", "tr": "Kim bilir? Bize asla hiçbir şey söylemezler."}
+{"key": "7cbdfe87a3f6993b", "tr": "Babam yaşlı bir adam. Sadece..."}
+{"key": "36a6e40756a22499", "tr": "Kusura bakmayın, herkesi içeri alamam."}
+{"key": "1321da963463b5d5", "tr": "Komutanınız nerede? Onunla iki kelime konuşmak istiyorum."}
+{"key": "466e9c78902a6b86", "tr": "Bir bakayım bulabilecek miyim efendim."}
+{"key": "8e00d88b3e57ec7b", "tr": "Korkarım hayır, hanımefendi."}
+{"key": "486927797007e91c", "tr": "Peki ya turta? Bir parça turta istemez miydin?"}
+{"key": "8222de5b98408abc", "tr": "Ne demek Kongre'ye katılamam?"}
+{"key": "533acd113306737d", "tr": "Yani katılamazsın efendim."}
+{"key": "51132f3b0e92763d", "tr": "Param var. Ve tanıdıklarım, biliyorsun."}
+{"key": "b8a292cf6c85c8d4", "tr": "Öyle olabilir. Ama seni içeri alamam."}
+{"key": "9758ff9e47ffe271", "tr": "Neyse, göreceğiz bakalım."}
+{"key": "dfd4e79478cda543", "tr": "Kızılderililerle daha yakın bağlar kurmalıyız."}
+{"key": "27e948ab2b7caffc", "tr": "Onlara güvenebileceğimizi sanmıyorum."}
+{"key": "a1ca356f690a90f7", "tr": "Şey, pek seçeneğimiz olduğunu sanmıyorum. Fransızlar her an saldırabilir."}
+{"key": "d4784d56b7889b49", "tr": "Umarım cesaret edemezler."}
+{"key": "f3dc073eb361c8dd", "tr": "Tam burada, Albany'de kendi kralımız olmalı."}
+{"key": "279c5fcaa2a757ff", "tr": "Şu genç subay Charles Lee ne olacak? Yetenekli olduğunu duydum."}
+{"key": "dd2c6d5f772aa3e9", "tr": "Kendi kralımız... Kulağa hoş geliyor."}
+{"key": "a1e77926624dc6bc", "tr": "Ah... Bu Tapınakçı William Johnson olmalı. Belki El Yazması onda ya da nerede olduğunu biliyordur."}
+{"key": "55ff2f21a43472f0", "tr": "Daha önce de belirttiğim gibi, Parlamento kararıyla onaylanan ama sömürgelerimize daha fazla bağımsızlık getiren ulusal bir birliğe ihtiyacımız olduğuna inanıyorum. Fransızlar acil bir tehdit ve onlarla yüzleşmeye hiç hazır değiliz. Açık konuşmak gerekirse, sömürgeler..."}
+{"key": "560106a45437200b", "tr": "Coşkulu bir konuşma, Üstat Franklin. Ama Büyük Britanya'nın sömürgelerine özerklik vereceğine gerçekten inanıyor musun?"}
+{"key": "2ec357c2bbb60086", "tr": "Pek seçenekleri yok, Üstat Johnson. Bu sınırın ne kadar uzak olduğunu çoğumuzdan iyi biliyorsun."}
+{"key": "e4c2c2f5ec671a5c", "tr": "Öyle... Ama siyaseti başka bir güne bırakalım. Araştırmaların için sana teşekkür etmek istiyordum."}
+{"key": "25da43a69d569475", "tr": "Elbette, elbette! O kutuyu inceleyebildiğim kısa süre zarfında eşsiz bir şey olduğunu anladım. Antik Mısır'dan mı demiştin? Şey, mektubumda da bahsettiğim gibi, ona elektrik vermeye tamamen hazırım..."}
+{"key": "b16cfd1376f109ec", "tr": "Mükemmel. Kutuyu kısa süre içinde teslim alacağız. El Yazması'na gelince... Yüzbaşı!"}
+{"key": "fdafd05ebdb9f2cc", "tr": "Özür dilerim efendim, ancak Üstat Wardrop onu vermeyi reddetti. Risklerin çok büyük olduğunu söyledi."}
+{"key": "4fc5a4cfb5d31cb9", "tr": "Riskler mi!? Ah... Özür dilerim. En kısa sürede hem El Yazması'na hem de kutuya sahip olacaksınız."}
+{"key": "b7724079c49cc90e", "tr": "Seni sefil üniforma müsveddesi! Koş Fort Frederick'e ve Üstat Wardrop'a o el yazmasını derhal teslim etse iyi olur de! Yoksa derisini yüzerim!"}
+{"key": "4543917b6d8cefad", "tr": "O Istakoz Yüzbaşı'nın Wardrop'a ulaşmasına izin vermem!"}
+{"key": "7528ae4e9db67754", "tr": "Şimdi sıra Wardrop'ta... ve El Yazması'nda."}
+{"key": "a75ddc44328e2da8", "tr": "Dikkatli ol asker! Asker, üniformana dikkat et! Aferin asker. Benim için durma. Tekrar, delikanlı. Senden bir asker yapacağız imal edeceğiz."}
+{"key": "eb2bf9e9877aa976", "tr": "İmdat! Beyler, saldırı altındayız! Şu kapüşonlu adam! Yakalayın onu! Tapınakçılar intikamını alacak! Bütün bir tabur peşine düşecek! Bunun pişmanlığını yaşayacaksın, Suikastçı!"}
+{"key": "ae85fa66f8464b85", "tr": "Bunu alıyorum seni Tapınakçı it."}
+{"key": "678112872ca04e77", "tr": "Hayır! Ne yaptığın hakkında hiçbir fikrin yok, aptal."}
+{"key": "7bc616378f3d3149", "tr": "İnsanları sizin kontrolünüzden uzak, özgür tutuyorum."}
+{"key": "c302c3e843225233", "tr": "Fransızlar bu kavga eden sömürgelerin altını oyduğunda ne kadar özgür olacaksın?"}
+{"key": "72d45af8e92d4345", "tr": "Bu sömürgeler, ipleri elinde tutan Tapınakçılar olmadan çok daha iyi durumda olurdu."}
+{"key": "b204721b51ba2253", "tr": "Biz kaostan düzen kurarız. Her şey mubahsa, kimse güvende değildir."}
+{"key": "3a28198459d77965", "tr": "Şeytan bile kendi çıkarları için kutsal kitaptan ayetler okuyabilir."}

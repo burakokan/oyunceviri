@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Samsung TV helper for Oyun Çeviri: install / start the TV app on a Samsung (Tizen) TV in Developer Mode.
+       Build: tools\SamsungHelper\build.bat  ->  vendor\samsung\SamsungHelper.exe -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <AssemblyName>SamsungHelper</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- sdb connection, widget signing and installing (MIT, github.com/PatrickSt1991/tizen-sdb) -->
+    <PackageReference Include="TizenSdb.Core" Version="1.1.9" />
+    <EmbeddedResource Include="ca\*.pem" LogicalName="ca.%(Filename).pem" />
+  </ItemGroup>
+</Project>

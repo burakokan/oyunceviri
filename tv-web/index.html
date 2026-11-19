@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080, user-scalable=no">
+<title>Oyun Çeviri</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- The PS5 picture: Samsung draws its TV window under the page, LG plays the HDMI input as a video,
+     a browser (testing on the PC) shows a placeholder. -->
+<video id="hdmi" autoplay></video>
+<div id="placeholder">PS5 görüntüsü (HDMI) burada görünür</div>
+
+<!-- Screen translation: Turkish boxes over menus, quests, map names -->
+<div id="screen"></div>
+<div id="regions"></div>
+
+<!-- Subtitles: in a busy scene earlier lines stay stacked (dimmed) above the newest one -->
+<div id="subs"></div>
+
+<!-- On-screen guide while the PC is not connected (Back key opens / closes it) -->
+<div id="help">
+  <div class="card">
+    <h1>Oyun Çeviri</h1>
+    <p id="state" class="state">Bilgisayar aranıyor…</p>
+    <ol>
+      <li>Bilgisayarda <b>Oyun Çeviri</b> açık olsun ve <b>Başlat</b>'a basılsın.</li>
+      <li>TV ile bilgisayar aynı modeme bağlı olmalı.</li>
+      <li>PS5 hangi HDMI girişine takılıysa kumandada o rakama bas: <b>1</b>, <b>2</b>, <b>3</b> ya da <b>4</b>.
+          Şu an: <b id="hdmiNow">HDMI 1</b></li>
+      <li>Bağlanınca bu ekran kendiliğinden kapanır; Türkçe altyazı oyunun üstünde görünür.</li>
+    </ol>
+    <p class="keys">Kumanda: <b>1–4</b> HDMI girişi · <b>Geri</b> bu yardımı aç / kapat · <b>0</b> bilgisayarı yeniden ara</p>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+{
+ "time": "2026-11-19 11:19:01",
+ "model": null,
+ "blocked": {},
+ "jobs": {
+  "far-cry-6": [
+   "done",
+   16503,
+   16503,
+   ""
+  ],
+  "marvels-spider-man-remastered": [
+   "done",
+   4509,
+   4509,
+   ""
+  ],
+  "marvels-spider-man-miles-morales": [
+   "done",
+   2041,
+   2041,
+   ""
+  ],
+  "resident-evil-village": [
+   "done",
+   1590,
+   1590,
+   ""
+  ],
+  "resident-evil-4-remake": [
+   "done",
+   1142,
+   1142,
+   ""
+  ],
+  "metal-gear-solid-delta": [
+   "done",
+   1810,
+   1810,
+   ""
+  ],
+  "assassins-creed-valhalla": [
+   "done",
+   24597,
+   24597,
+   ""
+  ],
+  "assassins-creed-mirage": [
+   "done",
+   3654,
+   3654,
+   ""
+  ],
+  "assassins-creed-origins": [
+   "done",
+   7934,
+   7934,
+   ""
+  ],
+  "assassins-creed-unity": [
+   "done",
+   3424,
+   3424,
+   ""
+  ],
+  "assassins-creed-syndicate": [
+   "done",
+   3982,
+   3982,
+   ""
+  ],
+  "assassins-creed-black-flag": [
+   "done",
+   4125,
+   4125,
+   ""
+  ],
+  "assassins-creed-rogue": [
+   "done",
+   1403,
+   1403,
+   ""
+  ],
+  "assassins-creed-ezio-collection": [
+   "done",
+   5836,
+   5836,
+   ""
+  ],
+  "assassins-creed-iii": [
+   "done",
+   4000,
+   4000,
+   ""
+  ],
+  "assassins-creed-odyssey": [
+   "done",
+   24046,
+   24046,
+   ""
+  ]
+ }
+}

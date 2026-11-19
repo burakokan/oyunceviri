@@ -1,0 +1,37 @@
+# ---- Personal data: never in git (API keys, PS5 keys, TV certificates, logs, caches) ----
+config.json
+ps5.json
+speakers.json
+*_cache.json
+logs/
+tv-keys/
+update/
+*.ini
+*.lnk
+
+# ---- Python / build output ----
+.venv/
+__pycache__/
+*.pyc
+packaging/build/
+packaging/dist/
+packaging/output/
+packaging/*.log
+
+# ---- TV app build output ----
+tv/.gradle/
+tv/build/
+tv/app/build/
+tv/local.properties
+tools/SamsungHelper/bin/
+tools/SamsungHelper/obj/
+
+# ---- Large files (see README: where they come from) ----
+models/
+vendor/llama/
+vendor/samsung/
+
+# ---- Built TV apps (go into the setup and the releases) ----
+OyunCeviri-TV.apk
+OyunCeviri-Samsung.wgt
+OyunCeviri-LG.ipk
