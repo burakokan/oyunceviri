@@ -4,7 +4,7 @@
  * messages: one box per area, "⟦1⟧" in the text is a button icon sent as a PNG). */
 (function () {
   "use strict";
-  var VERSION = "1.3-web";
+  var VERSION = "1.4-web";
   var PORT = 8765;
   var PLATFORM = window.tizen ? "tizen"
     : (window.PalmSystem || window.webOSSystem || /Web0S|webOS/i.test(navigator.userAgent)) ? "webos" : "browser";
@@ -243,7 +243,8 @@
   }
 
   function html(text) {
-    return String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");          // a sentence's rest added under its beginning
   }
 
   /* The speaker's own color from the PC (same name, same color), or the one name color of the style. */

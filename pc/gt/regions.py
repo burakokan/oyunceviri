@@ -23,8 +23,10 @@ import base64
 import json
 import queue
 import re
+import statistics
 import threading
 import time
+from collections import deque
 
 import cv2
 import numpy as np
@@ -55,6 +57,9 @@ FILTERS = {
     "dark_box": "Koyu kutudaki beyaz yazı",        # the hint box: white letters on a dark, plain background
     "outlined": "Kenarlıklı beyaz yazı",           # like subtitles: white letters with a dark outline / shadow
     "bright": "Parlak (beyaz) yazı",
+    # the phone: dark text on a light message bubble AND white text on a black call / notification card; text on
+    # a busy or colourful background (the street, a sign) is left out
+    "plain": "Düz zemindeki yazı (açık ya da koyu)",
     "any": "Alandaki her yazı",
 }
 PLACES = ("cover", "below", "above", "top", "bottom")
@@ -73,10 +78,60 @@ LOOK = {"place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFF
         "opacity": 92}
 
 
+_MENU_SMALL = {"of", "and", "&", "the", "a", "an", "to", "in", "on", "for", "with", "or", "by"}
+
+
+def menu_like(english):
+    """Menu items / tab names, not a hint: every word starts with a capital ("Game Store Help Photo Studio",
+    "Hair Color Facial Hair Style", "Load Game New Game") and there is no sentence punctuation. The game's pause
+    menu sits where the hint box appears and looks the same (white text on a dark background)."""
+    text = TOKEN.sub(" ", english)
+    words = [w for w in re.findall(r"[^\W\d_][\w'’]*", text) if len(w) > 1]   # stray letters ("w Map …")
+    letters = [c for c in text if c.isupper() or c.islower()]      # cased letters ("白" is neither)
+    if letters and all(c.isupper() for c in letters) and len(words) <= 12:
+        # all capitals: button bars and interaction menus, with or without punctuation ("CASH? / SHUT UP /
+        # PARROT", "MIN/MAX R1 / AMOUNT / WITHDRAW ($2,480) / BACK"); hints and messages are mixed case
+        return True
+    if re.search(r"[.!?,:;]", text):
+        return False
+    return all(w[0].isupper() or w.lower() in _MENU_SMALL for w in words)
+
+
+def skip_reason(a, english):
+    """Why the area's reading is not translated ("" = it is): a menu, or one of the user's exceptions."""
+    plain = " ".join(TOKEN.sub(" ", english).split()).casefold()
+    for phrase in a.get("ignore") or []:
+        if phrase.strip() and phrase.strip().casefold() in plain:
+            return f"istisna: {phrase.strip()}"
+    if a.get("skip_menus") and menu_like(english):
+        return "menü"
+    return ""
+
+
+def keep_reading(a, english, paragraph):
+    """-> (what is translated, why the rest was left out). A paragraph area (hint box) is kept or left out as a whole.
+    In the phone area a reading of only menu text goes as a whole; next to a message, only a button bar in capitals
+    ("RESTORE DEFAULT BACK") and the user's exceptions go - the sender's name ("Jason W") stays with the message."""
+    if not english:
+        return "", ""
+    why = skip_reason(a, english.replace("\n", " "))
+    if paragraph or why:
+        return ("", why) if why else (english, "")
+    kept = []
+    for block in english.split("\n"):
+        reason = skip_reason(a, block)
+        letters = [c for c in TOKEN.sub(" ", block) if c.isalpha()]
+        if reason and (reason != "menü" or (letters and all(c.isupper() for c in letters))):
+            why = why or reason
+        else:
+            kept.append(block)
+    return "\n".join(kept), why
+
+
 def area_cfg(cfg, kind):
     """The settings of an area with every key present (older config files lack the newer ones)."""
     from .config import DEFAULTS
-    base = dict(LOOK, enabled=False, roi=None, filter="any", text_min=170, bg_max=80)
+    base = dict(LOOK, enabled=False, roi=None, filter="any", text_min=170, bg_max=80, skip_menus=False, ignore=[])
     base.update(DEFAULTS.get("regions", {}).get(kind, {}))
     base.update(cfg.get("regions", {}).get(kind, {}))
     return base
@@ -117,10 +172,43 @@ def row_look(crop, rect, text_min=170):
             "outline": float((edge & near_dark).sum() / max(1, int(edge.sum())))}
 
 
+def plain_look(crop, rect):
+    """A piece of text on a plain card, whichever is lighter (dark text on a white message bubble, white text on a
+    black call card) -> {"plain": True, "contrast", "bg_spread", "bg_s"}: the letters / background difference, how much
+    the background's brightness varies, how colourful it is."""
+    x0, y0, x1, y1 = rect
+    pad = max(2, int(0.25 * max(1, y1 - y0)))
+    region = crop[max(0, y0 - pad):y1 + pad, max(0, x0 - pad):x1 + pad]
+    if region.size == 0:
+        return None
+    gray = cv2.cvtColor(region, cv2.COLOR_BGR2GRAY)
+    _, bw = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    high = bw > 0
+    text = high if high.mean() < 0.5 else ~high       # the smaller part is the text
+    # the background without the letters' soft edges
+    bg = cv2.erode((~text).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    if text.sum() < 15 or bg.sum() < 15:
+        return None
+    s = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)[..., 1]
+    return {"plain": True, "contrast": float(abs(np.median(gray[text]) - np.median(gray[bg]))),
+            "bg_spread": float(np.percentile(gray[bg], 90) - np.percentile(gray[bg], 10)),
+            "bg_s": float(np.median(s[bg]))}
+
+
 def accepts(look, a):
     """-> (row is read, why not) for an area's filter settings `a`."""
     kind = a.get("filter", "any")
     if kind == "any":
+        return True, ""
+    if kind == "plain":
+        if look is None:
+            return False, "yazı ayrılamadı"
+        if look["contrast"] < 60:
+            return False, "yazı zemine karışıyor"
+        if look["bg_spread"] > 70:
+            return False, "zemin düz değil"
+        if look["bg_s"] > 70:
+            return False, "zemin renkli"      # a green road sign, a coloured poster
         return True, ""
     if look is None or not look["bright"]:
         return False, "açık renk yazı yok"
@@ -233,7 +321,9 @@ class AreaReader:
             # objective is still read.
             kept = []
             for b in boxes:
-                ok, why = accepts(row_look(crop, b, area.get("text_min", 170)), area)
+                look = (plain_look(crop, b) if area.get("filter") == "plain"
+                        else row_look(crop, b, area.get("text_min", 170)))
+                ok, why = accepts(look, area)
                 if ok:
                     kept.append(b)
                 else:
@@ -386,6 +476,10 @@ class Area:
         self.rows = 0
         self.tr = None
         self.empty = 0
+        # The distance between its text rows (px) in recent readings: the Turkish text's size is taken from their
+        # median, so it no longer jumps when one reading boxed the text a little bigger or smaller.
+        self.pitches = deque(maxlen=15)
+        self.skipped = ""
 
 
 class RegionTranslator:
@@ -506,13 +600,19 @@ class RegionTranslator:
         for kind in due:
             crop, _ = self._crop(kind, frame)
             if crop.size:
-                self._note(kind, crop, self._reader.read(crop, self.area(kind)))
+                rows = self._reader.read(crop, self.area(kind))
+                english, _, _ = compose(rows, KINDS[kind]["paragraph"])
+                kept, why = keep_reading(self.area(kind), english, KINDS[kind]["paragraph"])
+                self._note(kind, crop, rows, "" if kept else why)
 
-    def _note(self, kind, crop, rows):
+    def _note(self, kind, crop, rows, skipped=""):
+        """What the area read, for the area page (skipped: the whole reading was left out, and why)."""
         out = []
         for r in rows:
             text = " ".join(p if isinstance(p, str) else f"[{p.get('label') or 'tuş'}]" for p in r["pieces"])
-            out.append({"rect": r["rect"], "ok": r.get("ok", True), "why": r.get("why", ""), "text": text})
+            ok = r.get("ok", True) and not skipped
+            out.append({"rect": r["rect"], "ok": ok, "why": r.get("why", "") or (skipped if r.get("ok", True) else ""),
+                        "text": text})
         self.debug[kind] = {"time": time.monotonic(), "size": (crop.shape[1], crop.shape[0]), "rows": out}
 
     def _crop(self, kind, frame):
@@ -543,8 +643,13 @@ class RegionTranslator:
         if self._reader is None:
             self._reader = AreaReader()
         rows = self._reader.read(crop, self.area(kind))
-        self._note(kind, crop, rows)
         english, icons, _ = compose(rows, KINDS[kind]["paragraph"])
+        kept, skipped = keep_reading(self.area(kind), english, KINDS[kind]["paragraph"])
+        self._note(kind, crop, rows, "" if kept else skipped)
+        if skipped and english != a.skipped:
+            a.skipped = english
+            self._log(kind, skip=skipped, en=english)
+        english = kept              # the pause menu / an exception is not shown
         if not english:
             a.candidate = ""
             a.empty += 1
@@ -563,6 +668,9 @@ class RegionTranslator:
         rows = [r for r in rows if r.get("ok", True)]
         rect = (x0 + min(r["rect"][0] for r in rows), y0 + min(r["rect"][1] for r in rows),
                 x0 + max(r["rect"][2] for r in rows), y0 + max(r["rect"][3] for r in rows))
+        # From the rows' own height, not the whole box / rows: the gaps between the phone's message bubbles made
+        # that "row distance" up to twice too big (63 px letters on the TV).
+        a.pitches.append(1.3 * statistics.median(r["rect"][3] - r["rect"][1] for r in rows))
         with self._lock:
             a.english, a.icons, a.rect, a.rows, a.tr = english, icons, rect, len(rows), self._cache.get(english)
         if a.tr is None:
@@ -653,7 +761,7 @@ class RegionTranslator:
 
     # ---- TV ----
 
-    def _box(self, kind, rect, rows, tr, icons, w, h):
+    def _box(self, kind, rect, rows, tr, icons, w, h, pitch=None):
         """The Turkish box for the TV with the area's own look: where (over the English, under / above it, or at a
         fixed place at the top / bottom of the screen), how big, which colours, with or without a box."""
         a = self.area(kind)
@@ -684,9 +792,14 @@ class RegionTranslator:
             mw = min(w - x0 - 4, max(bw * 1.15, right - x0))
         mh = min(h - y0 - 4, bh * 1.8)
         opacity = max(0, min(100, int(a.get("opacity", 92))))
+        # The TV takes the letters' size from the box height / rows; one reading's box can be a bit taller or
+        # shorter (an icon, a cut row), so the size is corrected to the area's usual row distance.
+        scale = float(a.get("size", 100)) / 100
+        if pitch:
+            scale *= pitch / max(1.0, bh / max(1, rows))
         return {"id": kind, "x": x0 / w, "y": y0 / h, "w": bw / w, "h": bh / h, "mw": mw / w, "mh": mh / h,
                 "lines": max(1, rows), "tr": tr, "icons": icons, "fg": a.get("fg", "#FFFFFF"),
-                "bg": a.get("bg", "#10151C"), "alpha": opacity / 100, "scale": float(a.get("size", 100)) / 100,
+                "bg": a.get("bg", "#10151C"), "alpha": opacity / 100, "scale": round(max(0.4, min(2.5, scale)), 3),
                 "shadow": opacity == 0, "align": "center" if center else "left"}
 
     def _send(self):
@@ -695,12 +808,30 @@ class RegionTranslator:
         with self._lock:
             for kind, a in self._areas.items():
                 if a.english and a.tr and a.rect:
-                    boxes.append(self._box(kind, a.rect, a.rows, a.tr, a.icons, w, h))
+                    pitch = statistics.median(a.pitches) if a.pitches else None
+                    boxes.append(self._box(kind, a.rect, a.rows, a.tr, a.icons, w, h, pitch))
         key = json.dumps(boxes, sort_keys=True)
         if key == self._sent:
             return
         self._sent = key
         self.server.send({"type": "regions", "boxes": boxes})
+        for b in boxes:
+            a = self._areas[b["id"]]
+            self._log(b["id"], en=a.english, tr=b["tr"], rows=b["lines"], scale=b["scale"],
+                      box=[round(b[k], 4) for k in ("x", "y", "w", "h")],
+                      pitch=round(statistics.median(a.pitches), 1) if a.pitches else None)
+
+    def _log(self, kind, **info):
+        """With the debug log on: what the areas showed / skipped, in logs/regions-<day>.jsonl."""
+        if not self.cfg.get("debug_log", True):
+            return
+        try:
+            path = ROOT / "logs" / f"regions-{time.strftime('%Y%m%d')}.jsonl"
+            path.parent.mkdir(exist_ok=True)
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(json.dumps({"t": time.strftime("%H:%M:%S"), "kind": kind, **info}, ensure_ascii=False) + "\n")
+        except OSError:
+            pass
 
     # ---- cache ----
 

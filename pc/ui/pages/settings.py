@@ -1,13 +1,13 @@
-"""General settings page: text reading (OCR), background mode, shortcut, updates, about."""
+"""General settings page: text reading (OCR), background mode, shortcut, updates, moving settings, about."""
 import os
 import subprocess
 import sys
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QMessageBox, QVBoxLayout, QWidget
 
-from gt import config
+from gt import config, settings_io
 from gt.updater import FROZEN
 from gt.version import REPO, VERSION
 
@@ -100,6 +100,21 @@ class SettingsPage(QWidget):
             update.add(note)
         lay.addWidget(update)
 
+        move = Card("Ayarları başka bilgisayara taşı",
+                    "Ayarlarını bir dosyaya yaz, öbür bilgisayarda o dosyadan yükle. Taşınanlar: altyazı ve görev / "
+                    "telefon alanları, filtreler, çeviri motoru, TV görünümü, konuşmacı renkleri. Taşınmayanlar "
+                    "(her bilgisayarda yeniden yapılır): PS5 bağlantısı ve PSN hesabı, TV'nin adresi ve markası.")
+        export = icon_button(theme.Icon.ADD, "Dosyaya yaz…")
+        export.clicked.connect(self._export_settings)
+        move.add(SettingRow("Dışa aktar", "API anahtarlarını (DeepL, Groq, Gemini) da koymak isteyip istemediğin "
+                            "sorulur.", export))
+        move.add(Divider())
+        bring = icon_button(theme.Icon.OPEN, "Dosyadan yükle…")
+        bring.clicked.connect(self._import_settings)
+        move.add(SettingRow("İçe aktar", "Bu bilgisayarın ayarları dosyadakilerle değişir, sonra uygulama yeniden "
+                            "açılır. Dosyada anahtar yoksa bu bilgisayardaki anahtarlar kalır.", bring))
+        lay.addWidget(move)
+
         about = Card("Hakkında")
         info = QLabel(
             f"Oyun Çeviri {VERSION}<br>"
@@ -110,6 +125,68 @@ class SettingsPage(QWidget):
         about.add(info)
         lay.addWidget(about)
         lay.addStretch(1)
+
+    # ---- settings to / from a file ----
+
+    def _page(self, name):
+        return next((p for p in self.win.pages if type(p).__name__ == name), None)
+
+    def _export_settings(self):
+        include = False
+        if settings_io.has_keys(self.cfg):
+            box = QMessageBox(QMessageBox.Question, "Ayarları dışa aktar",
+                              "API anahtarların (DeepL, Groq, Gemini) da dosyaya konsun mu?\n\nAnahtarlı dosyayı "
+                              "yalnızca kendi bilgisayarlarına taşı, kimseyle paylaşma.", parent=self)
+            yes = box.addButton("Evet, anahtarlarla", QMessageBox.YesRole)
+            no = box.addButton("Hayır, anahtarsız", QMessageBox.NoRole)
+            box.addButton("Vazgeç", QMessageBox.RejectRole)
+            box.exec()
+            if box.clickedButton() not in (yes, no):
+                return
+            include = box.clickedButton() is yes
+        start = os.path.join(os.path.expanduser("~"), "Desktop",
+                             "OyunCeviri-ayarlar" + ("-anahtarli" if include else "") + ".json")
+        path, _ = QFileDialog.getSaveFileName(self, "Ayarları kaydet", start, "Ayar dosyası (*.json)")
+        if not path:
+            return
+        look = self._page("TvLookPage")
+        data = settings_io.export(self.cfg, include,
+                                  tv_style=dict(look.style) if look is not None and look.tv_reported else None,
+                                  speakers=dict(self.win.engine.colors.colors))
+        try:
+            settings_io.write(path, data)
+        except OSError as e:
+            self.win.show_message(f"Dosya yazılamadı: {e}", error=True)
+            return
+        self.win.show_message(f"Ayarlar kaydedildi: {path}" + (" (API anahtarlarıyla)" if include else ""))
+
+    def _import_settings(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Ayar dosyasını seç", os.path.join(os.path.expanduser("~"),
+                                              "Desktop"), "Ayar dosyası (*.json)")
+        if not path:
+            return
+        try:
+            data = settings_io.read(path)
+        except settings_io.SettingsFileError as e:
+            QMessageBox.warning(self, "Ayarları içe aktar", str(e))
+            return
+        text = (f"{settings_io.summary(data)}\n\nBu bilgisayarın ayarları dosyadakilerle değişecek. PS5 bağlantısı, "
+                f"PSN hesabı ve TV'nin adresi olduğu gibi kalır.\n\nUygulama kapanıp yeniden açılacak"
+                + (", altyazı çevirisi birkaç saniye duracak" if getattr(self.win, "_engine_running", False) else "")
+                + ". Devam edilsin mi?")
+        if QMessageBox.question(self, "Ayarları içe aktar", text, QMessageBox.Yes | QMessageBox.No,
+                                QMessageBox.No) != QMessageBox.Yes:
+            return
+        changed = settings_io.apply(self.cfg, data)
+        if data.get("tv_style"):
+            self.cfg["tv_style_pending"] = data["tv_style"]     # sent to the TV when it connects
+        config.save(self.cfg)
+        colors = data.get("speaker_colors")
+        if isinstance(colors, dict):
+            self.win.engine.colors.colors.update({str(k): str(v) for k, v in colors.items()})
+            self.win.engine.colors._save()
+        self.win.show_message(f"{changed} ayar yüklendi, uygulama yeniden açılıyor…")
+        self.win.restart_app()
 
     # ---- updates (the main window does the work; this page shows it) ----
 

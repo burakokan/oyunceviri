@@ -126,6 +126,7 @@ class TvLookPage(QWidget):
         super().__init__()
         self.win = win
         self.style = dict(DEFAULT_STYLE)
+        self.tv_reported = False                # the TV told its look (only then is it worth taking to another PC)
         self._saved_style = dict(self.style)    # the style kept on the TV (Kaydet / Vazgeç)
         self.controls = {}
         self.screen_controls = {}
@@ -162,6 +163,13 @@ class TvLookPage(QWidget):
 
         layout_card = Card("Satır düzeni")
         layout_card.add(self._control(("_layout", "Yeni çeviri gelince", "layout")))
+        layout_card.add(Divider())
+        append = Toggle(self.win.cfg.get("append_rest", True))
+        append.toggled.connect(self._set_append)
+        layout_card.add(SettingRow("Cümlenin devamını alt satıra ekle",
+                                   "Bir cümle sonraki ekranda (ya da aynı satırda uzayarak) devam edince ekrandaki "
+                                   "Türkçe hiç değişmez; devamı hemen altına ayrı satır olarak eklenir. Kapalıyken "
+                                   "bütün cümle baştan çevrilip satırın üstüne yazılır.", append))
         lay.addWidget(layout_card)
 
         grid = QGridLayout()
@@ -324,6 +332,10 @@ class TvLookPage(QWidget):
         self._send_timer.start()
         self.win.save_config()      # shown on the TV now; kept with Kaydet, undone with Vazgeç
 
+    def _set_append(self, on):
+        self.win.cfg["append_rest"] = on
+        self.win.save_config()
+
     def _set_layout(self, layout):
         if self._loading:
             return
@@ -366,6 +378,7 @@ class TvLookPage(QWidget):
                               "tr": "Tüfek, dürbün yok, işleri ilginç tutuyor."})
 
     def on_tv_style(self, style):
+        self.tv_reported = True
         self.style = dict(DEFAULT_STYLE, **style)
         self._saved_style = dict(self.style)    # what the TV keeps
         self._fill()

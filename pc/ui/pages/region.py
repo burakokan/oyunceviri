@@ -7,8 +7,8 @@ import time
 
 import cv2
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import (QButtonGroup, QComboBox, QHBoxLayout, QLabel, QPushButton, QSlider, QVBoxLayout,
-                               QWidget)
+from PySide6.QtWidgets import (QButtonGroup, QComboBox, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSlider,
+                               QVBoxLayout, QWidget)
 
 from gt import config
 from gt.capture import WindowGrabber
@@ -165,6 +165,28 @@ class RegionPage(QWidget):
                                                      "atlanıyorsa yükselt, açık renkli tabelalar okunuyorsa düşür.",
                                                      20, 160, "bg_max")
         card.add(self.bg_row)
+        card.add(Divider())
+        self.skip_menus = Toggle(True)
+        self.skip_menus.toggled.connect(lambda v: self._set_area("skip_menus", v))
+        card.add(SettingRow("Menü yazılarını atla",
+                            "Oyunun duraklatma menüsü, mağaza listeleri ve tuş çubukları (\"Game Store Help Photo "
+                            "Studio\", \"SELECT EXIT\") kutuyla aynı görünse de çevrilmez: bütün kelimeleri büyük "
+                            "harfle başlayan, noktalaması olmayan yazılar atlanır. Görev ipuçları cümle olduğu için "
+                            "okunmaya devam eder.", self.skip_menus))
+        box = QWidget()
+        row = QHBoxLayout(box)
+        row.setContentsMargins(0, 0, 0, 0)
+        self.ignore = QLineEdit()
+        self.ignore.setPlaceholderText("örnek: Photo Studio, Saved Outfits")
+        self.ignore.setMinimumWidth(260)
+        self.ignore.editingFinished.connect(self._set_ignore)
+        add = icon_button(theme.Icon.ADD, "Ekrandakini ekle")
+        add.setToolTip("Alanda şu an okunan yazıyı istisnalara ekler")
+        add.clicked.connect(self._ignore_current)
+        row.addWidget(self.ignore, 1)
+        row.addWidget(add)
+        card.add(SettingRow("İstisnalar", "Bu yazılardan birini içeren okuma hiç çevrilmez (virgülle ayır). "
+                            "Atlanmasını istediğin şey ekrandayken \"Ekrandakini ekle\"ye bas.", box))
         self.builtin_note = QLabel("Bu alanlar yalnızca dahili Remote Play ile çalışır (PS5 Bağlantısı sayfası).")
         self.builtin_note.setObjectName("muted")
         self.builtin_note.setWordWrap(True)
@@ -280,6 +302,8 @@ class RegionPage(QWidget):
                 slider.setValue(int(a[key]))
                 slider.value_label.setText(f"{int(a[key])}{slider.unit}")
             self.fg.set_value(a["fg"])
+            self.skip_menus.setChecked(bool(a.get("skip_menus")))
+            self.ignore.setText(", ".join(a.get("ignore") or []))
             self.bg.set_value(a["bg"])
             self._syncing = False
             self._show_rows_for_settings(a)
@@ -304,6 +328,29 @@ class RegionPage(QWidget):
         self._show_rows_for_settings(a)
         if restyle:
             self.win.regions.restyle()
+
+    def _set_ignore(self):
+        if self._syncing or self.area == "subtitle":
+            return
+        phrases = [p.strip() for p in self.ignore.text().split(",") if p.strip()]
+        if phrases != (self._area_cfg(self.area).get("ignore") or []):
+            self._set_area("ignore", phrases)
+
+    def _ignore_current(self):
+        """The text the area reads now becomes an exception (the menu that is on screen)."""
+        info = self.win.regions.debug.get(self.area) or {}
+        texts = [r["text"].strip() for r in info.get("rows", []) if r.get("text", "").strip()]
+        if not texts:
+            self.win.show_message("Alanda şu an okunan bir yazı yok.", error=True)
+            return
+        current = [p.strip() for p in self.ignore.text().split(",") if p.strip()]
+        for t in texts:
+            t = t.replace(",", " ")
+            if t not in current:
+                current.append(t)
+        self.ignore.setText(", ".join(current))
+        self._set_ignore()
+        self.win.show_message(f"İstisnalara eklendi: {', '.join(texts)[:120]}")
 
     def _show_rows_for_settings(self, a):
         """Only the controls that matter for the chosen filter / place are shown."""

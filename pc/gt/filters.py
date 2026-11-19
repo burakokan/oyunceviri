@@ -7,11 +7,17 @@ _SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-]*(?:\s+[A-Z][\w'’.\-]*){0,3})\s*:
 _LOOSE_SPEAKER = re.compile(r"^\s*([A-Za-z][\w'’.\-]*(?:\s+[A-Za-z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
 # ...but not a sentence with a colon ("Here's the deal: …", "Listen up: …").
 _NOT_NAME = {"a", "an", "the", "it", "is", "up", "to", "me", "you", "this", "that", "now", "here", "there", "and",
-             "or", "of", "so", "what", "my", "your", "we", "i", "deal", "thing", "is", "are", "was", "do", "go"}
+             "or", "of", "so", "what", "my", "your", "we", "i", "deal", "thing", "is", "are", "was", "do", "go",
+             "him", "her", "them", "us", "he", "she", "they", "his", "its", "our", "their", "all", "then", "tell",
+             "said", "say", "says", "look", "listen", "remember", "note", "rule", "one", "two", "first", "last"}
 # The end of a name cut off by the area's edge: "ress: Another one?" (Waitress), "ison Recording: The Hamlet…"
 _CUT_SPEAKER = re.compile(r"^\s*([a-z][a-z'’.\-]{0,11}(?:\s+[A-Z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
 # A cut-off name starts with this: the engine completes it from the names seen before ("…ress" -> "Waitress").
 CUT = "…"
+# A name with its colon as the row's first word ("M7:", "Joey:"): never trimmed as a HUD token
+_NAME_TAG = re.compile(r"^[A-Z][\w'’.\-]*:$")
+# GTA's note on a line spoken in another language: "In Spanish: Take it…"
+_LANGUAGE = re.compile(r"^\s*In [A-Z][a-z]+\s*:\s*")
 # HUD letters stuck to the front of a name: "WARaiza" -> "Raiza"
 _NAME_NOISE = re.compile(r"^[A-Z]{1,3}(?=[A-Z][a-z])")
 # OCR reads the pronoun "I" as a lowercase "l"
@@ -77,11 +83,13 @@ def _clean_row(text, f):
         # Only the edges are trimmed: numbers inside a sentence ("5 minutes") belong to the dialogue,
         # and so does a number that ends the sentence ("back in the 70s.").
         tokens = text.split()
+        # A speaker's name in front stays, also one with a digit ("M7: Let's go!" lost its "M7:" as a HUD token).
+        name = [tokens.pop(0)] if tokens and _NAME_TAG.match(tokens[0]) else []
         while tokens and _is_hud_token(tokens[0]):
             tokens.pop(0)
         while tokens and _is_hud_token(tokens[-1]) and not tokens[-1].endswith((".", "!", "?", "…")):
             tokens.pop()
-        text = " ".join(tokens)
+        text = " ".join(name + tokens) if tokens else ""
     text = _LOWER_L.sub("I", text.strip())
     if f.get("skip_titles", True) and _is_title(text):
         return ""
@@ -105,9 +113,32 @@ def _clean_name(name):
     return _NAME_NOISE.sub("", name)
 
 
+# "In Spanish:" (also after the name: "M7: In Spanish: Let's go!") -> "Spanish"
+_LANGUAGE_IN = re.compile(r"^\s*(?:[A-Z][\w'’.\-]*(?:\s+[A-Z][\w'’.\-]*){0,3}\s*:\s*)?In ([A-Z][a-z]+)\s*:")
+LANGUAGES_TR = {"Spanish": "İspanyolca", "French": "Fransızca", "Italian": "İtalyanca", "German": "Almanca",
+                "Portuguese": "Portekizce", "Russian": "Rusça", "Chinese": "Çince", "Mandarin": "Çince",
+                "Cantonese": "Kantonca", "Japanese": "Japonca", "Korean": "Korece", "Arabic": "Arapça",
+                "Creole": "Kreolce", "Haitian": "Haiti dilinde", "Vietnamese": "Vietnamca", "Hindi": "Hintçe",
+                "Polish": "Lehçe", "Ukrainian": "Ukraynaca", "English": "İngilizce"}
+
+
+def language_of(row):
+    """The game's note that a line is spoken in another language -> its Turkish name ("İspanyolca"), or None."""
+    m = _LANGUAGE_IN.match(row)
+    return LANGUAGES_TR.get(m.group(1), m.group(1)) if m else None
+
+
 def split_speaker(text):
     """-> (speaker or None, line without the speaker). A name cut off by the area's edge comes as CUT + its end
-    ("…ress"); a misread one as read with a capital first letter ("cO Wilson" -> "CO Wilson")."""
+    ("…ress"); a misread one as read with a capital first letter ("cO Wilson" -> "CO Wilson"). The game's note that
+    a line is spoken in another language ("M7: In Spanish: Let's go!") is no speaker and is taken off the line (it
+    is looked up and translated without it); language_of() gives it, and the TV shows it in Turkish."""
+    text = _LANGUAGE.sub("", text, count=1)
+    name, body = _split_speaker(text)
+    return (name, _LANGUAGE.sub("", body, count=1)) if name else (name, body)
+
+
+def _split_speaker(text):
     m = _SPEAKER.match(text)
     if m and len(m.group(1)) <= 30 and m.group(2).strip():
         return _clean_name(m.group(1)), m.group(2).strip()
@@ -158,7 +189,7 @@ def utterance_rows(text):
     for row in (r.strip() for r in text.split("\n")):
         if not row:
             continue
-        if not groups or split_speaker(row)[0] or is_hint(row):
+        if not groups or split_speaker(row)[0] or is_hint(row) or _LANGUAGE.match(row):
             groups.append([row])
         elif is_hint(" ".join(groups[-1])):
             groups.append([row])        # dialogue under a hint row

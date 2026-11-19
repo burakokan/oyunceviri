@@ -57,6 +57,14 @@ class FiltersPage(QWidget):
                             "\"Karl: …\" gibi satırlarda isim çevrilmeden başta gösterilir. Kapatırsan yalnızca "
                             "konuşma çevrilir.", speaker))
         main.add(Divider())
+        names_only = Toggle(f.get("names_only", False))
+        names_only.toggled.connect(lambda v: self._set("names_only", v))
+        main.add(SettingRow("Yalnız adı olan satırları göster",
+                            "Oyun her konuşmanın başına \"Ad:\" yazıyorsa (GTA 6'da altyazı ayarlarından konuşmacı "
+                            "adı açıkken) adı olmayan yazı tabela ya da HUD sayılır ve gösterilmez. Görev yazıları ve "
+                            "tuş ipuçları yine gösterilir. Oyun adları her satıra yazmıyorsa kendiliğinden devre dışı "
+                            "kalır.", names_only))
+        main.add(Divider())
         letters = QSpinBox()
         letters.setRange(1, 12)
         letters.setValue(f["min_letters"])

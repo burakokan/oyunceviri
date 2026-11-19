@@ -40,3 +40,11 @@ Bu komut uygulamayı derler. Yalnız değişen dosyaları içeren bir güncellem
 ```
 
 - Bağlanan Android TV uygulaması eskiyse, altyazı durdurulmuşken ağ üzerinden kendiliğinden güncellenir.
+
+## Ayarları başka bilgisayara taşıma
+
+Genel → "Ayarları başka bilgisayara taşı" bölümünde iki düğme var: "Dosyaya yaz" ve "Dosyadan yükle". Bunlar `pc/gt/settings_io.py` kodunu kullanır.
+
+- **Taşınanlar:** altyazı alanı ve eşikleri, görev ve telefon alanları, filtreler, çeviri motoru, TV görünümü, konuşmacı renkleri.
+- **API anahtarları:** Dosyaya yalnızca kullanıcı "Evet, anahtarlarla" derse girer. Anahtarsız bir dosya yüklenirse bilgisayardaki mevcut anahtarlar korunur.
+- **Taşınmayanlar:** PS5 bağlantısı ve PSN hesabı (`ps5.json`), TV'nin adresi ve markası, chiaki-ng yolu. Bunlar her bilgisayarda yeniden kurulur. Dosyaya elle eklenseler bile yükleme sırasında dikkate alınmaz.

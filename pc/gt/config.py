@@ -56,6 +56,9 @@ DEFAULTS = {
         "min_letters": 2,
         # Keep "Karl:" in front of the line (the name itself is not translated)
         "speaker_names": True,
+        # In a game that writes "Name:" in front of every line (GTA 6 with speaker names on), lines without a name
+        # are not shown (signs, HUD); objectives / button hints still are
+        "names_only": False,
         # Text from these phrases to the end of the line is removed (HUD prompts)
         "cut_phrases": ["Swap "],
         # Lines containing any of these are ignored completely
@@ -80,18 +83,23 @@ DEFAULTS = {
     # short mission objective under the subtitles ("Go to the bank."; the subtitle reader leaves its area out).
     # roi: [x, y, w, h] fractions of the PS5 picture.
     # Reading: filter dark_box (white text in a dark box) | outlined (white text with a dark outline) | bright |
-    # any; text_min: the letters' least brightness (0-255); bg_max: a dark box's most brightness.
+    # plain (text on a plain light or dark card: phone messages) | any; text_min: the letters' least brightness (0-255); bg_max: a dark box's most brightness; skip_menus: a
+    # reading whose every word is capitalised and has no punctuation (the pause menu) is left out; ignore: phrases
+    # whose readings are left out (the user's exceptions).
     # Look on the TV: place cover (over the English) | below | above | top | bottom (fixed, centred; offset % from
     # the edge); align left | center; size % of the English text; fg / bg colours; opacity % of the box (0: none,
     # shadowed text).
     "regions": {
         "hint": {"enabled": False, "roi": None, "filter": "dark_box", "text_min": 170, "bg_max": 80,
+                 "skip_menus": True, "ignore": [],
                  "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
                  "opacity": 92},
-        "phone": {"enabled": False, "roi": None, "filter": "any", "text_min": 170, "bg_max": 80,
+        "phone": {"enabled": False, "roi": None, "filter": "plain", "text_min": 170, "bg_max": 80,
+                  "skip_menus": True, "ignore": [],
                   "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
                   "opacity": 92},
         "objective": {"enabled": False, "roi": None, "filter": "outlined", "text_min": 190, "bg_max": 80,
+                      "skip_menus": False, "ignore": [],
                       "place": "cover", "offset": 8, "align": "center", "size": 100, "fg": "#FFFFFF",
                       "bg": "#000000", "opacity": 80},
     },
@@ -111,6 +119,9 @@ DEFAULTS = {
     "update": {"auto": True, "token": ""},
     # The first-run guide ("Başlarken") was finished
     "onboarded": False,
+    # A sentence that goes on (next screen, or the same row revealed further): the Turkish already on the TV stays
+    # and only the rest is added under it on its own line (False: the whole sentence is written over the row)
+    "append_rest": True,
     "tv_ip": "",
 }
 

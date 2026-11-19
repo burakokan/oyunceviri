@@ -102,7 +102,7 @@ class SpeakerNames:
         same screen row ("…Pair with transmisJoey: There ya go.", "…paint job ad oey: You wanna…") -> the row from
         that name on, with the name written in full; None when there is none."""
         with self._lock:
-            known = sorted((k for k, c in self.counts.items() if c >= 2), key=len, reverse=True)
+            known = sorted((k for k, c in self.counts.items() if c >= 3), key=len, reverse=True)
         for m in _INSIDE.finditer(row):
             if m.start() == 0:
                 continue
@@ -110,6 +110,6 @@ class SpeakerNames:
             for name in known:
                 last = name.split()[-1].casefold()
                 # "transmisJoey" ends with "Joey"; "oey" is "Joey" without its first letter
-                if word.endswith(last) or (len(word) >= 3 and last.endswith(word)):
+                if word.endswith(last) or (len(word) >= max(3, len(last) - 2) and last.endswith(word)):
                     return f"{name}: {row[m.end():]}"
         return None

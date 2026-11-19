@@ -37,6 +37,8 @@ HEARTBEAT_SECONDS = 15.0
 # A short line (up to this many words) of the same speaker is overwritten by their next line within this time.
 REPLACE_WORDS = 3
 REPLACE_SECONDS = 3.0
+# A line shown without a name gets its name if the same line is read with one within this time.
+RENAME_SECONDS = 6.0
 REREAD_SECONDS = 1.0
 FRAME_EVERY = 1.0
 FRAME_LIMIT = 3600
@@ -102,6 +104,41 @@ def rereads(first, second):
 
 
 _PRONOUN_I = re.compile(r"I\b|I['’]")
+
+
+def rest_of(old, new):
+    """The words `new` adds after `old` when the game revealed the line further ("I'd like to make sure we're all
+    hunky dory" -> "… hunky dory after whatever you boys did the other day.") -> "after whatever…", or None when
+    `new` is only `old` read again (a better reading)."""
+    old_words, new_words = old.split(), new.split()
+    target = normalize(old.rstrip(".…-–— "))
+    if not target:
+        return None
+    tries = [(fuzz.ratio(normalize(" ".join(new_words[:k])), target), k)
+             for k in range(max(1, len(old_words) - 2), min(len(new_words) - 1, len(old_words) + 2) + 1)]
+    score, k = max(tries, default=(0, 0))       # the best match, not the first close one ("…all hunky" ~ "…dory")
+    if score < 90:
+        return None
+    rest = " ".join(new_words[k:])
+    return rest if len(normalize(rest)) >= 2 else None
+
+
+def lower_start(turkish):
+    """A Turkish part that goes on mid-sentence starts in lowercase (Turkish I -> ı)."""
+    return ({"I": "ı", "İ": "i"}.get(turkish[:1], turkish[:1].lower()) + turkish[1:]) if turkish else turkish
+
+
+def remainder(shown, full):
+    """What the full sentence's translation adds after the part already on the TV, when it starts with it word for
+    word ("Her şeyin yolunda olduğundan emin olmak istiyorum" + "geçen gün yaptıklarınızdan sonra, çocuklar.");
+    None when it is worded differently."""
+    a, b = shown.split(), full.split()
+    if len(b) <= len(a):
+        return None
+    key = lambda w: normalize(w)    # noqa: E731 - small local comparison helper
+    if [key(w) for w in a] != [key(w) for w in b[:len(a)]]:
+        return None
+    return " ".join(b[len(a):])
 
 
 def join_parts(english_parts, turkish_parts):
@@ -172,12 +209,16 @@ class Engine:
         # speaker on every line (then a line without a name is not given the previous speaker's name).
         self.names = SpeakerNames()
         self._named = deque(maxlen=12)
+        # Lines shown without a name: when the name is read a moment later (it was cut or faded in), the TV writes
+        # the line again over its row, with the name and its colour.
+        self._unnamed = deque(maxlen=6)
         self._sticky = StickyRows()     # objectives / notices that stay while people talk
         self.repeats = RepeatGuard()    # signs / billboards read again and again
         self._cleared = True  # the screen was empty since the previous line
         self._history = []     # (line, time, hint) shown recently, so lines left on screen are not re-translated
         self._last_clear = 0.0
         self._last_sent = None   # the line the TV shows last (translation thread)
+        self._sent_tr = {}       # line id -> the Turkish sent for it (a growing sentence adds its rest under it)
         # Translation runs on its own thread, in reading order, so the screen is read on meanwhile.
         self._jobs = queue.Queue()
         threading.Thread(target=self._translation_worker, daemon=True).start()
@@ -194,6 +235,7 @@ class Engine:
         self.cfg = cfg
         self.names = SpeakerNames()         # a new session may be another game
         self._named.clear()
+        self._unnamed.clear()
         self.conductor.warm(cfg)            # open the online connections / start Gemma before the first line
         self._stop.clear()
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -540,14 +582,16 @@ class Engine:
             ocr_ms += (time.perf_counter() - t0) * 1000
             if better:
                 text = better
-        if self.names_always():
-            # A menu next to the dialogue on the same screen row (GTA's garage: "…Pair with transmisJoey: There ya
-            # go."): the row starts at the known speaker's name.
-            text = "\n".join(row if filters.split_speaker(row)[0] else (self.names.find(row) or row)
-                             for row in text.split("\n"))
+        # A menu next to the dialogue on the same screen row (GTA's garage: "the torque and top speed. Pair with
+        # transmisJoey: There ya go."): the row starts at the name of someone who already spoke several times. Not
+        # only in games that name everyone: badly read lines there made that test fail, and the menu text was
+        # translated and shown with a second "Joey:" in the middle.
+        text = "\n".join(row if filters.split_speaker(row)[0] else (self.names.find(row) or row)
+                         for row in text.split("\n"))
         # Every speaker's line on its own row, in screen order (a busy scene shows several at once); lines that
         # stay on screen (or come back) are not translated again.
         for rows in filters.utterance_rows(text):
+            language = filters.language_of(rows[0])     # "In Spanish:" -> shown as "İspanyolca:"
             speaker, first = filters.split_speaker(rows[0])
             speaker = self.names.resolve(speaker)   # "CO wiison" -> "CO Wilson", "…ress" -> "Waitress"
             rows = [first] + rows[1:]
@@ -564,19 +608,30 @@ class Engine:
                 continue        # a sign / billboard shown 3 times in the last minutes
             hint = not speaker and filters.is_hint(english)
             line = {"speaker": speaker, "english": english, "ocr": "\n".join(rows), "t_first": t_first,
-                    "since": now, "ocr_ms": ocr_ms, "crop": frame[0] if frame is not None else None, "hint": hint}
+                    "since": now, "ocr_ms": ocr_ms, "crop": frame[0] if frame is not None else None, "hint": hint,
+                    "lang": language}
             if hint:
                 # Objectives / button hints: shown at once (they have no full stop), never joined with dialogue.
                 if not self._seen(normalize(english), now, hint):
                     self._show(line)
                 continue
+            if speaker and self._unnamed:
+                key = normalize(english)
+                late = next((u for u in self._unnamed if now - u["time"] < RENAME_SECONDS
+                             and fuzz.ratio(u["norm"], key) >= 90), None)
+                if late:
+                    # The same line again, now with its name: written over the row that had none.
+                    self._unnamed.remove(late)
+                    self._show(line, replaces=late)
+                    continue
             op = self._open_for(speaker, now)
             if op and rereads(op["english"], english):
                 # The unfinished line on the TV again: written over it when this reading is longer or now ends the
                 # sentence ("…you're-" -> "…you're- you're the only one…", "You're a jokel" -> "You're a joke!").
                 if (unfinished(op["english"]) and not unfinished(english)
                         or len(normalize(english)) > len(normalize(op["english"])) + 1):
-                    self._show(dict(line, speaker=speaker or op["speaker"]), replaces=op)
+                    self._show(dict(line, speaker=speaker or op["speaker"], grows=rest_of(op["english"], english)),
+                               replaces=op)
                 continue
             if self._seen(normalize(english), now):
                 continue
@@ -610,14 +665,14 @@ class Engine:
             stripped = english.strip()
             if _ASIDE.match(stripped):
                 # "(is that the right term?)" in the middle of a sentence: kept inside the sentence.
-                self._show(dict(line, english=f'{op["english"]} {stripped}', joined=True,
+                self._show(dict(line, english=f'{op["english"]} {stripped}', joined=True, grows=stripped,
                                 speaker=op["speaker"] or speaker), replaces=op, parts=op["parts"] + [stripped])
                 return
             if continues(op["english"], english):
                 joined = f'{_ELLIPSIS.sub("", op["english"])} {english}'
                 if len(joined) <= MAX_JOIN:
-                    self._show(dict(line, english=joined, joined=True, speaker=op["speaker"] or speaker),
-                               replaces=op, parts=op["parts"] + [english])
+                    self._show(dict(line, english=joined, joined=True, speaker=op["speaker"] or speaker,
+                                    grows=english), replaces=op, parts=op["parts"] + [english])
                     return
         self._show(line)
 
@@ -637,6 +692,13 @@ class Engine:
             # misread or cut off, and giving it the previous speaker's name put one person's words in another's
             # mouth ("cO Wilson: Shit, you haven't heard?" was shown as Lucia's).
             speaker = last["speaker"]
+        if (not speaker and not hint and replaces is None and cfg["filters"].get("names_only")
+                and self.names_always()):
+            # "Only lines with a name": the game writes "Name:" in front of every line, so a line without one is a
+            # sign / HUD text (or its name is not read yet: it comes again with the name and is shown then).
+            if self.log:
+                self.log.note(no_name=line["english"][:60])
+            return
         if not hint and replaces is None:
             self._named.append(bool(line["speaker"]))
         english = line["english"]
@@ -652,6 +714,9 @@ class Engine:
                 and self.log):
             self.log.note(repeat_blocked=english[:60])
         self.line_id += 1
+        if not hint and not speaker:
+            self._unnamed.append({"id": self.line_id, "english": english, "norm": normalize(english), "time": now,
+                                  "parts": parts or [english]})
         incomplete = False
         if not hint:
             self._ended.append(not unfinished(english))
@@ -681,6 +746,29 @@ class Engine:
         ends = list(self._ended)
         return len(ends) < 10 or any(ends)
 
+    def _grow(self, job, shown, cfg):
+        """The sentence on the TV went on (next screen, or the same row revealed further): the Turkish already shown
+        stays as it is and only the rest is put under it, on its own line, so nothing jumps or changes wording.
+        The rest is taken from the whole sentence's pack translation when that starts with the shown part,
+        otherwise the new English part is translated on its own (with the beginning as context)."""
+        t0 = time.perf_counter()
+        english, rest_en = job["english"], job["line"]["grows"]
+        rest = None
+        hit = self.pack_hit(english, cfg)
+        if hit:
+            rest = remainder(shown, filters.correct(hit.turkish, cfg["corrections"]))
+            if rest:
+                self.last_source, self.last_candidates = f"Paket · {hit.pack.title}", None
+        if not rest:
+            context = (self._context(rest_en, cfg, job["line"].get("completes"))
+                       + f' This is only the end of a sentence that began: "{english[:len(english) - len(rest_en)].strip()}"'
+                       " - translate only this end.")
+            rest, _ = self.translate_text(rest_en, cfg, context)
+        if rest_en[:1].islower() or rest_en[:1] in ",;":
+            rest = lower_start(rest)
+        lines = shown.split("\n")
+        return "\n".join(lines + [rest.strip()]), (time.perf_counter() - t0) * 1000
+
     def _translation_worker(self):
         """Translates the lines in the order they were read and sends them to the TV."""
         while True:
@@ -694,7 +782,11 @@ class Engine:
     def _deliver(self, job):
         cfg = self.cfg
         line, english, speaker = job["line"], job["english"], job["speaker"]
-        turkish, tr_ms = self.translate_text(english, cfg, job["context"], job.get("parts"))
+        shown = self._sent_tr.get(job.get("replaces")) if job.get("replaces") is not None else None
+        if line.get("grows") and shown and cfg.get("append_rest", True):
+            turkish, tr_ms = self._grow(job, shown, cfg)
+        else:
+            turkish, tr_ms = self.translate_text(english, cfg, job["context"], job.get("parts"))
         if similar(normalize(turkish), normalize(english)):
             # Nobody translated it. Longer: not English (a Turkish menu), unless it is only names ("Lucia Caminos.").
             # One word without a speaker: a car's badge, a sign or a plate read as a subtitle ("Canboniare!").
@@ -703,6 +795,9 @@ class Engine:
             if not line["speaker"] and len(english.split()) <= 1 and not job["hint"]:
                 return
         partial = job["partial"]
+        if line.get("lang") and not (line.get("grows") and shown) and not turkish.startswith(line["lang"]):
+            # The game's "In Spanish:" in front of the line, in Turkish: "M7: İspanyolca: Hadi gidelim!"
+            turkish = f'{line["lang"]}: {turkish}'
         shown_speaker = speaker if cfg["filters"]["speaker_names"] else None
         now = time.perf_counter()
         prev = self._last_sent
@@ -717,6 +812,9 @@ class Engine:
         # also when it has moved up (busy scene).
         update = replaces is not None and prev is not None and replaces == prev["id"]
         self._last_sent = {"id": job["id"], "speaker": speaker, "english": english, "hint": job["hint"], "time": now}
+        self._sent_tr[job["id"]] = turkish
+        while len(self._sent_tr) > 60:
+            self._sent_tr.pop(next(iter(self._sent_tr)))
         msg = {"type": "line", "id": job["id"], "speaker": shown_speaker or "", "en": english, "tr": turkish,
                "partial": partial, "update": update}
         if replaces is not None:

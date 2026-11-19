@@ -1,5 +1,7 @@
 """Main window: sidebar navigation, header with status and Start button, pages, tray icon."""
 import copy
+import subprocess
+import sys
 import threading
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
@@ -539,6 +541,12 @@ class MainWindow(QMainWindow):
             self.side_tv.set_state(theme.MUTED, "TV bağlı değil")
         # The connected TV app knows what TV it runs on: a brand picked by hand (e.g. while reading the Samsung
         # steps) must not make "TV'de aç" look for the wrong kind of TV.
+        pending = self.cfg.get("tv_style_pending")
+        if clients and pending:
+            # A TV look brought in from another PC's settings file: the TV keeps it from now on.
+            self.server.send({"type": "style", "style": pending})
+            self.cfg.pop("tv_style_pending", None)
+            self.persist_config("tv_style_pending")
         brand = self._brand_of(clients)
         if brand and (brand != self.cfg.get("tv_app_brand") or brand != self.cfg.get("tv_brand")):
             self.cfg["tv_app_brand"] = self.cfg["tv_brand"] = brand
@@ -774,6 +782,25 @@ class MainWindow(QMainWindow):
             self._tray_hint_shown = True
             self.tray.showMessage("Oyun Çeviri", "Arka planda çalışmaya devam ediyor. Kapatmak için simgeye sağ "
                                   "tıklayıp Çıkış'ı seç.", QSystemTrayIcon.Information, 4000)
+
+    def restart_app(self):
+        """Close and open the app again (after settings were brought in from a file), subtitles on if they were."""
+        if FROZEN:
+            exe, args = sys.executable, []
+        else:
+            exe = str(__import__("pathlib").Path(sys.executable).with_name("pythonw.exe"))
+            args = [str(config.ROOT / "pc" / "app.py")]
+        if getattr(self, "_engine_running", False):
+            args.append("--start")
+        # Windows PowerShell does not quote ArgumentList items: a path with a space gets its own double quotes
+        quoted = ",".join("'" + (f'"{a}"' if " " in a else a).replace("'", "''") + "'" for a in args)
+        command = (f"Start-Sleep -Seconds 3; Start-Process -FilePath '{exe.replace(chr(39), chr(39) * 2)}'"
+                   + (f" -ArgumentList {quoted}" if args else "")
+                   + f" -WorkingDirectory '{str(config.ROOT).replace(chr(39), chr(39) * 2)}'")
+        subprocess.Popen(["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden", "-Command", command],
+                         creationflags=0x08000000 | 0x00000200)      # the new app starts once this one has quit
+        self._dirty = False
+        self.quit()
 
     def quit(self):
         self._quitting = True

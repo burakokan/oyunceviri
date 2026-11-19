@@ -128,8 +128,10 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
             colored = (_letters_only((bright * 255).astype(np.uint8))
                        | _letters_only(((bright & (cv2.erode(v, _OUTLINE) < 60)) * 255).astype(np.uint8)))
         cols = colored[y0:y1].any(axis=0)
-        while x0 > 0 and cols[max(0, x0 - gap // 2):x0].any():
-            x0 = max(0, x0 - gap // 2) + int(np.argmax(cols[max(0, x0 - gap // 2):x0]))
+        # To the left a bit further: the space after "Stranger:" (colon + space) is wider than between words.
+        left = (3 * gap) // 4
+        while x0 > 0 and cols[max(0, x0 - left):x0].any():
+            x0 = max(0, x0 - left) + int(np.argmax(cols[max(0, x0 - left):x0]))
         while x1 < w and cols[x1:min(w, x1 + gap // 2)].any():
             x1 = x1 + int(np.flatnonzero(cols[x1:min(w, x1 + gap // 2)])[-1]) + 1
         pad = (y1 - y0) // 3
