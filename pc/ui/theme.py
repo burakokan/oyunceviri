@@ -159,4 +159,9 @@ QScrollBar::handle:horizontal {{ background: {BORDER}; border-radius: 4px; min-w
 QMenu {{ background: {CARD_HI}; border: 1px solid {BORDER}; padding: 4px; }}
 QMenu::item {{ padding: 6px 18px; border-radius: 6px; }}
 QMenu::item:selected {{ background: {ACCENT}; }}
+
+/* Question / warning boxes and other dialogs: with Windows in light mode they kept a white background under the
+   light text of this style (white on white, unreadable). */
+QDialog, QMessageBox, QColorDialog, QInputDialog {{ background: {CARD}; }}
+QMessageBox QLabel, QDialog QLabel {{ color: {TEXT}; background: transparent; }}
 """

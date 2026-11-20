@@ -46,6 +46,11 @@ def main():
     app.setApplicationName("Oyun Çeviri")
     app.setQuitOnLastWindowClosed(False)
     app.setFont(QFont(theme.FONT, 10))
+    try:
+        # The app is dark: native parts (dialogs, menus, scroll bars) must not follow a light Windows theme.
+        app.styleHints().setColorScheme(Qt.ColorScheme.Dark)
+    except AttributeError:      # Qt older than 6.8
+        pass
     app.setStyleSheet(theme.QSS)
     from ui.widgets import WheelGuard
     wheel_guard = WheelGuard(app)
