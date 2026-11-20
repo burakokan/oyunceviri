@@ -49,7 +49,21 @@ Genel → "Ayarları başka bilgisayara taşı" bölümünde iki düğme var: "D
 
 - **Taşınanlar:** altyazı alanı, görev ve telefon alanları, filtreler, çeviri motoru, TV görünümü, konuşmacı renkleri.
 - **API anahtarları:** Dosyaya yalnızca kullanıcı "Evet, anahtarlarla" derse girer. Anahtarsız bir dosya yüklenirse bilgisayardaki mevcut anahtarlar korunur.
-- **Taşınmayanlar:** PS5 bağlantısı ve PSN hesabı (`ps5.json`), TV'nin adresi ve markası, chiaki-ng yolu. Okuma eşikleri (parlaklık / renk) de taşınmaz, çünkü o PS5'in görüntüsüne göre değişir. Her bilgisayarda Altyazı Alanı → "Otomatik ayarla" ile bulunur. Bu ayarlar dosyaya elle eklense bile yükleme sırasında dikkate alınmaz.
+- **Taşınmayanlar:** PS5 bağlantısı ve PSN hesabı (`ps5.json`), TV'nin adresi ve markası, chiaki-ng yolu. Okuma eşikleri (parlaklık / renk) ve "Oyunda altyazı arka planı açık" seçeneği de taşınmaz, çünkü o PS5'in görüntüsüne göre değişir. Her bilgisayarda Altyazı Alanı → "Otomatik ayarla" ile bulunur. Bu ayarlar dosyaya elle eklense bile yükleme sırasında dikkate alınmaz.
+
+## Altyazı okuma ve oyunun altyazı arka planı
+
+Altyazılar varsayılan olarak parlaklık ve renk eşiğiyle okunur (Altyazı Alanı → "Okumayı ayarla").
+
+Oyunun altyazı ayarlarında arka plan (yarı saydam ya da koyu kutu) açıksa, Altyazı Alanı → "Oyunda altyazı arka planı açık" seçeneği de açılabilir. Bu seçenek açıkken:
+
+- Harfler arkalarındaki kutuya göre okunur, sabit eşik kullanılmaz.
+- Görüntü soluk ya da renk tonu kaymış olsa bile (TV görüntü modu, HDR) okuma bozulmaz. Renkli konuşmacı adları da kaçmaz.
+- Kutu bulunamazsa eski eşikli okumaya dönülür.
+
+Oyunda kutu kapalıysa bu seçenek kapalı kalmalı. Kutu yokken aydınlık sahnelerde eşikli okuma daha iyi sonuç verir.
+
+"Otomatik ayarla" düğmesi iki yolu da dener. Kutuya göre okuma belirgin şekilde daha iyiyse seçeneği açar, kötüyse kapatır.
 
 ## Lisans
 

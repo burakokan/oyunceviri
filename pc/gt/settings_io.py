@@ -19,7 +19,8 @@ FORMAT = "oyun-ceviri-ayarlar"
 # The reading thresholds belong here too: they fit one PS5's picture (HDR, the game's subtitle background, colour);
 # 108 / 15 brought from another PC made a friend's subtitles unreadable. Each PC finds its own ("Otomatik ayarla").
 DEVICE_KEYS = [("tv_ip",), ("tv_brand",), ("tv_app_brand",), ("chiaki_path",), ("window_process",), ("onboarded",),
-               ("gemini", "building"), ("packs", "game"), ("text_v_min",), ("text_s_max",)]
+               ("gemini", "building"), ("packs", "game"), ("text_v_min",), ("text_s_max",),
+               ("text_box",)]
 # Only with the user's yes.
 SECRET_KEYS = [("online", "deepl_key"), ("online", "groq_key"), ("gemini", "key"), ("update", "token")]
 

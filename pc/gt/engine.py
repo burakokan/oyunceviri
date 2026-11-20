@@ -13,8 +13,8 @@ from .capture import WindowGrabber
 from .conductor import Conductor
 from .guards import RepeatGuard, StickyRows, non_speech
 from .logbook import Logbook
-from .ocr import (RowCache, changed, keep_boxes, make_ocr, outline_mask, outline_ratio, signature, subtitle_lines,
-                  text_lines, text_mask)
+from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mask, outline_ratio, signature,
+                  subtitle_lines, text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .speakers import SpeakerColors, SpeakerNames
@@ -167,10 +167,25 @@ def reading_score(text):
     return score
 
 
+def read_on_box(cfg, crops, roi, ocr):
+    """Reading on the game's subtitle background (box mode) -> (total score, clearest reading)."""
+    total, sample = 0, ""
+    for crop in crops:
+        mask = box_mask(crop)
+        boxes = Engine.lines(cfg, crop, mask, roi)
+        text = filters.clean(ocr.read(crop, mask, boxes=boxes), cfg["filters"]) if boxes else ""
+        total += reading_score(text)
+        if reading_score(text) > reading_score(sample):
+            sample = text
+    return total, sample
+
+
 def calibrate(cfg, crops, roi, ocr):
     """The brightness / colour thresholds that read the subtitles on screen best ("Otomatik ayarla"): every pair
     on a grid is tried on the given pictures of the subtitle area (each PS5 picture differs: HDR, the game's
-    subtitle background, a colour cast) -> (v_min, s_max, best reading)."""
+    subtitle background, a colour cast) -> (v_min, s_max, best reading, score, box mode).
+    Box mode (reading against the game's subtitle background) is chosen when it reads clearly better than the
+    best pair: with the box on and a dim or colour-cast picture; without the box it reads worse and stays off."""
     best = None
     for v_min in (120, 140, 160, 180, 200, 220, 240):
         for s_max in (15, 30, 60, 100, 150, 220):
@@ -198,7 +213,11 @@ def calibrate(cfg, crops, roi, ocr):
     # that wins in one scene by a letter or two can lose in the next one).
     if best[0][0] < default[0][0] * 1.1 + 5:
         best = default
-    return best[1], best[2], best[3], best[0][0]
+    box_total, box_sample = read_on_box(cfg, crops, roi, ocr)
+    # Equal readings keep what the user chose (with the box on, both read a normal picture equally well).
+    if box_total > best[0][0] * 1.05 + 5 or (cfg.get("text_box") and box_total >= best[0][0] * 0.97):
+        return best[1], best[2], box_sample, box_total, True
+    return best[1], best[2], best[3], best[0][0], False
 
 
 def punch(mask, holes):
@@ -480,7 +499,12 @@ class Engine:
                         recorder(bgr, t_frame)
                     boxes = None
                     holes = self._holes(roi, bgr.shape)
-                    if outlined:
+                    if cfg.get("text_box"):
+                        # The game's own subtitle background is on: letters are read against the box, no fixed
+                        # thresholds (a dim or colour-cast picture reads too; coloured names stay).
+                        mask = punch(box_mask(bgr), holes)
+                        boxes = self.lines(cfg, bgr, mask, roi)
+                    if outlined and not boxes:
                         mask = punch(outline_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
                         boxes = self.lines(cfg, bgr, mask, roi)
                     if not boxes:

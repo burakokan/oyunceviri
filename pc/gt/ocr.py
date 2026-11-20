@@ -322,6 +322,20 @@ def outline_mask(bgr, v_min, s_max, dark=60):
     return _letters_only((((v >= v_min) & (hsv[..., 1] <= s_max) & near_dark) * 255).astype(np.uint8))
 
 
+def box_mask(bgr, contrast=70, box_max=120):
+    """Subtitles on the game's own subtitle background (a dark box behind the text, semi-transparent or solid):
+    letters of any colour that are clearly brighter than the box right around them. Measured against the box, not
+    against fixed brightness / colour thresholds, so a dim, washed-out or colour-cast picture (HDR, a TV's picture
+    mode) is read as well and coloured speaker names are kept. Where the background around a letter is not dark (no
+    box there) nothing is taken."""
+    v = bgr.max(axis=2)
+    # The background without the letters: an opening wider than any letter stroke takes them out.
+    side = max(9, int(bgr.shape[0] * 0.045)) | 1
+    background = cv2.morphologyEx(v, cv2.MORPH_OPEN, np.ones((side, side), np.uint8))
+    text = (v.astype(np.int16) - background >= contrast) & (background <= box_max)
+    return _letters_only((text * 255).astype(np.uint8))
+
+
 def outline_ratio(bgr, mask, boxes, dark=60):
     """Share of the text pixels in the boxes that have a near-black pixel next to them (1.0: outlined text)."""
     if not boxes:

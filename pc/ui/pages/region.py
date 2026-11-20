@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QButtonGroup, QComboBox, QHBoxLayout, QLabel, QLi
 from gt import config
 from gt.capture import WindowGrabber
 from gt.engine import Engine, calibrate
-from gt.ocr import make_ocr, text_mask
+from gt.ocr import box_mask, make_ocr, text_mask
 from gt.regions import FILTERS, area_cfg
 from gt.remoteplay import RemotePlaySource, needs_link, uses_builtin
 from gt.winutil import find_window
@@ -117,9 +117,17 @@ class RegionPage(QWidget):
             0, 255, "text_s_max")
         tune.add(v_row)
         tune.add(s_row)
+        self.text_box = Toggle(bool(self.cfg.get("text_box")))
+        self.text_box.toggled.connect(self._set_text_box)
+        tune.add(SettingRow("Oyunda altyazı arka planı açık",
+                            "Oyunun altyazı ayarlarında arka planı (yarı saydam ya da koyu kutu) açtıysan bunu da aç. "
+                            "Harfler arkalarındaki kutuya göre okunur: görüntü soluk ya da renk tonu kaymış olsa da "
+                            "eşik gerekmez, renkli konuşmacı adları kaçmaz. Oyunda kutu kapalıysa kapalı tut.",
+                            self.text_box))
         buttons = QHBoxLayout()
         auto = icon_button(theme.Icon.SYNC, "Otomatik ayarla")
-        auto.setToolTip("Ekranda bir altyazı varken bas: parlaklık ve renk eşiklerinin hepsini dener, en iyi okuyanı seçer")
+        auto.setToolTip("Ekranda bir altyazı varken bas: parlaklık ve renk eşiklerinin hepsini ve oyunun altyazı arka "
+                        "planına göre okumayı dener, en iyi okuyanı seçer")
         auto.clicked.connect(self.auto_thresholds)
         self.auto_button = auto
         defaults = icon_button(theme.Icon.REFRESH, "Varsayılan ayarlar")
@@ -408,6 +416,9 @@ class RegionPage(QWidget):
 
     def reverted(self):
         """Settings went back to the saved ones: show the saved thresholds."""
+        self.text_box.blockSignals(True)
+        self.text_box.setChecked(bool(self.cfg.get("text_box")))
+        self.text_box.blockSignals(False)
         for slider, value, key in getattr(self, "_sliders", []):
             slider.blockSignals(True)
             slider.setValue(self.cfg[key])
@@ -437,6 +448,10 @@ class RegionPage(QWidget):
         h.addWidget(value)
         return slider, SettingRow(title, desc, box)
 
+    def _set_text_box(self, on):
+        self.cfg["text_box"] = bool(on)
+        self.win.save_config()
+
     def auto_thresholds(self):
         """Tries every brightness / colour pair on the last moments of the subtitle area and keeps the best."""
         crops = self._crops[::3][-4:]
@@ -464,19 +479,22 @@ class RegionPage(QWidget):
         if isinstance(result, Exception):
             self.win.show_message(f"Otomatik ayar yapılamadı: {result}", error=True)
             return
-        v_min, s_max, text, score = result
+        v_min, s_max, text, score, on_box = result
         if score < 8 or not text:
             self.win.show_message("Ekranda okunacak bir altyazı bulunamadı. Oyunda bir altyazı çıkınca tekrar bas.",
                                   error=True)
             return
         self.v_slider.setValue(v_min)
         self.s_slider.setValue(s_max)
-        self.win.show_message(f"Ayarlandı: parlaklık {v_min}, renk {s_max}. Okunan: {text.splitlines()[0][:80]} "
+        self.text_box.setChecked(on_box)
+        how = "oyunun altyazı arka planına göre okunuyor" if on_box else f"parlaklık {v_min}, renk {s_max}"
+        self.win.show_message(f"Ayarlandı: {how}. Okunan: {text.splitlines()[0][:80]} "
                               f"(beğendiysen üstteki çubuktan Kaydet).")
 
     def reset_thresholds(self):
         self.v_slider.setValue(config.DEFAULTS["text_v_min"])
         self.s_slider.setValue(config.DEFAULTS["text_s_max"])
+        self.text_box.setChecked(config.DEFAULTS["text_box"])
 
     @property
     def roi_key(self):
@@ -581,8 +599,13 @@ class RegionPage(QWidget):
             self.area_preview.set_image(self._draw_area_rows(crop))
             return
         self._crops = (self._crops + [crop.copy()])[-12:]       # the last moments, for "Otomatik ayarla"
-        mask = text_mask(crop, self.cfg["text_v_min"], self.cfg["text_s_max"])
-        boxes = Engine.lines(self.cfg, crop, mask, roi)
+        boxes = None
+        if self.cfg.get("text_box"):
+            mask = box_mask(crop)
+            boxes = Engine.lines(self.cfg, crop, mask, roi)
+        if not boxes:
+            mask = text_mask(crop, self.cfg["text_v_min"], self.cfg["text_s_max"])
+            boxes = Engine.lines(self.cfg, crop, mask, roi)
         self.preview.set_image(draw_lines_preview(crop, mask, boxes))
         if time.monotonic() - self._last_ocr > 0.5:
             self._last_ocr = time.monotonic()
