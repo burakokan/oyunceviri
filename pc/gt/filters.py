@@ -16,6 +16,10 @@ _CUT_SPEAKER = re.compile(r"^\s*([a-z][a-z'’.\-]{0,11}(?:\s+[A-Z][\w'’.\-]*)
 CUT = "…"
 # A name with its colon as the row's first word ("M7:", "Joey:"): never trimmed as a HUD token
 _NAME_TAG = re.compile(r"^[A-Z][\w'’.\-]*:$")
+# Specks read in front of a row (". ", "• ", "'"): not part of a name
+_LEAD_JUNK = re.compile(r"^[\s.,:;·•*'\"`´|\-–—]+")
+# A lowercase letter or two glued in front of a name: "gJason"
+_LOWER_NOISE = re.compile(r"^[a-z]{1,3}(?=[A-Z][a-z])")
 # GTA's note on a line spoken in another language: "In Spanish: Take it…"
 _LANGUAGE = re.compile(r"^\s*In [A-Z][a-z]+\s*:\s*")
 # HUD letters stuck to the front of a name: "WARaiza" -> "Raiza"
@@ -134,8 +138,12 @@ def split_speaker(text):
     a line is spoken in another language ("M7: In Spanish: Let's go!") is no speaker and is taken off the line (it
     is looked up and translated without it); language_of() gives it, and the TV shows it in Turkish."""
     text = _LANGUAGE.sub("", text, count=1)
-    name, body = _split_speaker(text)
-    return (name, _LANGUAGE.sub("", body, count=1)) if name else (name, body)
+    # A speck read in front of the name (".Jason: Hey." on a grey subtitle box) hid the name: it went into the line
+    # as plain text and the TV showed it white, without the speaker's colour.
+    name, body = _split_speaker(_LEAD_JUNK.sub("", text))
+    if not name:
+        return None, text
+    return name, _LANGUAGE.sub("", body, count=1)
 
 
 def _split_speaker(text):
@@ -149,7 +157,7 @@ def _split_speaker(text):
         # The first word has a capital ("cO", "CO"); an all-lowercase first word is a cut-off name (below).
         if (words[0] not in lower and len(lower) <= 1
                 and not any(w.lower() in _NOT_NAME for w in words)):
-            name = m.group(1)
+            name = _LOWER_NOISE.sub("", m.group(1))       # "gJason" -> "Jason" ("cO Wilson" stays)
             return name[0].upper() + name[1:], m.group(2).strip()
     m = _CUT_SPEAKER.match(text)
     if m and m.group(2).strip():

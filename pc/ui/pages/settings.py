@@ -2,12 +2,13 @@
 import os
 import subprocess
 import sys
+import threading
 
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QMessageBox, QVBoxLayout, QWidget
 
-from gt import config, settings_io
+from gt import config, diagnostics, settings_io
 from gt.updater import FROZEN
 from gt.version import REPO, VERSION
 
@@ -117,6 +118,16 @@ class SettingsPage(QWidget):
                             "açılır. Dosyada anahtar yoksa bu bilgisayardaki anahtarlar kalır.", bring))
         lay.addWidget(move)
 
+        report = Card("Sorun bildir",
+                      "Bir şey yolunda gitmediyse (altyazı kaçtı, ad yanlış, TV bağlanmadı…) kayıtları tek dosyada "
+                      "topla ve yardım edene gönder. API anahtarları, PS5 / PSN anahtarları ve TV sertifikaları "
+                      "dosyaya girmez; son oyun oturumlarının okunan satırları ve altyazı alanının görüntüleri girer.")
+        self.bundle_button = icon_button(theme.Icon.ADD, "Kayıtları paketle")
+        self.bundle_button.clicked.connect(self._make_bundle)
+        report.add(SettingRow("Kayıt paketi", "Masaüstüne OyunCeviri-kayitlar-….zip olarak kaydedilir. Sorunu "
+                              "yaşadıktan hemen sonra bas (uygulamayı kapatmadan da olur).", self.bundle_button))
+        lay.addWidget(report)
+
         about = Card("Hakkında")
         info = QLabel(
             f"Oyun Çeviri {VERSION}<br>"
@@ -190,6 +201,32 @@ class SettingsPage(QWidget):
             self.win.engine.colors._save()
         self.win.show_message(f"{changed} ayar yüklendi, uygulama yeniden açılıyor…")
         self.win.restart_app()
+
+    # ---- diagnostics ----
+
+    def _make_bundle(self):
+        self.bundle_button.setEnabled(False)
+        self.bundle_button.setText("  Hazırlanıyor…")
+        cfg, clients = dict(self.cfg), list(getattr(self.win, "tv_clients", []))
+
+        def work():
+            try:
+                result = diagnostics.make_bundle(cfg, tv_clients=clients)
+            except Exception as e:  # noqa: BLE001 - shown to the user
+                result = e
+            QTimer.singleShot(0, self, lambda: self._bundle_done(result))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _bundle_done(self, result):
+        self.bundle_button.setEnabled(True)
+        self.bundle_button.setText(f"{theme.Icon.ADD}  Kayıtları paketle")
+        if isinstance(result, Exception):
+            self.win.show_message(f"Kayıt paketi hazırlanamadı: {result}", error=True)
+            return
+        mb = result.stat().st_size / 1e6
+        self.win.show_message(f"Kayıt paketi hazır ({mb:.0f} MB): {result}")
+        subprocess.Popen(["explorer", "/select,", str(result)])
 
     # ---- updates (the main window does the work; this page shows it) ----
 
