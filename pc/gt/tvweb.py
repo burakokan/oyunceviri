@@ -13,11 +13,14 @@ Keys and certificates are kept in tv-keys/ (never in the installer).
 import io
 import json
 import re
+import shutil
 import socket
 import subprocess
 import urllib.parse
 import urllib.request
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 
 from .config import ROOT
@@ -50,6 +53,29 @@ def scan(port, progress=lambda t: None):
     """Addresses on the local /24 network with this port open."""
     from .tvctl import scan_port
     return scan_port(port, progress)
+
+
+def with_pc_address(package, tv_ip):
+    """A copy of the Samsung package with this PC's addresses in pc.js (the app tries them first, so it connects at
+    once instead of searching the whole network). The copy is signed and installed in place of the plain package."""
+    import tempfile
+    from .tvctl import lan_ips, pc_ip_for
+    try:
+        first = pc_ip_for(tv_ip) if tv_ip else None
+        ips = [ip for ip in [first] + lan_ips() if ip]
+        ips = list(dict.fromkeys(ips))
+        if not ips:
+            return package
+        copy = Path(tempfile.mkdtemp(prefix="oyunceviri-")) / package.name
+        shutil.copyfile(package, copy)
+        with zipfile.ZipFile(copy, "a") as z:
+            if "pc.js" not in z.namelist():
+                z.writestr("pc.js", f"window.OC_PC = {json.dumps(ips)};\n")
+        log(f"Samsung: bu PC'nin adresleri pakete yazıldı: {', '.join(ips)}")
+        return copy
+    except (OSError, zipfile.BadZipFile) as e:
+        log(f"Samsung: adres pakete yazılamadı ({e}), paket olduğu gibi kuruluyor")
+        return package
 
 
 # ---------------------------------------------------------------- Samsung
@@ -124,8 +150,13 @@ class Samsung:
 
     @classmethod
     def install(cls, ip, progress):
-        ok, message = cls._run(["install", ip, str(cls.PACKAGE), str(KEYS / "samsung"), cls.APP_ID, cls.PACKAGE_ID],
-                               progress)
+        package = with_pc_address(cls.PACKAGE, ip)
+        try:
+            ok, message = cls._run(["install", ip, str(package), str(KEYS / "samsung"), cls.APP_ID, cls.PACKAGE_ID],
+                                   progress)
+        finally:
+            if package != cls.PACKAGE:
+                shutil.rmtree(package.parent, ignore_errors=True)     # the temporary copy with the address
         return ok, ("Samsung TV'ye kuruldu ve açıldı." if ok else message)
 
     @classmethod
@@ -267,15 +298,20 @@ class LG:
             cls._run(client, f"rm -f '{remote}'")
             cls.renew(client)
             progress("TV'de açılıyor…")
-            cls._launch(client)
+            cls._launch(client, ip)
             return True, "LG TV'ye kuruldu ve açıldı."
         finally:
             client.close()
 
     @classmethod
-    def _launch(cls, client):
+    def _launch(cls, client, ip=None):
+        """Starts the app; it is told this PC's address ("pc"), so it connects at once instead of searching."""
+        from .tvctl import pc_ip_for
+        launch = {"id": cls.APP_ID}
+        if ip:
+            launch["params"] = {"pc": pc_ip_for(ip)}
         cls._run(client, f"/usr/bin/luna-send-pub -n 1 'luna://com.webos.applicationManager/launch' "
-                         f"'{json.dumps({'id': cls.APP_ID})}'", timeout=20)
+                         f"'{json.dumps(launch)}'", timeout=20)
 
     @classmethod
     def launch(cls, ip, progress=lambda t: None):
@@ -285,7 +321,7 @@ class LG:
             return False, f"TV'ye bağlanılamadı ({e})."
         try:
             hours = cls.renew(client)
-            cls._launch(client)
+            cls._launch(client, ip)
             extra = f" Developer Mode {hours} saat daha açık." if hours else ""
             return True, "LG TV'de uygulama açıldı." + extra
         finally:

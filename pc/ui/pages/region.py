@@ -3,6 +3,7 @@ mission objective - on the live PS5 picture; every extra area has its own readin
 import os
 import re
 import subprocess
+import threading
 import time
 
 import cv2
@@ -12,7 +13,7 @@ from PySide6.QtWidgets import (QButtonGroup, QComboBox, QHBoxLayout, QLabel, QLi
 
 from gt import config
 from gt.capture import WindowGrabber
-from gt.engine import Engine
+from gt.engine import Engine, calibrate
 from gt.ocr import make_ocr, text_mask
 from gt.regions import FILTERS, area_cfg
 from gt.remoteplay import RemotePlaySource, needs_link, uses_builtin
@@ -57,6 +58,7 @@ class RegionPage(QWidget):
         self._ocr = None
         self._last_ocr = 0.0
         self._last_find = 0.0
+        self._crops = []          # the subtitle area's last pictures (for "Otomatik ayarla")
         self._syncing = False
         self._builtin = self._unlinked = False
         self.area = "subtitle"
@@ -116,10 +118,15 @@ class RegionPage(QWidget):
         tune.add(v_row)
         tune.add(s_row)
         buttons = QHBoxLayout()
+        auto = icon_button(theme.Icon.SYNC, "Otomatik ayarla")
+        auto.setToolTip("Ekranda bir altyazı varken bas: parlaklık ve renk eşiklerinin hepsini dener, en iyi okuyanı seçer")
+        auto.clicked.connect(self.auto_thresholds)
+        self.auto_button = auto
         defaults = icon_button(theme.Icon.REFRESH, "Varsayılan ayarlar")
         defaults.clicked.connect(self.reset_thresholds)
         look = icon_button(theme.Icon.TV, "TV'de görünümü (boyut, renk, konum, tek satır)…")
         look.clicked.connect(lambda: self.win.go("TvLookPage"))
+        buttons.addWidget(auto)
         buttons.addWidget(defaults)
         buttons.addWidget(look)
         buttons.addStretch(1)
@@ -430,6 +437,43 @@ class RegionPage(QWidget):
         h.addWidget(value)
         return slider, SettingRow(title, desc, box)
 
+    def auto_thresholds(self):
+        """Tries every brightness / colour pair on the last moments of the subtitle area and keeps the best."""
+        crops = self._crops[::3][-4:]
+        if not crops or self.area != "subtitle":
+            self.win.show_message("Önce altyazı alanını seç; ekranda bir altyazı varken bas.", error=True)
+            return
+        self.auto_button.setEnabled(False)
+        self.auto_button.setText("  Ayarlanıyor…")
+        cfg, roi = dict(self.cfg), self.current_roi()
+
+        def work():
+            try:
+                if self._ocr is None:
+                    self._ocr = make_ocr(cfg["ocr_engine"], accurate=False)
+                result = calibrate(cfg, crops, roi, self._ocr)
+            except Exception as e:  # noqa: BLE001 - shown to the user
+                result = e
+            QTimer.singleShot(0, self, lambda: self._auto_done(result))
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _auto_done(self, result):
+        self.auto_button.setEnabled(True)
+        self.auto_button.setText(f"{theme.Icon.SYNC}  Otomatik ayarla")
+        if isinstance(result, Exception):
+            self.win.show_message(f"Otomatik ayar yapılamadı: {result}", error=True)
+            return
+        v_min, s_max, text, score = result
+        if score < 8 or not text:
+            self.win.show_message("Ekranda okunacak bir altyazı bulunamadı. Oyunda bir altyazı çıkınca tekrar bas.",
+                                  error=True)
+            return
+        self.v_slider.setValue(v_min)
+        self.s_slider.setValue(s_max)
+        self.win.show_message(f"Ayarlandı: parlaklık {v_min}, renk {s_max}. Okunan: {text.splitlines()[0][:80]} "
+                              f"(beğendiysen üstteki çubuktan Kaydet).")
+
     def reset_thresholds(self):
         self.v_slider.setValue(config.DEFAULTS["text_v_min"])
         self.s_slider.setValue(config.DEFAULTS["text_s_max"])
@@ -536,6 +580,7 @@ class RegionPage(QWidget):
         if self.area != "subtitle":
             self.area_preview.set_image(self._draw_area_rows(crop))
             return
+        self._crops = (self._crops + [crop.copy()])[-12:]       # the last moments, for "Otomatik ayarla"
         mask = text_mask(crop, self.cfg["text_v_min"], self.cfg["text_s_max"])
         boxes = Engine.lines(self.cfg, crop, mask, roi)
         self.preview.set_image(draw_lines_preview(crop, mask, boxes))

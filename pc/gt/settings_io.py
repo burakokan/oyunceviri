@@ -2,7 +2,8 @@
 
 Only what is the same on every PC goes into the file: subtitle and area choices, filters, translation engine,
 TV look, speaker colours… What belongs to one PC / one TV stays out and is set up again there: the PS5 link and
-PSN account (ps5.json is never touched), the TV's address and brand, chiaki-ng's path, the first-run guide. The API
+PSN account (ps5.json is never touched), the TV's address and brand, chiaki-ng's path, the first-run guide, and the
+reading thresholds (brightness / colour: they depend on that PS5's picture). The API
 keys (DeepL, Groq, Gemini, GitHub) go in only when the user says so; a file without keys never removes the keys a PC
 already has.
 """
@@ -15,8 +16,10 @@ from .version import VERSION
 
 FORMAT = "oyun-ceviri-ayarlar"
 # Never in the file, never changed by a file: set up on each PC.
+# The reading thresholds belong here too: they fit one PS5's picture (HDR, the game's subtitle background, colour);
+# 108 / 15 brought from another PC made a friend's subtitles unreadable. Each PC finds its own ("Otomatik ayarla").
 DEVICE_KEYS = [("tv_ip",), ("tv_brand",), ("tv_app_brand",), ("chiaki_path",), ("window_process",), ("onboarded",),
-               ("gemini", "building"), ("packs", "game")]
+               ("gemini", "building"), ("packs", "game"), ("text_v_min",), ("text_s_max",)]
 # Only with the user's yes.
 SECRET_KEYS = [("online", "deepl_key"), ("online", "groq_key"), ("gemini", "key"), ("update", "token")]
 

@@ -4,7 +4,7 @@
  * messages: one box per area, "⟦1⟧" in the text is a button icon sent as a PNG). */
 (function () {
   "use strict";
-  var VERSION = "1.5-web";
+  var VERSION = "1.6-web";
   var PORT = 8765;
   var PLATFORM = window.tizen ? "tizen"
     : (window.PalmSystem || window.webOSSystem || /Web0S|webOS/i.test(navigator.userAgent)) ? "webos" : "browser";
@@ -41,11 +41,36 @@
     save("hdmi", n);
     $("hdmiNow").textContent = "HDMI " + n;
     if (PLATFORM === "tizen") {
+      if (!window.tizen || !tizen.tvwindow) { diag("HDMI HATA: bu TV tizen.tvwindow desteklemiyor"); return; }
+      /* The source object comes from the TV itself (VIDEOSOURCE) and the window is shown BEHIND the page over the
+       * whole surface ("100%"), the way CouchSubs (AGPL-3.0) does it. A hand-made {type, number} source and a px
+       * rectangle without BEHIND gave a black page on some Samsung TVs (found and fixed on a user's TV). */
+      var open = function (source) {
+        try {
+          diag("HDMI " + n + ": kaynak seçiliyor…");
+          tizen.tvwindow.setSource(source, function () {
+            diag("HDMI " + n + ": kaynak seçildi, pencere açılıyor…");
+            try {
+              tizen.tvwindow.show(function () { diag("HDMI " + n + ": pencere açık (görüntü gelmeli)"); },
+                function (e) { diag("HDMI HATA show(): " + (e && (e.name + " " + e.message))); },
+                ["0", "0", "100%", "100%"], "MAIN", "BEHIND");
+            } catch (e) { diag("HDMI HATA show() çağrısı: " + e.name + " " + e.message); }
+          }, function (e) { diag("HDMI HATA setSource(" + n + "): " + (e && (e.name + " " + e.message))); });
+        } catch (e) { diag("HDMI HATA: " + (e && (e.name + " " + e.message))); }
+      };
       try {
-        tizen.tvwindow.setSource({ type: "HDMI", number: n }, function () {
-          tizen.tvwindow.show(function () {}, function () {}, ["0px", "0px", "1920px", "1080px"], "MAIN");
-        }, function (e) { toast("HDMI " + n + " açılamadı: " + e.message); });
-      } catch (e) { toast("TV penceresi açılamadı: " + e.message); }
+        tizen.systeminfo.getPropertyValue("VIDEOSOURCE", function (info) {
+          var all = ((info && info.connected) || []).concat((info && info.disconnected) || []), found = null, i;
+          for (i = 0; i < all.length; i++) { if (all[i].type === "HDMI" && all[i].number === n) { found = all[i]; } }
+          if (!found) {
+            var names = [];
+            for (i = 0; i < all.length; i++) { names.push(all[i].type + all[i].number); }
+            diag("HDMI HATA: TV'de HDMI " + n + " yok. TV'nin kaynakları: " + (names.join(" ") || "boş"));
+            return;
+          }
+          open(found);
+        }, function (e) { diag("VIDEOSOURCE okunamadı, elle deneniyor: " + (e && e.message)); open({ type: "HDMI", number: n }); });
+      } catch (e) { open({ type: "HDMI", number: n }); }
     } else if (PLATFORM === "webos") {
       var v = $("hdmi");
       v.innerHTML = "";
@@ -107,7 +132,7 @@
     var done = false, sock;
     try { sock = new WebSocket("ws://" + (address.indexOf(":") > 0 ? address : address + ":" + PORT)); }
     catch (e) { fail(); return; }
-    var timer = setTimeout(function () { if (!done) { done = true; try { sock.close(); } catch (e) { /* */ } fail(); } }, 2500);
+    var timer = setTimeout(function () { if (!done) { done = true; try { sock.close(); } catch (e) { /* */ } fail(); } }, 1500);
     sock.onopen = function () { if (!done) { done = true; clearTimeout(timer); ok(sock); } else { sock.close(); } };
     sock.onerror = function () { if (!done) { done = true; clearTimeout(timer); fail(); } };
   }
@@ -116,14 +141,20 @@
     if (searching) { return; }
     searching = true;
     setState("Bilgisayar aranıyor…", false);
-    var first = [query("pc"), launchHost(), load("host", null)].filter(function (x) { return !!x; });
+    // The PC that installed the app wrote its address into it (pc.js): tried first, so no scan is needed.
+    var first = [query("pc"), launchHost(), load("host", null)].concat(window.OC_PC || [])
+      .filter(function (x, i, all) { return !!x && all.indexOf(x) === i; });
     tryList(first, function () {
       ownAddress(function (ip) {
         if (!ip) { searching = false; setState("TV'nin ağ adresi alınamadı. Ağ bağlantısını kontrol et.", false); retryLater(); return; }
         var prefix = ip.split(".").slice(0, 3).join(".");
         setState("Bilgisayar aranıyor (" + prefix + ".x)…", false);
-        var list = [];
-        for (var i = 1; i < 255; i++) { if (prefix + "." + i !== ip) { list.push(prefix + "." + i); } }
+        // The usual home-network addresses first (routers hand out .2-.50 and .100-.150), then the rest.
+        var list = [], order = [], i;
+        for (i = 2; i <= 50; i++) { order.push(i); }
+        for (i = 100; i <= 150; i++) { order.push(i); }
+        for (i = 1; i < 255; i++) { if (order.indexOf(i) < 0) { order.push(i); } }
+        for (i = 0; i < order.length; i++) { if (prefix + "." + order[i] !== ip) { list.push(prefix + "." + order[i]); } }
         scan(list, function () { searching = false; setState("Bilgisayar bulunamadı. Bilgisayarda Oyun Çeviri açık mı?", false); retryLater(); });
       });
     });
@@ -414,6 +445,17 @@
   // ---------------------------------------------------------------- guide, toast, keys
 
   function setState(text, ok) { var s = $("state"); s.textContent = text; s.className = ok ? "state ok" : "state"; }
+
+  /* Shown on the help card and as a long toast, so a failure cannot be missed or overwritten. */
+  function diag(text) {
+    var d = $("diag");
+    if (d) { d.textContent = text; }
+    var t = $("toast");
+    t.textContent = text;
+    t.style.display = "block";
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () { t.style.display = "none"; }, 8000);
+  }
   function showHelp(on) { $("help").style.display = on ? "block" : "none"; }
   function toast(text) {
     var t = $("toast");
@@ -426,7 +468,7 @@
   var BACK = [8, 27, 461, 10009];
   document.addEventListener("keydown", function (e) {
     var k = e.keyCode;
-    if (k >= 49 && k <= 52) { showHdmi(k - 48); toast("HDMI " + (k - 48)); e.preventDefault(); }
+    if (k >= 49 && k <= 52) { showHdmi(k - 48); e.preventDefault(); }
     else if (k === 48) { if (!ws) { search(); } toast("Bilgisayar aranıyor…"); }
     else if (BACK.indexOf(k) >= 0) { showHelp($("help").style.display === "none"); e.preventDefault(); }
   });

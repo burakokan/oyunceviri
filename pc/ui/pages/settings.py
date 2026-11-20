@@ -103,7 +103,9 @@ class SettingsPage(QWidget):
         move = Card("Ayarları başka bilgisayara taşı",
                     "Ayarlarını bir dosyaya yaz, öbür bilgisayarda o dosyadan yükle. Taşınanlar: altyazı ve görev / "
                     "telefon alanları, filtreler, çeviri motoru, TV görünümü, konuşmacı renkleri. Taşınmayanlar "
-                    "(her bilgisayarda yeniden yapılır): PS5 bağlantısı ve PSN hesabı, TV'nin adresi ve markası.")
+                    "(her bilgisayarda yeniden yapılır): PS5 bağlantısı ve PSN hesabı, TV'nin adresi ve markası, "
+                    "okuma eşikleri (parlaklık / renk: o PS5'in görüntüsüne göre değişir; Altyazı Alanı → "
+                    "\"Otomatik ayarla\").")
         export = icon_button(theme.Icon.ADD, "Dosyaya yaz…")
         export.clicked.connect(self._export_settings)
         move.add(SettingRow("Dışa aktar", "API anahtarlarını (DeepL, Groq, Gemini) da koymak isteyip istemediğin "

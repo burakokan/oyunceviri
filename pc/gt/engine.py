@@ -153,6 +153,54 @@ def join_parts(english_parts, turkish_parts):
     return " ".join(out)
 
 
+_WORD = re.compile(r"[A-Za-z][A-Za-z'’]+")
+_JUNK = re.compile(r"[^\w\s.,!?'’:;\-…\"()]")
+
+
+def reading_score(text):
+    """How good a reading of the subtitle area looks: letters in real words, a bonus for a speaker's name, minus
+    stray symbols (a reading of the scene behind the text)."""
+    score = sum(len(w) for w in _WORD.findall(text)) - 3 * len(_JUNK.findall(text))
+    rows = [r for r in text.split("\n") if r.strip()]
+    if rows and filters.split_speaker(rows[0])[0]:
+        score += 15
+    return score
+
+
+def calibrate(cfg, crops, roi, ocr):
+    """The brightness / colour thresholds that read the subtitles on screen best ("Otomatik ayarla"): every pair
+    on a grid is tried on the given pictures of the subtitle area (each PS5 picture differs: HDR, the game's
+    subtitle background, a colour cast) -> (v_min, s_max, best reading)."""
+    best = None
+    for v_min in (120, 140, 160, 180, 200, 220, 240):
+        for s_max in (15, 30, 60, 100, 150, 220):
+            trial = dict(cfg, text_v_min=v_min)
+            total, sample = 0, ""
+            for crop in crops:
+                text = ""
+                for make in (outline_mask, text_mask):
+                    mask = make(crop, v_min, s_max)
+                    boxes = Engine.lines(trial, crop, mask, roi)
+                    if boxes:
+                        text = filters.clean(ocr.read(crop, mask, boxes=boxes), cfg["filters"])
+                        if text:
+                            break
+                total += reading_score(text)
+                if reading_score(text) > reading_score(sample):
+                    sample = text           # the clearest reading is shown to the user
+            # ties go to the pair nearest the defaults (200 / 60)
+            key = (total, -abs(v_min - 200) / 20 - abs(s_max - 60) / 40)
+            if (v_min, s_max) == (200, 60):
+                default = (key, v_min, s_max, sample)
+            if best is None or key > best[0]:
+                best = (key, v_min, s_max, sample)
+    # The defaults read well in most scenes: another pair is kept only when it reads clearly better here (a pair
+    # that wins in one scene by a letter or two can lose in the next one).
+    if best[0][0] < default[0][0] * 1.1 + 5:
+        best = default
+    return best[1], best[2], best[3], best[0][0]
+
+
 def punch(mask, holes):
     """The mask with the given rectangles [(y0, y1, x0, x1)] emptied."""
     for y0, y1, x0, x1 in holes:
