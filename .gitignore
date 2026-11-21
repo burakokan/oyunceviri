@@ -2,6 +2,7 @@
 config.json
 ps5.json
 speakers.json
+/speaker_game_colors.json
 *_cache.json
 logs/
 tv-keys/
