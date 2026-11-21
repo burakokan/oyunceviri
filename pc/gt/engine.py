@@ -277,7 +277,7 @@ class Engine:
         # The names read this session (misread / cut-off names are fixed with them) and whether the game names the
         # speaker on every line (then a line without a name is not given the previous speaker's name).
         self.names = SpeakerNames()
-        self._named = deque(maxlen=12)
+        self._named = deque(maxlen=60)
         # Lines shown without a name: when the name is read a moment later (it was cut or faded in), the TV writes
         # the line again over its row, with the name and its colour.
         self._unnamed = deque(maxlen=6)
@@ -743,8 +743,14 @@ class Engine:
 
     def names_always(self):
         """The game writes the speaker's name in front of (nearly) every line of dialogue."""
-        named = self._named
-        return len(named) >= 6 and sum(named) >= 0.85 * len(named)
+        named = list(self._named)
+        recent = named[-12:]
+        if len(recent) >= 6 and sum(recent) >= 0.85 * len(recent):
+            return True
+        # GTA 6 names everyone, yet a few names cut off or faded in brought the last 12 lines below that now and then
+        # (a quarter of the time): Lucia's nameless "I just need the number," was then given Jason's name and written
+        # over his line. The game's habit shows over a longer stretch.
+        return sum(named) >= 6 and sum(named) >= 0.7 * len(named)
 
     def _open_for(self, speaker, now):
         """The newest unfinished line on the TV this line may complete: the same speaker's (a line without a name:
@@ -763,8 +769,11 @@ class Engine:
         Split sentences are not held back any more: the first part is shown at once and, when the rest comes, the
         whole sentence is written over it (it used to wait 2-3.5 s for the rest)."""
         speaker, english = line["speaker"], line["english"]
-        if op and not speaker and op["speaker"] and self.names_always():
-            op = None   # the game names everyone: a line read without a name is not glued to someone else's
+        if op and bool(speaker) != bool(op["speaker"]) and self.names_always():
+            # The game names everyone: a line read without a name is not glued to someone else's, and a named line
+            # ("Jason: Yeah, I don't…") starts anew instead of finishing a nameless one (whose name was missed: it may
+            # be anyone's; Lucia's "I just need the number," came out as Jason's).
+            op = None
         if op:
             stripped = english.strip()
             if _ASIDE.match(stripped):
