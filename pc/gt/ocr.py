@@ -129,6 +129,13 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
             colored = (_letters_only((bright * 255).astype(np.uint8))
                        | _letters_only((outlined * 255).astype(np.uint8)))
         cols = colored[y0:y1].any(axis=0)
+        # The gap measured on the letters themselves: on the game's semi-transparent subtitle box the outline mask
+        # keeps only bits of the letters (the box is not dark enough to count as their outline), so their height
+        # came out small, the gap too, and the row stopped at the space after the name ("Dobbs: Loud and clear."
+        # was read "Loud and clear.").
+        full = letter_height(colored[y0:y1])
+        if full:
+            gap = max(gap, int(2.2 * full))
         # To the left a bit further: the space after "Stranger:" (colon + space) is wider than between words.
         left = (3 * gap) // 4
         while x0 > 0 and cols[max(0, x0 - left):x0].any():
