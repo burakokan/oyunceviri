@@ -6,9 +6,10 @@ import threading
 
 from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QComboBox, QFileDialog, QLabel, QLineEdit, QMessageBox, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (QComboBox, QFileDialog, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QVBoxLayout,
+                               QWidget)
 
-from gt import config, diagnostics, settings_io
+from gt import config, diagnostics, settings_io, snapshots
 from gt.updater import FROZEN
 from gt.version import REPO, VERSION
 
@@ -126,6 +127,28 @@ class SettingsPage(QWidget):
         self.bundle_button.clicked.connect(self._make_bundle)
         report.add(SettingRow("Kayıt paketi", "Masaüstüne OyunCeviri-kayitlar-….zip olarak kaydedilir. Sorunu "
                               "yaşadıktan hemen sonra bas (uygulamayı kapatmadan da olur).", self.bundle_button))
+        report.add(Divider())
+        self.snap_toggle = Toggle(False)
+        self.snap_toggle.toggled.connect(self._set_snapshots)
+        report.add(SettingRow("Diyalog görüntülerini topla",
+                              f"Açıkken oyunda biri konuştuğunda en fazla {snapshots.EVERY:.0f} saniyede bir altyazı "
+                              f"alanının ve ekranın resmini, okunan yazıyla ve TV'ye gidenle (ad, renk) birlikte "
+                              f"kaydeder. {snapshots.LIMIT} resimde kendiliğinden durur. Adların ya da renklerin "
+                              f"neden kaçtığını incelemek ve en iyi okuma ayarını bulmak için. Her açılışta yeni "
+                              f"klasör; \"Kayıtları paketle\" son klasörü de ekler.", self.snap_toggle))
+        snap_row = QWidget()
+        h = QHBoxLayout(snap_row)
+        h.setContentsMargins(0, 0, 0, 0)
+        self.snap_state = QLabel("Kapalı")
+        self.snap_state.setStyleSheet(f"color: {theme.MUTED};")
+        folder = icon_button(theme.Icon.OPEN, "Klasörü aç")
+        folder.clicked.connect(self._open_snapshots)
+        h.addWidget(self.snap_state, 1)
+        h.addWidget(folder)
+        report.add(snap_row)
+        self._snap_timer = QTimer(self)
+        self._snap_timer.timeout.connect(self._show_snapshots)
+        self._snap_timer.start(1000)
         lay.addWidget(report)
 
         about = Card("Hakkında")
@@ -203,6 +226,37 @@ class SettingsPage(QWidget):
         self.win.restart_app()
 
     # ---- diagnostics ----
+
+    def _set_snapshots(self, on):
+        snaps = self.win.engine.snaps
+        if on and not snaps.on:
+            snaps.start()
+        elif not on:
+            snaps.stop()
+        self._show_snapshots()
+
+    def _show_snapshots(self):
+        snaps = self.win.engine.snaps
+        if snaps.on:
+            text = f"Açık · {snaps.count} / {snaps.limit} resim (yalnızca biri konuşurken alınır)"
+        elif snaps.dir is not None and snaps.count:
+            full = " (sınıra ulaştı)" if snaps.count >= snaps.limit else ""
+            text = f"Kapalı · son toplamada {snaps.count} resim{full}: {snaps.dir}"
+        else:
+            text = "Kapalı"
+        if self.snap_state.text() != text:
+            self.snap_state.setText(text)
+        if self.snap_toggle.isChecked() != snaps.on:
+            self.snap_toggle.blockSignals(True)
+            self.snap_toggle.setChecked(snaps.on)
+            self.snap_toggle.blockSignals(False)
+
+    def _open_snapshots(self):
+        folder = self.win.engine.snaps.dir
+        if folder is None or not folder.is_dir():
+            folder = snapshots.DIR
+        folder.mkdir(parents=True, exist_ok=True)
+        subprocess.Popen(["explorer", str(folder)])
 
     def _make_bundle(self):
         self.bundle_button.setEnabled(False)

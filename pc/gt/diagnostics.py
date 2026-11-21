@@ -2,8 +2,8 @@
 
 What goes in: the app and TV app versions, Windows version, the settings WITHOUT any key (API keys, GitHub token),
 the last sessions' readings and translations (logs/session-*.jsonl), the subtitle-area picture of every line
-(logs/crops), a sample of the per-second pictures (logs/frames), the area translator's log, the Remote Play, TV
-install, update, self-test and crash logs. Never in it: ps5.json (PS5 / PSN keys), tv-keys/ (TV certificates),
+(logs/crops), a sample of the per-second pictures (logs/frames), the last "Diyalog görüntülerini topla" folder
+(logs/snapshots, a sample), the area translator's log, the Remote Play, TV install, update, self-test and crash logs. Never in it: ps5.json (PS5 / PSN keys), tv-keys/ (TV certificates),
 config.json as it is (it holds the keys).
 """
 import copy
@@ -20,6 +20,8 @@ from .version import TV_APP, TV_WEB, VERSION
 SESSIONS = 3            # the last sessions' readings
 CROPS_MAX = 400         # pictures of shown lines (last session)
 FRAMES_MAX = 300        # per-second pictures, evenly picked (last session)
+SNAP_AREAS = 150        # dialogue pictures of the subtitle area (PNG), evenly picked (last collection)
+SNAP_SCREENS = 40       # whole-picture JPEGs of them
 TEXT_TAIL = 400_000     # bytes kept from the end of the long text logs
 
 
@@ -87,4 +89,12 @@ def make_bundle(cfg, root=None, dest=None, tv_clients=()):
             step = max(1, len(frames) // FRAMES_MAX)
             for p in frames[::step][:FRAMES_MAX]:
                 z.write(p, f"logs/frames/{last}/{p.name}", compress_type=zipfile.ZIP_STORED)
+        snaps = _newest(logs / "snapshots", "*/index.jsonl", 1)
+        if snaps:
+            folder = snaps[0].parent
+            z.write(snaps[0], f"logs/snapshots/{folder.name}/index.jsonl")
+            for pattern, most in (("*-alan.png", SNAP_AREAS), ("*-ekran.jpg", SNAP_SCREENS)):
+                files = sorted(folder.glob(pattern))
+                for p in files[::max(1, -(-len(files) // most))][:most]:
+                    z.write(p, f"logs/snapshots/{folder.name}/{p.name}", compress_type=zipfile.ZIP_STORED)
     return path

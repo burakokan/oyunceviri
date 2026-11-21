@@ -17,6 +17,7 @@ from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mas
                   subtitle_lines, text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
+from .snapshots import Snapshots
 from .speakers import SpeakerColors, SpeakerNames
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
@@ -280,6 +281,9 @@ class Engine:
         # the line again over its row, with the name and its colour.
         self._unnamed = deque(maxlen=6)
         self._sticky = StickyRows()     # objectives / notices that stay while people talk
+        # Genel → "Diyalog görüntülerini topla": pictures of the dialogue for tuning (off until asked for).
+        self.snaps = Snapshots()
+        self._last_msg = None           # (time, message) of the last line the TV got
         self.repeats = RepeatGuard()    # signs / billboards read again and again
         self._cleared = True  # the screen was empty since the previous line
         self._history = []     # (line, time, hint) shown recently, so lines left on screen are not re-translated
@@ -497,19 +501,19 @@ class Engine:
                     beat["frames"] += 1
                     if recorder:
                         recorder(bgr, t_frame)
-                    boxes = None
+                    boxes, kind = None, None
                     holes = self._holes(roi, bgr.shape)
                     if cfg.get("text_box"):
                         # The game's own subtitle background is on: letters are read against the box, no fixed
                         # thresholds (a dim or colour-cast picture reads too; coloured names stay).
                         mask = punch(box_mask(bgr), holes)
-                        boxes = self.lines(cfg, bgr, mask, roi)
+                        boxes, kind = self.lines(cfg, bgr, mask, roi), "box"
                     if outlined and not boxes:
                         mask = punch(outline_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
-                        boxes = self.lines(cfg, bgr, mask, roi)
+                        boxes, kind = self.lines(cfg, bgr, mask, roi), "outline"
                     if not boxes:
                         mask = punch(text_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
-                        boxes = self.lines(cfg, bgr, mask, roi)
+                        boxes, kind = self.lines(cfg, bgr, mask, roi), "white"
                     beat["rows"] = max(beat["rows"], len(boxes))
                     sig = signature(keep_boxes(mask, boxes))
                     # Read when the text changed, and at least once a second while there is text (a change too
@@ -535,6 +539,9 @@ class Engine:
                         frame = (bgr, mask, boxes)
                         if self.log:
                             self.log.read(raw, last_text)
+                        if self.snaps.on:
+                            self.snaps.offer(t_frame, bgr, raw, last_text, boxes, kind, cfg, self._whole_picture(),
+                                             self._last_msg)
                     last_sig = sig
                     event = tracker.feed(t_frame, last_text)
                     if t_frame - last_preview > PREVIEW_INTERVAL:
@@ -554,6 +561,13 @@ class Engine:
                             "longest": 0.0}
         finally:
             source.stop()
+
+    def _whole_picture(self):
+        """For a dialogue picture: the whole PS5 picture (built-in Remote Play only; a window capture has the
+        subtitle area alone)."""
+        if not (self._builtin and self.rp is not None):
+            return None
+        return lambda: self.rp.frame()[1]
 
     def _unstick(self, text, now):
         """The reading without rows that stay on screen while new dialogue comes (objectives, notices)."""
@@ -895,6 +909,7 @@ class Engine:
         if color:
             msg["color"] = color
         self.server.send(msg)
+        self._last_msg = (now, msg)
         info = {
             "id": job["id"], "time": time.strftime("%H:%M:%S"), "speaker": shown_speaker,
             "en": english, "tr": turkish, "ocr_ms": line["ocr_ms"], "tr_ms": tr_ms,
