@@ -34,7 +34,7 @@ SCHEMA = [
     ]),
     ("Konuşmacı adı", [
         ("speakerShow", "Konuşmacı adını göster", "bool"),
-        ("speakerColors", "Her konuşmacı kendi renginde (aynı isim hep aynı renk)", "bool"),
+        ("speakerColors", "Konuşmacı adları renkli (oyundaki renk ya da kişinin rengi: Filtreler)", "bool"),
         ("speakerColor", "İsim rengi (yukarıdaki kapalıyken)", "color"),
         ("speakerOwnLine", "İsim ayrı satırda", "bool"),
     ]),

@@ -1,16 +1,23 @@
-"""A color for every speaker's name on the TV: the same name always gets the same color (kept in speakers.json, so
-Lucia is the same color tomorrow too). A new name gets the color used least so far, avoiding the colors of the people
-who just spoke, so the people talking in one scene look different."""
+"""The color of every speaker's name on the TV.
+
+By default the game's own color of the name is measured on every line (name_color) and sent, so the TV looks like the
+game. The app's own colors are the fallback (and the choice when "Ad rengi oyundaki gibi" is off): the same name
+always gets the same color (kept in speakers.json, so Lucia is the same color tomorrow too); a new name gets the color
+used least so far, avoiding the colors of the people who just spoke, so the people talking in one scene look
+different."""
 import json
 import re
 import threading
 import time
 from collections import Counter
 
+import cv2
+import numpy as np
 from rapidfuzz import fuzz
 
 from .config import ROOT
 from .filters import CUT
+from .ocr import _OUTLINE, _letters_only
 
 PATH = ROOT / "speakers.json"
 # Bright, clearly different colors that read well over the game with a dark outline (white is the text itself).
@@ -21,11 +28,52 @@ RECENT_SECONDS = 90.0
 _INSIDE = re.compile(r"([A-Za-z][\w'’.\-]{2,})\s*:\s+(?=\S)")
 
 
+def name_color(bgr, box, row_text):
+    """The colour of the speaker's name in the game, measured in the row ("Jason: Hey.") -> "#RRGGBB" or None.
+
+    GTA 6 does not give a person one colour for good: in each scene the speakers get colours (white, pale yellow,
+    yellow, pink, light blue…) to tell them apart, so the colour is measured on every line. The letters are the bright
+    pixels with the game's dark outline next to them, in the part of the row before the colon (found by the share of
+    characters, only its first 85 %); the brighter half of their pixels is taken (the edges blend into the outline).
+    None when too few letter pixels are found, they disagree or are dark (a bright scene behind the name)."""
+    colon = row_text.find(":")
+    if colon < 1 or bgr is None:
+        return None
+    y0, y1, x0, x1 = box
+    part = bgr[y0:y1, x0:x1]
+    if part.size == 0:
+        return None
+    v = part.max(axis=2)
+    outlined = (v >= 140) & (cv2.erode(v, _OUTLINE) < 60)
+    letters = _letters_only((outlined * 255).astype(np.uint8)) > 0
+    cols = np.flatnonzero(letters.any(axis=0))
+    if cols.size < 10:
+        return None
+    a, b = int(cols[0]), int(cols[-1])
+    end = a + (b - a) * colon / max(len(row_text), 1)
+    hi = int(a + 0.85 * (end - a))
+    if hi - a < 6:
+        return None
+    core = cv2.erode(letters[:, a:hi].astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
+    px = part[:, a:hi][core]
+    if len(px) < 20:
+        return None
+    px = px[px.max(axis=1) >= np.percentile(px.max(axis=1), 50)].astype(np.float32)
+    if float(px.std(axis=0).max()) > 28:
+        return None
+    color = np.median(px, axis=0)
+    if color.max() < 200:
+        return None         # the game's name colours are all bright: a dark one is the scene behind a thin name
+    b_, g_, r_ = (int(round(c)) for c in color)
+    return f"#{r_:02X}{g_:02X}{b_:02X}"
+
+
 class SpeakerColors:
     def __init__(self, path=PATH):
         self.path = path
         self._lock = threading.Lock()
         self._recent = {}     # name -> last time it was used
+        self.game = {}        # name -> the colour the game gave it last (this session)
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
             self.colors = {str(k): str(v) for k, v in data.items() if str(v) in PALETTE}
@@ -55,6 +103,22 @@ class SpeakerColors:
                 self._save()
             self._recent[key] = now
             return color
+
+    def pick(self, name, measured=None, from_game=True):
+        """The colour sent to the TV: the game's colour of this line's name (measured), or the one the game gave this
+        person last when it could not be measured; the app's own colour for the person when the game's colour is not
+        wanted or was never measured."""
+        if not name or not name.strip():
+            return None
+        if from_game:
+            key = self._key(name)
+            with self._lock:
+                if measured:
+                    self.game[key] = measured
+                    return measured
+                if key in self.game:
+                    return self.game[key]
+        return self.color(name)
 
     def _save(self):
         try:

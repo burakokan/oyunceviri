@@ -240,12 +240,13 @@ class RapidLineOcr:
         self.engine = RapidOCR(params={**params, "Rec.model_type": ModelType.TINY})
         self.accurate_engine = RapidOCR(params={**params, "Rec.model_type": ModelType.SMALL}) if accurate else None
         self.min_score = min_score
+        self.rows = []          # [(box, text)] of the last read, every row (the speaker name's colour is measured there)
 
     def read(self, bgr, mask, accurate=False, boxes=None, cache=None, fresh=False):
         """cache (RowCache): rows whose letters did not change since they were read keep their text;
         fresh: read every row anyway (and remember them)."""
         engine = self.accurate_engine if accurate and self.accurate_engine else self.engine
-        out = []
+        out, rows = [], []
         boxes = text_lines(mask) if boxes is None else boxes
         if cache is not None:
             cache.begin()
@@ -257,10 +258,12 @@ class RapidLineOcr:
                 text = r.txts[0].strip() if r.txts and r.scores[0] >= self.min_score else ""
                 if cache is not None:
                     cache.put(mask, box, text)
+            rows.append((tuple(int(v) for v in box), text))
             if text:
                 out.append(text)
         if cache is not None:
             cache.end()
+        self.rows = rows
         # One screen row per line: rows tell apart several speakers' lines shown at once.
         return "\n".join(out)
 

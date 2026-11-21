@@ -56,6 +56,13 @@ class FiltersPage(QWidget):
         main.add(SettingRow("Konuşmacı adını göster",
                             "\"Karl: …\" gibi satırlarda isim çevrilmeden başta gösterilir. Kapatırsan yalnızca "
                             "konuşma çevrilir.", speaker))
+        game_color = Toggle(f.get("speaker_color_game", True))
+        game_color.toggled.connect(lambda v: self._set("speaker_color_game", v))
+        main.add(SettingRow("Ad rengi oyundaki gibi",
+                            "Konuşmacının adı TV'de oyunda göründüğü renkte yazılır; renk her satırda ekrandan "
+                            "alınır. GTA 6 aynı kişiye her sahnede aynı rengi vermez, sahnedeki kişileri ayırmak için "
+                            "renk dağıtır; TV de öyle gösterir. Kapatırsan her kişinin hep aynı kalan kendi rengi "
+                            "olur. TV Görünümü'nde \"Konuşmacı adları renkli\" açık olmalı.", game_color))
         main.add(Divider())
         names_only = Toggle(f.get("names_only", False))
         names_only.toggled.connect(lambda v: self._set("names_only", v))

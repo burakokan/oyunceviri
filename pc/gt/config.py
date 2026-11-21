@@ -57,6 +57,7 @@ DEFAULTS = {
         "min_letters": 2,
         # Keep "Karl:" in front of the line (the name itself is not translated)
         "speaker_names": True,
+        "speaker_color_game": True,     # the name's colour on the TV as the game shows it
         # In a game that writes "Name:" in front of every line (GTA 6 with speaker names on), lines without a name
         # are not shown (signs, HUD); objectives / button hints still are
         "names_only": False,

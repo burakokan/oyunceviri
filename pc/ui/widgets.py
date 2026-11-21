@@ -438,8 +438,16 @@ class PairListEditor(QWidget):
 
 
 def draw_lines_preview(crop, mask, lines):
-    """Original strip on top, what OCR sees (black on white, green line boxes) below."""
+    """Original strip on top; below, what the reader uses: black = the letters that find the rows (brightness /
+    colour thresholds), blue = coloured letters taken into a row (speaker names like "Joey:"), green = the rows. The
+    text recognizer reads the colour picture inside each green box, so a name shown in blue is read too (it used to be
+    missing here, which looked as if the name was not read at all)."""
     seen = cv2.cvtColor(255 - mask, cv2.COLOR_GRAY2BGR)
+    if lines:
+        v = crop.max(axis=2)
+        coloured = (v >= 120) & (cv2.erode(v, np.ones((7, 7), np.uint8)) < 60) & (mask == 0)
+        for y0, y1, x0, x1 in lines:
+            seen[y0:y1, x0:x1][coloured[y0:y1, x0:x1]] = (200, 110, 30)
     for y0, y1, x0, x1 in lines:
         cv2.rectangle(seen, (x0, y0), (x1 - 1, y1 - 1), (80, 200, 120), 2)
     gap = np.full((6, crop.shape[1], 3), 14, np.uint8)

@@ -18,7 +18,7 @@ from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mas
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
-from .speakers import SpeakerColors, SpeakerNames
+from .speakers import SpeakerColors, SpeakerNames, name_color
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
 
@@ -536,7 +536,7 @@ class Engine:
                                     if self.log:
                                         self.log.note(outline_mode=True)
                         ocr_ms = (time.perf_counter() - t0) * 1000
-                        frame = (bgr, mask, boxes)
+                        frame = (bgr, mask, boxes, list(getattr(ocr, "rows", [])))
                         if self.log:
                             self.log.read(raw, last_text)
                         if self.snaps.on:
@@ -661,13 +661,16 @@ class Engine:
                 self.log.clear()
             return
         cfg = self.cfg
+        # Every row read with its box: the colour of a speaker's name is measured in its row.
+        read_rows = frame[3] if frame is not None and len(frame) > 3 else []
         if cfg["ocr_accurate"] and frame is not None:
             t0 = time.perf_counter()
-            bgr, mask, boxes = frame
+            bgr, mask, boxes = frame[:3]
             better = self._unstick(filters.clean(ocr.read(bgr, mask, accurate=True, boxes=boxes), cfg["filters"]), now)
             ocr_ms += (time.perf_counter() - t0) * 1000
             if better:
                 text = better
+                read_rows = list(getattr(ocr, "rows", [])) or read_rows
         # A menu next to the dialogue on the same screen row (GTA's garage: "the torque and top speed. Pair with
         # transmisJoey: There ya go."): the row starts at the name of someone who already spoke several times. Not
         # only in games that name everyone: badly read lines there made that test fail, and the menu text was
@@ -695,7 +698,8 @@ class Engine:
             hint = not speaker and filters.is_hint(english)
             line = {"speaker": speaker, "english": english, "ocr": "\n".join(rows), "t_first": t_first,
                     "since": now, "ocr_ms": ocr_ms, "crop": frame[0] if frame is not None else None, "hint": hint,
-                    "lang": language}
+                    "lang": language,
+                    "name_color": self._game_color(read_rows, frame[0] if frame is not None else None, speaker)}
             if hint:
                 # Objectives / button hints: shown at once (they have no full stop), never joined with dialogue.
                 if not self._seen(normalize(english), now, hint):
@@ -722,6 +726,18 @@ class Engine:
             if self._seen(normalize(english), now):
                 continue
             self._utterance(line, op, now)
+
+    @staticmethod
+    def _game_color(read_rows, bgr, speaker):
+        """The colour the game gave this speaker's name on screen now (None: not measured)."""
+        if not speaker or bgr is None:
+            return None
+        want = speaker.casefold()
+        for box, text in read_rows:
+            name = filters.split_speaker(text)[0]
+            if name and (name.casefold() == want or fuzz.ratio(name.casefold(), want) >= 75):
+                return name_color(bgr, box, text)
+        return None
 
     def names_always(self):
         """The game writes the speaker's name in front of (nearly) every line of dialogue."""
@@ -905,7 +921,9 @@ class Engine:
                "partial": partial, "update": update}
         if replaces is not None:
             msg["replaces"] = replaces
-        color = self.colors.color(shown_speaker) if shown_speaker else None
+        # The game's colour of the name (measured on screen), like the game shows it; or the app's own colours.
+        color = self.colors.pick(shown_speaker, line.get("name_color"),
+                                 cfg["filters"].get("speaker_color_game", True)) if shown_speaker else None
         if color:
             msg["color"] = color
         self.server.send(msg)
