@@ -8,7 +8,7 @@ from collections import deque
 import numpy as np
 from rapidfuzz import fuzz
 
-from . import filters, profanity
+from . import filters, imgio, profanity
 from .capture import WindowGrabber
 from .conductor import Conductor
 from .guards import RepeatGuard, StickyRows, non_speech
@@ -594,7 +594,7 @@ class Engine:
                 return
             state["last"], state["n"] = t, state["n"] + 1
             name = time.strftime("%H%M%S") + f"-{int(time.time() * 1000) % 1000:03d}.jpg"
-            cv2.imwrite(str(folder / name), bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            imgio.write(folder / name, bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
         return record
 

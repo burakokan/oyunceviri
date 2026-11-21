@@ -17,7 +17,7 @@ import time
 
 import cv2
 
-from . import filters
+from . import filters, imgio
 from .config import ROOT
 
 DIR = ROOT / "logs" / "snapshots"
@@ -99,9 +99,9 @@ class Snapshots:
             folder, crop, picture, record = self._jobs.get()
             try:
                 folder.mkdir(parents=True, exist_ok=True)
-                cv2.imwrite(str(folder / record["roi"]), crop, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+                imgio.write(folder / record["roi"], crop, [cv2.IMWRITE_PNG_COMPRESSION, 3])
                 if picture is not None:
-                    cv2.imwrite(str(folder / record["full"]), picture, [cv2.IMWRITE_JPEG_QUALITY, 92])
+                    imgio.write(folder / record["full"], picture, [cv2.IMWRITE_JPEG_QUALITY, 92])
                 with open(folder / "index.jsonl", "a", encoding="utf-8") as f:
                     f.write(json.dumps(record, ensure_ascii=False) + "\n")
             except OSError:

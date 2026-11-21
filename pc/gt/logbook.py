@@ -5,6 +5,7 @@ import time
 
 import cv2
 
+from . import imgio
 from .config import ROOT
 
 LOG_DIR = ROOT / "logs"
@@ -33,7 +34,7 @@ class Logbook:
     def line(self, info, crop=None):
         if crop is not None:
             name = f"{self.session}-{info['id']:04d}.jpg"
-            cv2.imwrite(str(self.dir / "crops" / name), crop, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            imgio.write(self.dir / "crops" / name, crop, [cv2.IMWRITE_JPEG_QUALITY, 85])
             info = {**info, "crop": name}
         self._write({"line": info})
 

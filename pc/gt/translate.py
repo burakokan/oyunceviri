@@ -37,8 +37,13 @@ class LocalTranslator:
         if not path.is_absolute():
             path = ROOT / path
         self.beam_size = beam_size
-        self.src = spm.SentencePieceProcessor(model_file=_first_existing(path, "source.spm", "src.spm.model"))
-        self.tgt = spm.SentencePieceProcessor(model_file=_first_existing(path, "target.spm", "tgt.spm.model"))
+        # The vocabularies are read by Python and handed over as bytes: SentencePiece cannot open a file whose path
+        # has letters outside plain ASCII on Windows (a user name like "Ali Şık" in the install folder), so the
+        # translation model did not load at all there.
+        self.src = spm.SentencePieceProcessor(
+            model_proto=Path(_first_existing(path, "source.spm", "src.spm.model")).read_bytes())
+        self.tgt = spm.SentencePieceProcessor(
+            model_proto=Path(_first_existing(path, "target.spm", "tgt.spm.model")).read_bytes())
         try:
             self.model = ctranslate2.Translator(str(path), device=device, compute_type=compute_type)
             self.device = device

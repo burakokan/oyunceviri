@@ -18,6 +18,7 @@ import time
 import cv2
 import numpy as np
 
+from . import imgio
 from .config import ROOT
 
 DETECT_EVERY = 1.2       # s between searches for new text while screen translation is on
@@ -358,7 +359,7 @@ class ScreenTranslator:
                 x0, y0, x1, y1 = l["rect"]
                 cv2.rectangle(img, (x0, y0), (x1, y1), (0, 255, 0), 2)
             stamp = time.strftime("%H%M%S")
-            cv2.imwrite(str(DEBUG_DIR / f"{stamp}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            imgio.write(DEBUG_DIR / f"{stamp}.jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 80])
             (DEBUG_DIR / f"{stamp}.json").write_text(json.dumps(
                 {"found": [list(map(int, r)) for r in found],
                  "read": [{"rect": list(map(int, l["rect"])), "text": l["text"]} for l in lines]},
