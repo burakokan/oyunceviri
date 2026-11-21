@@ -26,9 +26,26 @@ PATH = ROOT / "speakers.json"
 # that comes with the app (people whose colour never changes, from recorded GTA 6 play).
 GAME_PATH = ROOT / "speaker_game_colors.json"
 GAME_START = ASSETS / "speaker_game_colors.json"
-# The stream (Remote Play video) halves the colour of thin letters: a cream "Jason:" arrives nearly white. The
-# measured saturation is multiplied by this to look like the game again (Filtreler -> "Ad rengi canlılığı").
-BOOST = 2.2
+# The stream (Remote Play video) all but wipes out the colour of thin letters: a name the TV shows in a clear lake
+# green ("Shirley:") arrives nearly white (R254 G253 B244 next to the text's R255 G252 B250). Only the family of the
+# colour can be told from the stream, so the TV gets a saturated shade of that family. Several shades per family:
+# two people of one family in a dialogue get different ones. The first shade is the game's look on the TV.
+FAMILIES = {
+    "teal": ["#3FD5C4", "#4FC3F7", "#80DEEA", "#26A69A"],
+    "pink": ["#F48FB1", "#F06292", "#CE93D8", "#FF8A80"],
+    "yellow": ["#FFD54F", "#FFCA28", "#FFB74D"],
+    "cream": ["#FFF59D", "#FFF176", "#E6EE9C"],
+    "green": ["#9CCC65", "#81C784", "#AED581"],
+    "blue": ["#64B5F6", "#7986CB", "#90CAF9"],
+    "orange": ["#FFB74D", "#FF8A65", "#FFAB91"],
+}
+# For a name whose colour cannot be told (or that the game writes white): a colour all the same, never white.
+# (none of them is a shade of a family above, so a stand-in colour is never taken for a family's)
+FALLBACK = ["#B39DDB", "#A5D6A7", "#FFCCBC", "#B2DFDB", "#D1C4E9", "#B3E5FC", "#F8BBD0", "#DCE775", "#FFE0B2",
+            "#C5CAE9"]
+CREAM = 0.15            # a yellow weaker than this in the stream is the game's cream (Jason), stronger: yellow (Kyle)
+CLEAR = 0.12            # a colour this strong in the stream is clear (yellow names), not a washed-out pastel
+BOOST = 2.2             # kept for old callers; the shades above are used now
 # GTA 6's "white" names are mostly faint pastel tints, steady per person (Kenton light cyan, Dobbs and Cal light
 # pink: 1.6-2.7 % after the stream): a tint from this on counts, when the person's readings agree on the hue.
 WHITE = 0.018
@@ -71,6 +88,12 @@ def name_tint(bgr, box, row_text):
     v = part.max(axis=2)
     outlined = (v >= 140) & (cv2.erode(v, _OUTLINE) < 60)
     letters = _letters_only((outlined * 255).astype(np.uint8)) > 0
+    if np.count_nonzero(letters) < 60:
+        # Letters without a dark outline (on the game's semi-transparent box over a bright scene): the pixels clearly
+        # brighter than the background right around them.
+        ground = cv2.morphologyEx(v, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
+        lifted = ((v.astype(np.int16) - ground) >= 45) & (v >= 170)
+        letters = _letters_only((lifted * 255).astype(np.uint8)) > 0
     cols = np.flatnonzero(letters.any(axis=0))
     if cols.size < 10:
         return None
@@ -118,6 +141,29 @@ def tint_color(hue, sat, boost=BOOST):
     return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
 
 
+def family_of(tint):
+    """The colour family of a measured tint (None: white or unknown)."""
+    if tint is None or tint[1] < WHITE:
+        return None
+    h, sat = tint
+    if 40 <= h < 80:
+        return "cream" if sat < CREAM else "yellow"
+    if 20 <= h < 40:
+        return "orange"
+    if 80 <= h < 215:
+        # The game's lake green ("Shirley:") reads anywhere from green to cyan in the washed-out stream (97 in one
+        # picture, 180 in the next): one family.
+        return "teal"
+    if 215 <= h < 265:
+        return "blue"
+    return "pink"
+
+
+def family_of_color(color):
+    """The family a TV shade belongs to (None: a fallback colour)."""
+    return next((f for f, shades in FAMILIES.items() if color in shades), None)
+
+
 def name_color(bgr, box, row_text, boost=BOOST):
     """name_tint as the colour the TV gets (None when it cannot be measured)."""
     t = name_tint(bgr, box, row_text)
@@ -138,8 +184,9 @@ def same_kind(a, b):
 
 
 def typical(samples):
-    """The usual tint of a list of (hue, saturation): white when most are white, else the circular mean hue and the
-    median saturation of the coloured ones -> (hue, saturation), or None when the readings contradict each other."""
+    """The usual tint of a list of (hue, saturation): white when most are white, else the tint of the colour family
+    most coloured readings belong to (circular mean hue weighted by strength, median saturation) -> (hue,
+    saturation), or None when the readings contradict each other."""
     if not samples:
         return None
     coloured = [(h, s) for h, s in samples if s >= WHITE]
@@ -148,14 +195,21 @@ def typical(samples):
         return 0.0, 0.0
     if len(coloured) == 1 and coloured[0][1] < FAINT:
         return 0.0, 0.0     # one faint reading alone: a white name read a little off as often as a pastel one
-    # The hue weighted by how strong each reading is: a faint stray reading does not pull a yellow towards orange.
-    x = sum(s * math.cos(math.radians(h)) for h, s in coloured)
-    y = sum(s * math.sin(math.radians(h)) for h, s in coloured)
-    if len(coloured) >= 2 and math.hypot(x, y) / sum(s for _, s in coloured) < 0.75:
-        # The readings disagree on the hue: faint ones only, a white name read a little off -> white; a strong one
-        # among them, something else was read as the name (leaves, a sign behind it) -> unknown (the record decides).
+    # Agreement on the family, not on the exact hue: the game's lake green reads anywhere from 97 to 180 degrees.
+    votes = Counter(family_of((h, s)) for h, s in coloured)
+    family, n = votes.most_common(1)[0]
+    if n < 0.6 * len(coloured):
+        # Mixed families: faint ones only, a white name read a little off -> white; a strong one among them,
+        # something else was read as the name (leaves, a sign behind it) -> unknown (the record decides).
         return (0.0, 0.0) if all(s < FAINT for _, s in coloured) else None
-    return round(math.degrees(math.atan2(y, x)) % 360, 1), round(float(np.median([s for _, s in coloured])), 3)
+    chosen = [(h, s) for h, s in coloured if family_of((h, s)) == family]
+    if np.median([s for _, s in chosen]) < FAINT and n < 0.6 * len(samples):
+        # A faint colour on only some of the readings: a white name the stream tints a little now and then (pink in
+        # one scene, cyan in the next). A pastel name reads its faint colour nearly every time.
+        return 0.0, 0.0
+    x = sum(s * math.cos(math.radians(h)) for h, s in chosen)
+    y = sum(s * math.sin(math.radians(h)) for h, s in chosen)
+    return round(math.degrees(math.atan2(y, x)) % 360, 1), round(float(np.median([s for _, s in chosen])), 3)
 
 
 class SpeakerColors:
@@ -165,6 +219,9 @@ class SpeakerColors:
         self._recent = {}     # name -> last time it was used
         self.scene = {}       # name -> deque of (time, hue, saturation): this person's last lines
         self.learned = {}     # name -> [[hue, saturation], ...]: the colours seen in the game, kept for good
+        self.record = {}      # name -> {"family": family or None, "color": "#RRGGBB"}: the TV colour, kept for good
+        self.shown = {}       # name -> (time, colour) of the last line: the people of the dialogue
+        self.pending = {}     # name -> (family, lines in a row) another family than the one on record has won
         self.game_path = game_path
         self._learned_saved = 0.0
         self._learned_dirty = False
@@ -175,8 +232,14 @@ class SpeakerColors:
             self.colors = {}
         for source in (game_start, game_path):      # the user's own table over the one that comes with the app
             try:
-                for k, v in json.loads(source.read_text(encoding="utf-8")).items():
-                    self.learned[str(k)] = [[float(h), float(s_)] for h, s_ in v][-KEEP_SAMPLES:]
+                data = json.loads(source.read_text(encoding="utf-8"))
+                samples = data.get("samples", data) if isinstance(data.get("samples"), dict) else data
+                for k, v in samples.items():
+                    if isinstance(v, list):
+                        self.learned[str(k)] = [[float(h), float(s_)] for h, s_ in v][-KEEP_SAMPLES:]
+                for k, v in (data.get("colors") or {}).items():
+                    if isinstance(v, dict) and str(v.get("color", "")).startswith("#"):
+                        self.record[str(k)] = {"family": v.get("family"), "color": str(v["color"])}
             except (OSError, ValueError, AttributeError, TypeError):
                 pass
 
@@ -207,11 +270,11 @@ class SpeakerColors:
     def pick(self, name, tint=None, from_game=True, boost=BOOST, now=None):
         """The colour sent to the TV.
 
-        With the game's colours: the colour this person has in the scene, i.e. the usual one of their last lines (this
-        one's measured tint included), so one line read a little off does not turn the name white for a moment; a
-        new scene's colour takes over after two lines. Without a line in the scene: the colour kept for this person
-        from earlier play (the lasting table). Never measured: white. Without the game's colours: the app's own
-        colour for the person."""
+        With the game's colours: the family of the colour this person has in the scene (the usual one of their last
+        lines, this one's measured tint included; their long record when the scene is unclear), shown as a saturated
+        shade of that family. Every person keeps their shade for good (the record), and two people of one dialogue
+        never get the same colour. A person whose colour cannot be told gets a colour all the same (never white),
+        kept too. Without the game's colours: the app's own colour for the person."""
         if not name or not name.strip():
             return None
         if not from_game:
@@ -228,20 +291,75 @@ class SpeakerColors:
                 seen.append([float(tint[0]), float(tint[1])])
                 del seen[:-KEEP_SAMPLES]
                 self._learned_dirty = True
-                self._save_learned(now)
+            samples = self.learned.get(key, [])
             scene = typical([(h, s_) for _, h, s_ in lines])
-            kept = typical(self.learned.get(key, []))
-            # The scene decides the colour (GTA 6 gives some people another colour in another scene); when it is the
-            # one this person usually has, the usual shade is shown, so the name does not change shade line by line.
-            # Another colour than the person's usual one needs two lines of the scene: one reading alone may be a
-            # leaf or a sign where the name is.
-            usual = kept if scene is None or (kept is not None and (same_kind(scene, kept) or len(lines) < 2)) else scene
-            if tint and key in GENERIC:
-                usual = typical([tint])     # "Local", "Tourist"…: this line's own colour (another person maybe)
-            if usual is not None and WHITE <= usual[1] < FAINT and len(self.learned.get(key, [])) < 5:
-                usual = (0.0, 0.0)  # a faint pastel tint is trusted only after a few readings agree on it
-        # never measured and not in any table: white, the colour most names have in the game
-        return tint_color(*usual, boost) if usual is not None else "#FFFFFF"
+            kept = typical(samples)
+            others = {c for k, (t, c) in self.shown.items() if k != key and now - t < SCENE_SECONDS}
+            if key in GENERIC:
+                color = self._generic(key, tint, others, now)
+            else:
+                # The person's own family: the one most of their last readings (up to 40) belong to; a faint one only
+                # after a few readings. It moves slowly, so the name keeps its colour line after line.
+                # (someone new: from their third reading, when most of their readings agree on a family)
+                faint_ok = kept is not None and (kept[1] >= FAINT or len(samples) >= 3)
+                own = family_of(kept) if faint_ok else None
+                # A scene where the game clearly gives this person another colour (strong colour, two lines or more):
+                # shown for that scene only, the record stays.
+                strong = family_of(scene) if scene is not None and scene[1] >= CLEAR and len(lines) >= 2 else None
+                rec = self.record.get(key)
+                family = own or (rec or {}).get("family")
+                if rec and own and own != rec.get("family"):
+                    # Another family than the one on record: only after it wins six lines in a row (a person whose
+                    # readings are half pink, half lake green must not swap colours back and forth); from a stand-in
+                    # colour (the family was not known yet) after three.
+                    pending = self.pending.get(key)
+                    count = pending[1] + 1 if pending and pending[0] == own else 1
+                    self.pending[key] = (own, count)
+                    if count < (1 if rec.get("family") is None and len(samples) <= 5 else
+                                3 if rec.get("family") is None else 6):
+                        family = rec.get("family")
+                else:
+                    self.pending.pop(key, None)
+                if strong and strong != family:
+                    color = self._free(strong, others)
+                elif rec and rec.get("family") in (family, None) and \
+                        (family is None or family_of_color(rec["color"]) == family):
+                    # This person's colour, as always; when someone else of this dialogue has it (two people of one
+                    # family), another shade for now: the record stays.
+                    color = rec["color"] if rec["color"] not in others else self._free(family, others)
+                else:
+                    color = self._free(family, others, rec["color"] if rec and family is None else None)
+                    self.record[key] = {"family": family, "color": color}
+                    self._learned_dirty = True
+            self.shown[key] = (now, color)
+            self._save_learned(now)
+            return color
+
+    def _generic(self, key, tint, others, now):
+        """"Local", "Tourist"…: several people of one scene, told apart by colour in the game. Each line gets the
+        family measured on it; another family or an unclear one is another person, so not the last one's colour."""
+        family = family_of(typical([tint])) if tint else None
+        last = self.shown.get(key)
+        recent = last is not None and now - last[0] < SCENE_SECONDS
+        if tint is None and recent and now - last[0] < 10 and last[1] not in others:
+            return last[1]          # unmeasured: the same "Local" still talking, most likely
+        if recent and family_of_color(last[1]) == family and last[1] not in others:
+            return last[1]          # the same colour as the last "Local" (or unclear again): the same one
+        if recent and (family is None or family_of_color(last[1]) != family):
+            others = others | {last[1]}
+        return self._free(family, others)
+
+    def _free(self, family, others, previous=None):
+        """A shade of the family (any colour when unknown) no one else in the dialogue has, the one used least by
+        the people on record (so people stay told apart in later dialogues too)."""
+        shades = FAMILIES.get(family) or FALLBACK
+        used = Counter(r["color"] for r in self.record.values())
+        free = [c for c in shades if c not in others] or [c for c in FALLBACK if c not in others] or shades
+        if previous in free and family is None:
+            return previous
+        if family in FAMILIES:
+            return free[0]      # the family's own shade first (the game's look); the others when it is taken here
+        return min(free, key=lambda c: (used[c], FALLBACK.index(c) if c in FALLBACK else len(FALLBACK)))
 
     def _save_learned(self, now, force=False):
         """The lasting table to disk, at most every 20 s while playing (and when the engine stops)."""
@@ -249,8 +367,8 @@ class SpeakerColors:
             return
         self._learned_saved, self._learned_dirty = now, False
         try:
-            self.game_path.write_text(json.dumps(self.learned, ensure_ascii=False, separators=(",", ":")),
-                                      encoding="utf-8")
+            self.game_path.write_text(json.dumps({"samples": self.learned, "colors": self.record}, ensure_ascii=False,
+                                                 separators=(",", ":")), encoding="utf-8")
         except OSError:
             pass
 

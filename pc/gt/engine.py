@@ -18,7 +18,7 @@ from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mas
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
-from .speakers import BOOST, SpeakerColors, SpeakerNames, name_tint
+from .speakers import SpeakerColors, SpeakerNames, name_tint
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
 
@@ -924,8 +924,8 @@ class Engine:
         if replaces is not None:
             msg["replaces"] = replaces
         # The game's colour of the name (measured on screen), like the game shows it; or the app's own colours.
-        color = self.colors.pick(shown_speaker, line.get("name_tint"), cfg["filters"].get("speaker_color_game", True),
-                                 cfg["filters"].get("speaker_color_boost", BOOST)) if shown_speaker else None
+        color = self.colors.pick(shown_speaker, line.get("name_tint"),
+                                 cfg["filters"].get("speaker_color_game", True)) if shown_speaker else None
         if color:
             msg["color"] = color
         self.server.send(msg)
