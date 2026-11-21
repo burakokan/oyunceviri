@@ -4,6 +4,100 @@ PS5 oyunlarının İngilizce altyazılarını okuyup Türkçeye çevirir ve TV'd
 
 Lisans: [GNU AGPL-3.0](LICENSE) · Telif ve kaynak bildirimi: [NOTICE](NOTICE) · Kullanılan bileşenler, modeller ve oyun paketlerinin kaynakları: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
+## Kurulum
+
+### Gerekenler
+
+- **Bilgisayar:**
+  - Windows 10 ya da 11 (64 bit).
+  - Diskte yaklaşık 12 GB boş yer: indirme 4,6 GB, kurulu hâli 6,5 GB. Kurulumdan sonra indirilen dosyalar silinebilir.
+- **Ekran kartı (isteğe bağlı):** NVIDIA ekran kartı varsa yedek çeviri modeli (Gemma) onda çalışır. Yoksa öteki çeviri yolları kullanılır, uygulama yine çalışır.
+- **PS5:** Bilgisayar, PS5 ve TV aynı modeme bağlı olmalı. Bilgisayar ve PS5 için kablo önerilir.
+- **TV:**
+  - Android TV / Google TV (TCL, Sony, Philips, Xiaomi, Hisense…);
+  - Samsung (2019 ve sonrası);
+  - LG (webOS).
+- **İkinci PSN hesabı:** Ücretsiz. Neden gerektiği aşağıda, 4. adımda anlatılıyor.
+
+### 1. Kurulum dosyalarını indir
+
+Tam kurulum dosyaları **[v1.0.0 sürüm sayfasında](https://github.com/burakokan/oyunceviri/releases/tag/v1.0.0)**. Sonraki sürümlerin sayfalarında yalnızca güncelleme paketleri var; uygulama kurulduktan sonra kendini son sürüme günceller.
+
+1. Sayfanın altındaki **Assets** bölümünü aç.
+2. Şu 4 dosyanın **hepsini** indir (toplam yaklaşık 4,6 GB):
+   - `OyunCeviri-Kurulum.exe`
+   - `OyunCeviri-Kurulum-1.bin`
+   - `OyunCeviri-Kurulum-2.bin`
+   - `OyunCeviri-Kurulum-3.bin`
+3. Dördünü **aynı klasöre** koy (örneğin İndirilenler) ve **adlarını değiştirme**.
+4. Dördünün de indirmesi **bitmeden** kurulumu açma. `.bin` dosyaları büyüktür ve tarayıcı onları exe'den sonra bitirir.
+
+`.bin` dosyaları kurulumun parçalarıdır, tek başlarına açılmaz. Kurulum programı (`.exe`) bu parçaları kendi yanında arar. Biri eksikse ya da başka klasördeyse kurulum "disk" ister ve devam etmez.
+
+`Source code (zip)` ve `Source code (tar.gz)` kaynak koddur; kurulum için gerekmez.
+
+### 2. Kurulumu çalıştır
+
+1. `OyunCeviri-Kurulum.exe`'ye çift tıkla.
+2. "Windows bilgisayarınızı korudu" uyarısı çıkabilir (kurulum dosyası imzalı değil). **Ek bilgi**'ye, sonra **Yine de çalıştır**'a bas.
+3. Kurulum yönetici izni istemez. Uygulama `%LOCALAPPDATA%\Programs\Oyun Ceviri` klasörüne kurulur.
+4. Seçenekler:
+   - **Masaüstüne kısayol koy:** isteğe bağlı.
+   - **Windows güvenlik duvarında izin ver:** açık bırak. TV'nin bu bilgisayara bağlanabilmesi için gerekir; bir kez yönetici onayı ister.
+5. Kurulum bitince **Oyun Çeviri'yi şimdi aç** işaretli kalsın ve **Son**'a bas.
+
+### 3. Son sürüme güncelle
+
+Uygulama açılınca yeni sürüm olup olmadığına kendisi bakar. "Yeni sürüm var" bildirimi gelince **Genel → Güncelleme → İndir ve kur**'a bas. Uygulama güncellemeyi indirir, kapanıp yeniden açılır. 1.0.0'dan son sürüme geçiş yaklaşık 70 MB'tır.
+
+Bundan sonra da uygulama açılışta ve açıkken saatte bir yeni sürüme bakar. Yeni sürüm varsa yalnızca haber verir, sen istemeden hiçbir şey kurmaz. Ayarların ve kayıtların güncellemede korunur.
+
+### 4. İlk ayar (Başlarken)
+
+Uygulama ilk açılışta **Başlarken** rehberiyle açılır. Her adım uygulamanın içinden yapılır ve bittiğinde ✓ ile işaretlenir. Rehber her zaman soldaki menüde durur.
+
+1. **İkinci PSN hesabı:**
+   - Remote Play'e oyunu oynadığın hesapla bağlanılırsa PS5 o hesabın kolunu kapatır. Bu yüzden bilgisayar **ikinci bir hesapla** bağlanır; sen kendi hesabınla oynamaya devam edersin.
+   - Ücretsiz yeni bir PSN hesabı aç ve PS5'te bu hesapla bir kez oturum aç.
+2. **PS5 ayarları:**
+   - **Ayarlar → Sistem → Uzaktan Oynatma → Uzaktan Oynatmayı Etkinleştir:** açık.
+   - **Ayarlar → Sistem → Güç Tasarrufu → Dinlenme Modunda Kullanılabilen Özellikler:** **İnternete Bağlı Kal** ve **PS5'in Ağ Üzerinden Açılmasını Etkinleştir** açık. Böylece uygulama dinlenme modundaki PS5'i uyandırabilir.
+3. **PS5'i bağla:** Uygulamadaki PSN girişini **ikinci hesapla** yap. Sonra PS5'te ikinci hesap açıkken **Ayarlar → Sistem → Uzaktan Oynatma → Cihazı Bağla** (Link Device) ekranında çıkan 8 haneli kodu uygulamaya yaz. Bu adım bir kez yapılır.
+4. **TV uygulaması:** TV'nin markasını seç; adımlar uygulamada markaya göre gösterilir.
+   - **Android TV / Google TV:**
+     1. **Ayarlar → Sistem → Hakkında**'da **Android TV OS derlemesi**'ne 7 kez bas.
+     2. **Geliştirici seçenekleri**'nde **USB hata ayıklama**'yı aç.
+     3. Uygulamada **TV'de aç**'a bas. TV'de "USB hata ayıklamaya izin verilsin mi?" sorusunda "Her zaman izin ver"i işaretleyip **İzin ver**'e bas. Uygulama TV'ye kendisi kurulur; sonraki güncellemeleri de kendisi yapar.
+   - **Samsung:**
+     1. TV'de **Uygulamalar**'ı aç, kumandada **1 2 3 4 5**'e bas.
+     2. **Developer mode**'u **On** yap. **Host PC IP** olarak uygulamada yazan bilgisayar adresini gir.
+     3. Güç tuşuna 3 saniye basılı tutarak TV'yi yeniden başlat.
+     4. Uygulamada **Kur ve aç**'a bas. Samsung giriş sayfası açılırsa ücretsiz Samsung hesabınla giriş yap.
+     5. Yeni sürüm çıkınca TV uygulamasını bu sayfadan yeniden kur.
+   - **LG:**
+     1. [webostv.developer.lge.com](https://webostv.developer.lge.com) adresinde ücretsiz LG geliştirici hesabı aç.
+     2. TV'de LG Content Store'dan **Developer Mode** uygulamasını kur ve bu hesapla giriş yap.
+     3. **Dev Mode Status**'u aç; TV yeniden başlar.
+     4. **Key Server**'ı aç. Ekrandaki **Passphrase**'i uygulamaya yazıp **Kur ve aç**'a bas.
+5. **Altyazı alanı:** Oyunda bir konuşma altyazısı ekrandayken **Altyazı alanını seç**'e bas. Görüntünün üstünde altyazının çıktığı yeri fareyle çerçeve içine al; iki satırlık altyazıya yer bırak. Sonra **Okumayı ayarla** bölümünde **Otomatik ayarla**'ya bas.
+6. **Kol:** Uygulama PS5'e bağlanınca kolun bağlantısı bir anlık düşebilir. Koldaki **PS tuşuna** bas ve **kendi hesabını** seç.
+
+### Her oyunda
+
+1. PS5'te oyunu aç.
+2. Uygulamada oynadığın oyunu seç. Emin değilsen "Otomatik algıla"da bırak; paketi olan oyunlarda replikler hazır Türkçesiyle çıkar.
+3. Sağ üstteki **Başlat**'a bas. TV uygulaması kendiliğinden açılır ve TV PS5'in ekranına geçer.
+
+İsteğe bağlı:
+- **Çeviri** sayfasında DeepL ya da Gemini anahtarı girersen paketi olmayan satırlar daha iyi çevrilir.
+- Yazı boyutu, renk ve konum **TV Görünümü** sayfasında.
+
+### Sorun olursa
+
+1. **Genel → Sorun bildir → Kayıtları paketle**'ye bas. Masaüstüne bir kayıt dosyası koyar; API anahtarların ve PS5 / PSN bilgilerin bu dosyaya girmez.
+2. Konuşmacı adları ya da renkleriyle ilgili bir sorunsa, önce aynı bölümde **Diyalog görüntülerini topla**'yı açıp birkaç dakika oyna.
+3. Kayıt dosyasını, bu depoda açacağın bir *issue*'ya ekle.
+
 ## Klasörler
 
 | Klasör | Ne var |
@@ -28,6 +122,8 @@ Git'e konmayanlar: `config.json` (API anahtarları), `ps5.json` (PS5 anahtarlar�
 ```
 
 Bu komut uygulamayı derler. Yalnız değişen dosyaları içeren bir güncelleme paketi hazırlar ve GitHub Releases'e yükler. Kurulu uygulamalar bu paketi kendileri indirir. Tam kurulum dosyasını da yüklemek için komuta `--setup` ekle.
+
+Her sürüm sayfasının metni de bu komutla yazılır: önce yeni bilgisayara kurulum, sonra "Zaten kuruluysa", en sonda `--notes`. Kurulum dosyalarının bulunduğu en yeni sürüm GitHub'dan bulunur; `--setup` ile yeni bir kurulum yüklenince bütün sayfalar ona yönlenir. O zaman bu README'deki Kurulum bölümündeki bağlantıyı da güncelle. Yalnızca sayfaları yeniden yazmak için `packaging\publish.py --fix-notes` kullanılır.
 
 `packaging/releases/` klasöründe her sürümün dosya listesi durur. Bir sonraki güncellemenin neyin değiştiğini bulması bu listeye bağlıdır, o yüzden klasör git'te kalmalı.
 

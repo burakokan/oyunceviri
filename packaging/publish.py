@@ -2,7 +2,8 @@
 
     .venv\\Scripts\\python.exe packaging\\publish.py                 build + update package, upload
     .venv\\Scripts\\python.exe packaging\\publish.py --setup         ...and the full setup (exe + bin parts)
-    options: --no-build (use the existing dist), --notes "what changed", --dry-run (nothing is uploaded)
+    options: --no-build (use the existing dist), --notes "what changed", --dry-run (nothing is uploaded),
+             --fix-notes (only write every release page again: how to install first, then what changed)
 
 The version comes from pc/gt/version.py (raise it first). The update package holds only the files that changed
 since the previous release (its manifest is in packaging/releases/), so a code change is ~10 MB and a game pack
@@ -13,7 +14,6 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import subprocess
 import sys
 import time
@@ -205,13 +205,107 @@ def release_for(s, notes, dry):
         return r.json()
     if dry:
         return {"id": 0, "assets": []}
-    body = (notes or "") + ("\n\nKurulu uygulama bu sürüme kendisi güncellenir (Genel → Güncelleme)."
-                            "\nYeni bilgisayara kurmak için: OyunCeviri-Kurulum.exe ve yanındaki .bin dosyalarını "
-                            "aynı klasöre indirip exe'yi çalıştır.")
     r = s.post(f"{API}/releases", json={"tag_name": tag, "target_commitish": "main", "name": f"Oyun Çeviri {VERSION}",
-                                        "body": body.strip(), "draft": False, "prerelease": False})
+                                        "body": (notes or "").strip(), "draft": False, "prerelease": False})
     r.raise_for_status()
     return r.json()
+
+
+# ---- the release page: how to install first, then what changed ----
+
+SETUP_EXE = "OyunCeviri-Kurulum.exe"
+README_SETUP = f"https://github.com/{REPO}#kurulum"
+_NOTES_HEADING = "## Bu sürümde"
+_OLD_FOOTER = "\n\nKurulu uygulama bu sürüme kendisi"
+
+
+def all_releases(s):
+    out, page = [], 1
+    while True:
+        r = s.get(f"{API}/releases", params={"per_page": 100, "page": page}, timeout=30)
+        r.raise_for_status()
+        batch = r.json()
+        out += batch
+        if len(batch) < 100:
+            return out
+        page += 1
+
+
+def setup_release(releases):
+    """The newest release that carries the full setup (exe + .bin parts) -> (release, [(name, size)]) or None."""
+    found = [r for r in releases if any(a["name"] == SETUP_EXE for a in r["assets"])]
+    if not found:
+        return None
+    rel = max(found, key=lambda r: parse(r["tag_name"].lstrip("v")))
+    parts = sorted(((a["name"], a["size"]) for a in rel["assets"] if a["name"].startswith("OyunCeviri-Kurulum")),
+                   key=lambda p: (not p[0].endswith(".exe"), p[0]))
+    return rel, parts
+
+
+def release_notes(body):
+    """What changed, from a release page in the new or in the old form."""
+    body = body or ""
+    if _NOTES_HEADING in body:
+        return body.split(_NOTES_HEADING, 1)[1].strip()
+    return body.split(_OLD_FOOTER, 1)[0].strip()
+
+
+def release_body(tag, notes, setup, assets=()):
+    """The release page: installing on a new computer (which files, all in one folder, run the exe), updating an
+    installed app, then what changed."""
+    lines = ["## Yeni bilgisayara kurulum", ""]
+    if setup:
+        rel, parts = setup
+        total = sum(size for _, size in parts) / 1e9
+        here = rel["tag_name"] == tag
+        where = ("Tam kurulum dosyaları bu sayfanın altındaki **Assets** bölümünde." if here else
+                 f"Tam kurulum dosyaları **[{rel['tag_name']} sayfasında]({rel['html_url']})**, oradaki **Assets** "
+                 f"bölümünde. Bu sayfada yalnızca güncelleme paketi var; kurduktan sonra uygulama kendini bu sürüme "
+                 f"günceller.")
+        size = f"{total:.1f}".replace(".", ",")
+        lines += [where, "", f"1. Şu {len(parts)} dosyanın **hepsini** indir (toplam yaklaşık {size} GB):"]
+        lines += [f"   - `{name}`" for name, _ in parts]
+        lines += ["2. Hepsini **aynı klasöre** koy (örneğin İndirilenler) ve **adlarını değiştirme**. Hepsinin indirmesi "
+                  "bitmeden kurulumu açma.",
+                  f"3. `{SETUP_EXE}`'yi çalıştır. `.bin` dosyaları kurulumun parçalarıdır, tek başlarına açılmaz; kurulum "
+                  "onları kendi yanında arar. Biri eksikse ya da başka klasördeyse \"disk\" ister ve devam etmez.",
+                  "4. \"Windows bilgisayarınızı korudu\" uyarısı çıkarsa **Ek bilgi**'ye, sonra **Yine de çalıştır**'a bas.",
+                  "5. Kurulumda **Windows güvenlik duvarında izin ver** seçeneğini açık bırak (TV'nin bu bilgisayara "
+                  "bağlanması için).",
+                  "6. Kurulum bitince uygulama açılır. \"Yeni sürüm var\" bildirimi gelince **Genel → Güncelleme → "
+                  "İndir ve kur**'a bas; uygulama son sürüme geçer.",
+                  "",
+                  f"PS5'i bağlama, TV uygulamasını kurma ve altyazı alanını seçme adım adım: "
+                  f"**[README → Kurulum]({README_SETUP})**. Uygulama da ilk açılışta **Başlarken** rehberiyle açılır.",
+                  "",
+                  "`Source code (zip / tar.gz)` kaynak koddur, kurulum için gerekmez."]
+    else:
+        lines += [f"Kurulum anlatımı: **[README → Kurulum]({README_SETUP})**."]
+    own = [f"`{n}`" for n in ("update-*.zip", "update.json", "manifest.json")
+           if any(a == n or (n == "update-*.zip" and a.startswith("update-") and a.endswith(".zip")) for a in assets)]
+    lines += ["", "## Zaten kuruluysa", "",
+              "Uygulama yeni sürümü kendisi bulur (açılışta ve açıkken saatte bir) ve haber verir; **Genel → Güncelleme "
+              "→ İndir ve kur**'a basınca kurulur. Sen istemeden hiçbir şey kurulmaz, ayarların korunur."
+              + (f" Bu sayfadaki {', '.join(own)} uygulamanın kendi kullandığı "
+                 f"{'dosyalardır' if len(own) > 1 else 'dosyadır'}; elle indirmen gerekmez." if own else "")]
+    if notes:
+        lines += ["", _NOTES_HEADING, "", notes.strip()]
+    return "\n".join(lines).strip()
+
+
+def write_bodies(s, only_tag=None, notes_for=None):
+    """Writes the release page text: every release, or only `only_tag` (its notes: notes_for, else what is there)."""
+    releases = all_releases(s)
+    setup = setup_release(releases)
+    for rel in releases:
+        if only_tag and rel["tag_name"] != only_tag:
+            continue
+        notes = notes_for if (only_tag and notes_for is not None) else release_notes(rel.get("body"))
+        body = release_body(rel["tag_name"], notes, setup, [a["name"] for a in rel["assets"]])
+        if body != (rel.get("body") or "").strip():
+            r = s.patch(f"{API}/releases/{rel['id']}", json={"body": body}, timeout=30)
+            r.raise_for_status()
+            say(f"Sayfa metni yazıldı: {rel['tag_name']}")
 
 
 def main():
@@ -220,12 +314,18 @@ def main():
     ap.add_argument("--no-build", action="store_true", help="use the existing dist folder")
     ap.add_argument("--notes", default="", help="what changed (shown in the app)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--fix-notes", action="store_true",
+                    help="build nothing: write every release page again (installation first, then what changed)")
     ap.add_argument("--upload-only", action="store_true",
                     help="build nothing: upload what an interrupted run left in packaging/output")
     args = ap.parse_args()
 
     OUT.mkdir(exist_ok=True)
     RELEASES.mkdir(exist_ok=True)
+    if args.fix_notes:
+        write_bodies(session())
+        say("Bitti: sürüm sayfaları yazıldı.")
+        return
     if args.upload_only:
         mfile = OUT / "manifest.json"
         if json.loads(mfile.read_text(encoding="utf-8"))["version"] != VERSION:
@@ -238,6 +338,7 @@ def main():
             say(f"Yükleniyor: {a.name} ({a.stat().st_size / 1e6:.1f} MB)")
             upload(s, release, a)
         (RELEASES / f"{VERSION}.json").write_text(mfile.read_text(encoding="utf-8"), encoding="utf-8")
+        write_bodies(s)
         say(f"Bitti: {release.get('html_url', '')}")
         return
     if not args.no_build:
@@ -283,6 +384,8 @@ def main():
         say(f"Yükleniyor: {a.name} ({a.stat().st_size / 1e6:.1f} MB)")
         upload(s, release, a)
     (RELEASES / f"{VERSION}.json").write_text(mfile.read_text(encoding="utf-8"), encoding="utf-8")
+    # every page again: this one gets its installation part, and the others point to a new setup when there is one
+    write_bodies(s)
     say(f"Bitti: {release.get('html_url', '')}")
 
 
