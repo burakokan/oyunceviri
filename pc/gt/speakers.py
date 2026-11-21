@@ -1,25 +1,40 @@
 """The color of every speaker's name on the TV.
 
-By default the game's own color of the name is measured on every line (name_color) and sent, so the TV looks like the
+By default the game's own color of the name is measured on every line (name_tint) and sent, so the TV looks like the
 game. The app's own colors are the fallback (and the choice when "Ad rengi oyundaki gibi" is off): the same name
 always gets the same color (kept in speakers.json, so Lucia is the same color tomorrow too); a new name gets the color
 used least so far, avoiding the colors of the people who just spoke, so the people talking in one scene look
 different."""
+import colorsys
 import json
+import math
 import re
 import threading
 import time
-from collections import Counter
+from collections import Counter, deque
 
 import cv2
 import numpy as np
 from rapidfuzz import fuzz
 
-from .config import ROOT
+from .config import ASSETS, ROOT
 from .filters import CUT
 from .ocr import _OUTLINE, _letters_only
 
 PATH = ROOT / "speakers.json"
+# Every person's name colours seen in the game, kept for good (the user's own, grows while playing), and the table
+# that comes with the app (people whose colour never changes, from recorded GTA 6 play).
+GAME_PATH = ROOT / "speaker_game_colors.json"
+GAME_START = ASSETS / "speaker_game_colors.json"
+# The stream (Remote Play video) halves the colour of thin letters: a cream "Jason:" arrives nearly white. The
+# measured saturation is multiplied by this to look like the game again (Filtreler -> "Ad rengi canlılığı").
+BOOST = 2.2
+WHITE = 0.05            # a name whose tint is weaker than this is white in the game
+SCENE_SECONDS = 90.0    # the colour a person had in the last lines within this time (a scene)
+SCENE_LINES = 3
+KEEP_SAMPLES = 40       # per person in the lasting table
+# The hues names come in (yellow measures 48-62 degrees: snapped to one, so it does not switch to gold line by line)
+HUES = (0, 30, 57, 90, 120, 160, 185, 210, 240, 275, 300, 330)
 # Bright, clearly different colors that read well over the game with a dark outline (white is the text itself).
 PALETTE = ["#FFD54F", "#4FC3F7", "#81C784", "#F48FB1", "#FFB74D", "#B39DDB", "#4DB6AC", "#FF8A80", "#DCE775",
            "#90A4AE"]
@@ -28,14 +43,15 @@ RECENT_SECONDS = 90.0
 _INSIDE = re.compile(r"([A-Za-z][\w'’.\-]{2,})\s*:\s+(?=\S)")
 
 
-def name_color(bgr, box, row_text):
-    """The colour of the speaker's name in the game, measured in the row ("Jason: Hey.") -> "#RRGGBB" or None.
+def name_tint(bgr, box, row_text):
+    """The tint of the speaker's name in the game, measured in the row ("Jason: Hey.") -> (hue 0-360, saturation 0-1)
+    or None.
 
-    GTA 6 does not give a person one colour for good: in each scene the speakers get colours (white, pale yellow,
-    yellow, pink, light blue…) to tell them apart, so the colour is measured on every line. The letters are the bright
-    pixels with the game's dark outline next to them, in the part of the row before the colon (found by the share of
-    characters, only its first 85 %); the brighter half of their pixels is taken (the edges blend into the outline).
-    None when too few letter pixels are found, they disagree or are dark (a bright scene behind the name)."""
+    Measured against the white text of the same row, so the picture's own colour cast does not count. The letters are
+    the bright pixels with the game's dark outline next to them; the name is the part of the row before the colon
+    (found by the share of characters, only its first 85 %), the text the part after it; the brighter half of the
+    pixels is taken (the edges blend into the outline). None when too few letter pixels are found, they disagree or
+    are dark (a bright scene behind a thin name)."""
     colon = row_text.find(":")
     if colon < 1 or bgr is None:
         return None
@@ -54,31 +70,87 @@ def name_color(bgr, box, row_text):
     hi = int(a + 0.85 * (end - a))
     if hi - a < 6:
         return None
-    core = cv2.erode(letters[:, a:hi].astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
-    px = part[:, a:hi][core]
-    if len(px) < 20:
+    core = cv2.erode(letters.astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
+
+    def brighter_half(px):
+        if len(px) < 20:
+            return None
+        return px[px.max(axis=1) >= np.percentile(px.max(axis=1), 50)].astype(np.float32)
+
+    name = brighter_half(part[:, a:hi][core[:, a:hi]])
+    if name is None or float(name.std(axis=0).max()) > 28:
         return None
-    px = px[px.max(axis=1) >= np.percentile(px.max(axis=1), 50)].astype(np.float32)
-    if float(px.std(axis=0).max()) > 28:
-        return None
-    color = np.median(px, axis=0)
+    color = np.median(name, axis=0)
     if color.max() < 200:
         return None         # the game's name colours are all bright: a dark one is the scene behind a thin name
-    b_, g_, r_ = (int(round(c)) for c in color)
-    return f"#{r_:02X}{g_:02X}{b_:02X}"
+    after = int(end) + 8
+    text = brighter_half(part[:, after:][core[:, after:]]) if after < part.shape[1] else None
+    white = np.median(text, axis=0) if text is not None else np.full(3, 250.0, np.float32)
+    tint = np.clip(color / np.maximum(white, 180), 0, 1)
+    tint = tint / max(float(tint.max()), 1e-6)
+    b_, g_, r_ = (float(c) for c in tint)
+    h, sat, _ = colorsys.rgb_to_hsv(r_, g_, b_)
+    return round(h * 360, 1), round(sat, 3)
+
+
+def tint_color(hue, sat, boost=BOOST):
+    """The colour for the TV: white below WHITE, else the measured hue with the saturation brought back (rounded, so
+    one person does not flicker between shades line by line)."""
+    if sat < WHITE:
+        return "#FFFFFF"
+    sat = min(0.6, max(0.1, round(sat * boost / 0.1) * 0.1))
+    hue = min(HUES, key=lambda h: abs((hue - h + 180) % 360 - 180))
+    r, g, b = colorsys.hsv_to_rgb(hue / 360, sat, 1.0)
+    return f"#{round(r * 255):02X}{round(g * 255):02X}{round(b * 255):02X}"
+
+
+def name_color(bgr, box, row_text, boost=BOOST):
+    """name_tint as the colour the TV gets (None when it cannot be measured)."""
+    t = name_tint(bgr, box, row_text)
+    return tint_color(*t, boost) if t else None
+
+
+def same_kind(a, b):
+    """Two tints are the same colour in the game: both white, or both coloured with a near hue."""
+    if (a[1] < WHITE) != (b[1] < WHITE):
+        return False
+    return a[1] < WHITE or abs((a[0] - b[0] + 180) % 360 - 180) <= 25
+
+
+def typical(samples):
+    """The usual tint of a list of (hue, saturation): white when most are white, else the circular mean hue and the
+    median saturation of the coloured ones -> (hue, saturation)."""
+    if not samples:
+        return None
+    coloured = [(h, s) for h, s in samples if s >= WHITE]
+    if len(coloured) * 2 <= len(samples):
+        return 0.0, 0.0
+    x = sum(math.cos(math.radians(h)) for h, _ in coloured)
+    y = sum(math.sin(math.radians(h)) for h, _ in coloured)
+    return round(math.degrees(math.atan2(y, x)) % 360, 1), round(float(np.median([s for _, s in coloured])), 3)
 
 
 class SpeakerColors:
-    def __init__(self, path=PATH):
+    def __init__(self, path=PATH, game_path=GAME_PATH, game_start=GAME_START):
         self.path = path
         self._lock = threading.Lock()
         self._recent = {}     # name -> last time it was used
-        self.game = {}        # name -> the colour the game gave it last (this session)
+        self.scene = {}       # name -> deque of (time, hue, saturation): this person's last lines
+        self.learned = {}     # name -> [[hue, saturation], ...]: the colours seen in the game, kept for good
+        self.game_path = game_path
+        self._learned_saved = 0.0
+        self._learned_dirty = False
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
             self.colors = {str(k): str(v) for k, v in data.items() if str(v) in PALETTE}
         except (OSError, ValueError, AttributeError):
             self.colors = {}
+        for source in (game_start, game_path):      # the user's own table over the one that comes with the app
+            try:
+                for k, v in json.loads(source.read_text(encoding="utf-8")).items():
+                    self.learned[str(k)] = [[float(h), float(s_)] for h, s_ in v][-KEEP_SAMPLES:]
+            except (OSError, ValueError, AttributeError, TypeError):
+                pass
 
     @staticmethod
     def _key(name):
@@ -104,21 +176,53 @@ class SpeakerColors:
             self._recent[key] = now
             return color
 
-    def pick(self, name, measured=None, from_game=True):
-        """The colour sent to the TV: the game's colour of this line's name (measured), or the one the game gave this
-        person last when it could not be measured; the app's own colour for the person when the game's colour is not
-        wanted or was never measured."""
+    def pick(self, name, tint=None, from_game=True, boost=BOOST, now=None):
+        """The colour sent to the TV.
+
+        With the game's colours: the colour this person has in the scene, i.e. the usual one of their last lines (this
+        one's measured tint included), so one line read a little off does not turn the name white for a moment; a
+        new scene's colour takes over after two lines. Without a line in the scene: the colour kept for this person
+        from earlier play (the lasting table). Never measured: white. Without the game's colours: the app's own
+        colour for the person."""
         if not name or not name.strip():
             return None
-        if from_game:
-            key = self._key(name)
-            with self._lock:
-                if measured:
-                    self.game[key] = measured
-                    return measured
-                if key in self.game:
-                    return self.game[key]
-        return self.color(name)
+        if not from_game:
+            return self.color(name)
+        key = self._key(name)
+        now = time.monotonic() if now is None else now
+        with self._lock:
+            lines = self.scene.setdefault(key, deque(maxlen=SCENE_LINES))
+            while lines and now - lines[0][0] > SCENE_SECONDS:
+                lines.popleft()
+            if tint:
+                lines.append((now, float(tint[0]), float(tint[1])))
+                seen = self.learned.setdefault(key, [])
+                seen.append([float(tint[0]), float(tint[1])])
+                del seen[:-KEEP_SAMPLES]
+                self._learned_dirty = True
+                self._save_learned(now)
+            scene = typical([(h, s_) for _, h, s_ in lines])
+            kept = typical(self.learned.get(key, []))
+            # The scene decides the colour (GTA 6 gives some people another colour in another scene); when it is the
+            # one this person usually has, the usual shade is shown, so the name does not change shade line by line.
+            usual = kept if scene is None or (kept is not None and same_kind(scene, kept)) else scene
+        # never measured and not in any table: white, the colour most names have in the game
+        return tint_color(*usual, boost) if usual is not None else "#FFFFFF"
+
+    def _save_learned(self, now, force=False):
+        """The lasting table to disk, at most every 20 s while playing (and when the engine stops)."""
+        if not self._learned_dirty or (not force and now - self._learned_saved < 20):
+            return
+        self._learned_saved, self._learned_dirty = now, False
+        try:
+            self.game_path.write_text(json.dumps(self.learned, ensure_ascii=False, separators=(",", ":")),
+                                      encoding="utf-8")
+        except OSError:
+            pass
+
+    def flush(self):
+        with self._lock:
+            self._save_learned(time.monotonic(), force=True)
 
     def _save(self):
         try:

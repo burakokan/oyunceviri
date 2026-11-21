@@ -1,5 +1,6 @@
 """Filters page: HUD/number filter, speaker names, cut phrases, ignored lines, stability."""
-from PySide6.QtWidgets import QLabel, QLineEdit, QSpinBox, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QSlider, QSpinBox, QVBoxLayout, QWidget
 
 from gt import filters
 
@@ -63,6 +64,26 @@ class FiltersPage(QWidget):
                             "alınır. GTA 6 aynı kişiye her sahnede aynı rengi vermez, sahnedeki kişileri ayırmak için "
                             "renk dağıtır; TV de öyle gösterir. Kapatırsan her kişinin hep aynı kalan kendi rengi "
                             "olur. TV Görünümü'nde \"Konuşmacı adları renkli\" açık olmalı.", game_color))
+        boost_box = QWidget()
+        h = QHBoxLayout(boost_box)
+        h.setContentsMargins(0, 0, 0, 0)
+        boost = QSlider(Qt.Horizontal)
+        boost.setRange(10, 40)
+        boost.setValue(round(f.get("speaker_color_boost", 2.2) * 10))
+        boost.setMinimumWidth(220)
+        boost_value = QLabel(f"{boost.value() / 10:.1f}×")
+        boost_value.setMinimumWidth(36)
+
+        def boost_changed(v):
+            boost_value.setText(f"{v / 10:.1f}×")
+            self._set("speaker_color_boost", v / 10)
+        boost.valueChanged.connect(boost_changed)
+        h.addWidget(boost)
+        h.addWidget(boost_value)
+        main.add(SettingRow("Ad rengi canlılığı",
+                            "PS5'in Remote Play görüntüsü ince harflerin rengini soldurur: oyunda krem görünen "
+                            "\"Jason:\" bilgisayara neredeyse beyaz gelir. Ölçülen renk bu kadar canlandırılır. "
+                            "TV'deki ad rengi oyundakinden soluksa artır, fazla koyuysa azalt.", boost_box))
         main.add(Divider())
         names_only = Toggle(f.get("names_only", False))
         names_only.toggled.connect(lambda v: self._set("names_only", v))

@@ -18,7 +18,7 @@ from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mas
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
-from .speakers import SpeakerColors, SpeakerNames, name_color
+from .speakers import BOOST, SpeakerColors, SpeakerNames, name_tint
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
 
@@ -316,6 +316,7 @@ class Engine:
     def stop(self):
         self._stop.set()
         self.conductor.stop()
+        self.colors.flush()         # the people's name colours seen this time, kept for good
 
     # ---- models (also used by the UI for test translations) ----
 
@@ -700,7 +701,7 @@ class Engine:
             line = {"speaker": speaker, "english": english, "ocr": "\n".join(rows), "t_first": t_first,
                     "since": now, "ocr_ms": ocr_ms, "crop": frame[0] if frame is not None else None, "hint": hint,
                     "lang": language,
-                    "name_color": self._game_color(read_rows, frame[0] if frame is not None else None, speaker)}
+                    "name_tint": self._game_tint(read_rows, frame[0] if frame is not None else None, speaker)}
             if hint:
                 # Objectives / button hints: shown at once (they have no full stop), never joined with dialogue.
                 if not self._seen(normalize(english), now, hint):
@@ -729,15 +730,15 @@ class Engine:
             self._utterance(line, op, now)
 
     @staticmethod
-    def _game_color(read_rows, bgr, speaker):
-        """The colour the game gave this speaker's name on screen now (None: not measured)."""
+    def _game_tint(read_rows, bgr, speaker):
+        """The tint the game gave this speaker's name on screen now -> (hue, saturation) or None (not measured)."""
         if not speaker or bgr is None:
             return None
         want = speaker.casefold()
         for box, text in read_rows:
             name = filters.split_speaker(text)[0]
             if name and (name.casefold() == want or fuzz.ratio(name.casefold(), want) >= 75):
-                return name_color(bgr, box, text)
+                return name_tint(bgr, box, text)
         return None
 
     def names_always(self):
@@ -923,8 +924,8 @@ class Engine:
         if replaces is not None:
             msg["replaces"] = replaces
         # The game's colour of the name (measured on screen), like the game shows it; or the app's own colours.
-        color = self.colors.pick(shown_speaker, line.get("name_color"),
-                                 cfg["filters"].get("speaker_color_game", True)) if shown_speaker else None
+        color = self.colors.pick(shown_speaker, line.get("name_tint"), cfg["filters"].get("speaker_color_game", True),
+                                 cfg["filters"].get("speaker_color_boost", BOOST)) if shown_speaker else None
         if color:
             msg["color"] = color
         self.server.send(msg)

@@ -29,7 +29,8 @@ from .version import REPO, VERSION, parse
 FROZEN = getattr(sys, "frozen", False)
 TIMEOUT = 20
 # Never written by an update, whatever a release contains: the user's own data in the app folder.
-PROTECTED = {"config.json", "ps5.json", "speakers.json", "region_cache.json", "screen_cache.json"}
+PROTECTED = {"config.json", "ps5.json", "speakers.json", "speaker_game_colors.json", "region_cache.json",
+             "screen_cache.json"}
 PROTECTED_DIRS = ("logs/", "tv-keys/", "update/", "packs/build/")
 
 APPLY_PS1 = r"""$ErrorActionPreference = 'SilentlyContinue'
