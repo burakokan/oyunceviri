@@ -1,5 +1,5 @@
 """Versions: the PC app, and the TV apps it carries (packaging/publish.py and the updater read these)."""
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 TV_APP = "1.4"      # Android TV app: tv/app/build.gradle.kts versionName
 TV_WEB = "1.6"      # Samsung / LG web app: tv-web/app.js VERSION ("1.2-web")
 # Where updates come from: GitHub Releases of this (public) repository
