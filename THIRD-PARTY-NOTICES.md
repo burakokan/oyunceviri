@@ -83,6 +83,7 @@ The LGPL libraries (Qt / PySide6, paramiko) are used as separate, replaceable fi
 | quickmt `quickmt-en-tr` | CC-BY-4.0 | <https://huggingface.co/quickmt/quickmt-en-tr> |
 | Gemma 4 E2B (Q4_0 GGUF) | Gemma Terms of Use | <https://ai.google.dev/gemma/terms> |
 | PP-OCR text detection / recognition models (in RapidOCR) | Apache-2.0 | <https://github.com/PaddlePaddle/PaddleOCR> |
+| `assets/ocr/game_rec_tiny_en.onnx`: PP-OCRv6 tiny recognizer fine-tuned by this project on recorded game subtitle rows, output cut to English characters and Turkish letters (a modified version of the PP-OCRv6 tiny model) | Apache-2.0 | <https://github.com/PaddlePaddle/PaddleOCR> |
 
 Gemma is provided under and subject to the Gemma Terms of Use found at <https://ai.google.dev/gemma/terms>.
 

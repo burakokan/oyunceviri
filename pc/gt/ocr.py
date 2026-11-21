@@ -125,8 +125,9 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
             # On a sunlit street the bright pavement melts into a coloured name ("Joey:") and the blob is thrown
             # away as too big, so the name stayed outside the row and the line had no speaker: letters with a dark
             # outline next to them are taken too (the pavement has none).
+            outlined = bright & (cv2.erode(v, _OUTLINE) < 60)
             colored = (_letters_only((bright * 255).astype(np.uint8))
-                       | _letters_only(((bright & (cv2.erode(v, _OUTLINE) < 60)) * 255).astype(np.uint8)))
+                       | _letters_only((outlined * 255).astype(np.uint8)))
         cols = colored[y0:y1].any(axis=0)
         # To the left a bit further: the space after "Stranger:" (colon + space) is wider than between words.
         left = (3 * gap) // 4
@@ -134,6 +135,14 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
             x0 = max(0, x0 - left) + int(np.argmax(cols[max(0, x0 - left):x0]))
         while x1 < w and cols[x1:min(w, x1 + gap // 2)].any():
             x1 = x1 + int(np.flatnonzero(cols[x1:min(w, x1 + gap // 2)])[-1]) + 1
+        # The dots right after the row ("causeway...", "so..."): too small to count as letters, so the row ended
+        # at the first or second one, "..." was read "." or ".." and the line looked finished (its rest on the
+        # next screen was not joined to it). Outlined bright marks in the lower half of the row, close together,
+        # at most a row's height further.
+        low = outlined[y0 + (y1 - y0) // 2:y1]
+        step, limit = max(3, (y1 - y0) // 4), min(w, x1 + (y1 - y0))
+        while x1 < limit and low[:, x1:min(limit, x1 + step)].any():
+            x1 = x1 + int(np.flatnonzero(low[:, x1:min(limit, x1 + step)].any(axis=0))[-1]) + 1
         pad = (y1 - y0) // 3
         out.append((y0, y1, max(0, x0 - pad), min(w, x1 + pad)))
     return out
@@ -223,6 +232,16 @@ class RowCache:
         self.rows = self._next
 
 
+def trained_model():
+    """The recognizer trained for game subtitles (assets/ocr): PP-OCRv6 tiny fine-tuned on the recorded subtitle rows
+    of the games played with the app (GTA 6 most), with an output of English characters and the Turkish letters only
+    (108 classes instead of 6 906; Turkish so that a PS5 menu in Turkish is still seen as Turkish and not translated):
+    faster than tiny, as right as small, and it cannot answer "ó" or "〇". None when the file is missing."""
+    from .config import ASSETS
+    path = ASSETS / "ocr" / "game_rec_tiny_en.onnx"
+    return path if path.is_file() else None
+
+
 class RapidLineOcr:
     """PP-OCRv6 recognizer (RapidOCR, CPU), one call per text line.
 
@@ -233,11 +252,15 @@ class RapidLineOcr:
 
     language = "PP-OCRv6 tiny"
 
-    def __init__(self, min_score=0.6, accurate=True):
+    def __init__(self, min_score=0.6, accurate=True, model=None):
         from rapidocr import ModelType, RapidOCR
         # A few threads are faster than all 12 for single short lines.
         params = {"Global.log_level": "error", "EngineConfig.onnxruntime.intra_op_num_threads": 4}
-        self.engine = RapidOCR(params={**params, "Rec.model_type": ModelType.TINY})
+        if model is not None:
+            self.engine = RapidOCR(params={**params, "Rec.model_path": str(model)})
+            self.language = "Oyunlar için eğitilmiş (PP-OCRv6 tiny)"
+        else:
+            self.engine = RapidOCR(params={**params, "Rec.model_type": ModelType.TINY})
         self.accurate_engine = RapidOCR(params={**params, "Rec.model_type": ModelType.SMALL}) if accurate else None
         self.min_score = min_score
         self.rows = []          # [(box, text)] of the last read, every row (the speaker name's colour is measured there)
@@ -306,7 +329,12 @@ class WinOcr:
 
 
 def make_ocr(name, accurate=True):
-    ocr = WinOcr() if name == "windows" else RapidLineOcr(accurate=accurate)
+    """name: "trained" (the model trained for game subtitles; the standard tiny one when its file is missing), "rapid"
+    (standard PP-OCRv6 tiny) or "windows"."""
+    if name == "windows":
+        ocr = WinOcr()
+    else:
+        ocr = RapidLineOcr(accurate=accurate, model=trained_model() if name == "trained" else None)
     # The first read loads the model (~150 ms); do it now instead of on the first subtitle.
     img = np.zeros((48, 220, 3), np.uint8)
     cv2.putText(img, "Warm up", (8, 34), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)

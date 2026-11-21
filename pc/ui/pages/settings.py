@@ -36,19 +36,23 @@ class SettingsPage(QWidget):
 
         general = Card("Yazı okuma ve uygulama")
         ocr = QComboBox()
-        ocr.addItem("PP-OCRv6 tiny (önerilen)", "rapid")
+        ocr.addItem("Oyunlar için eğitilmiş (önerilen)", "trained")
+        ocr.addItem("PP-OCRv6 tiny (standart)", "rapid")
         ocr.addItem("Windows OCR (İngilizce dil paketi gerekir)", "windows")
-        ocr.setCurrentIndex(0 if self.cfg["ocr_engine"] == "rapid" else 1)
+        ocr.setCurrentIndex(max(0, ocr.findData(self.cfg["ocr_engine"])))
         ocr.currentIndexChanged.connect(lambda: self._set("ocr_engine", ocr.currentData()))
         general.add(SettingRow("Yazı okuma motoru",
-                               "Ekrandaki İngilizce yazıyı okuyan motor. Önerilen, satır başına ~10 ms'de okur. "
+                               "Ekrandaki İngilizce yazıyı okuyan motor. Önerilen, standart tiny modelin oyun "
+                               "altyazılarıyla eğitilmiş hâli: daha hızlı (satır başına ~5 ms) ve çok daha az hata yapar. "
                                "Değişiklik bir sonraki Başlat'ta uygulanır.", ocr))
         general.add(Divider())
         accurate = Toggle(self.cfg["ocr_accurate"])
         accurate.toggled.connect(lambda v: self._set("ocr_accurate", v))
         general.add(SettingRow("Satırı son kez büyük modelle oku",
-                               "Satır ekranda oturunca daha büyük OCR modeliyle bir kez daha okunur. I/l karışması "
-                               "ve harf atlama azalır, satır başına ~40 ms ekler. (Yeniden başlatınca uygulanır.)",
+                               "Satır ekranda oturunca 4 kat yavaş, büyük bir OCR modeliyle bir kez daha okunur; "
+                               "satır başına ~30 ms ekler. Eğitilmiş modelle gerekmez, ölçümde neredeyse aynı "
+                               "doğrulukta okuyor. Standart modelde I/l karışmasını azaltır. (Yeniden başlatınca "
+                               "uygulanır.)",
                                accurate))
         general.add(Divider())
         log = Toggle(self.cfg["debug_log"])

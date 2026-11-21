@@ -34,7 +34,7 @@ def _checks(cfg):
         img = np.zeros((70, 760, 3), np.uint8)
         cv2.putText(img, "Keep your head down, the sniper is out there.", (12, 46), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
                     (255, 255, 255), 2, cv2.LINE_AA)
-        return repr(make_ocr("rapid", accurate=False).read(img, text_mask(img, 160, 60)))
+        return repr(make_ocr("trained", accurate=False).read(img, text_mask(img, 160, 60)))
     yield "Yazı okuma (OCR)", ocr
 
     def packs():

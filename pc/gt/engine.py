@@ -46,7 +46,8 @@ FRAME_LIMIT = 3600
 # Joined sentences longer than this are not joined further.
 MAX_JOIN = 260
 _ASIDE = re.compile(r"^\(.*\)$", re.S)
-_ELLIPSIS = re.compile(r"\s*(\.\.\.|…)\s*$")
+# "..." / "…" at the end: the sentence goes on on the next screen; ".." too (the third dot of a cut-off row)
+_ELLIPSIS = re.compile(r"\s*(\.{2,}|…)\s*$")
 _SENTENCE_END = re.compile(r"[.!?]['\"”’)]*$")
 _TURKISH = re.compile(r"[çğışöüÇĞİŞÖÜ]")
 _LEADING_DASH = re.compile(r"^\s*[-–—]\s+|(?<=[.!?])\s+[-–—]\s+")

@@ -31,10 +31,11 @@ DEFAULTS = {
     "hold_unfinished": True,
     # ...but show the part we have if the screen does not change for this long
     "max_hold_ms": 4500,
-    # "rapid" (PP-OCRv6 tiny, default) or "windows" (needs the English OCR language installed)
-    "ocr_engine": "rapid",
-    # Re-read a stable line with the larger PP-OCRv6 small model (+~40 ms, fewer misreads)
-    "ocr_accurate": True,
+    # Text reader: "windows" needs the English OCR language installed
+    "ocr_engine": "trained",      # trained for game subtitles (assets/ocr); "rapid": standard tiny; "windows"
+    # Read a settled line once more with the big (small-size, 4x slower) model. The trained model reads as well on
+    # its own (checked on 132 rows by eye and 257 TV lines), so it is off: lines come ~30 ms sooner.
+    "ocr_accurate": False,
     # Undo the model's softening of swear words ("Shit!" -> "Siktir!" instead of "Kahretsin!")
     "uncensored": True,
     # Write logs/session-*.jsonl and an image of the subtitle area for every line

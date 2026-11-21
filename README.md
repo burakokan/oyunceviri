@@ -51,6 +51,18 @@ Genel → "Ayarları başka bilgisayara taşı" bölümünde iki düğme var: "D
 - **API anahtarları:** Dosyaya yalnızca kullanıcı "Evet, anahtarlarla" derse girer. Anahtarsız bir dosya yüklenirse bilgisayardaki mevcut anahtarlar korunur.
 - **Taşınmayanlar:** PS5 bağlantısı ve PSN hesabı (`ps5.json`), TV'nin adresi ve markası, chiaki-ng yolu. Okuma eşikleri (parlaklık / renk) ve "Oyunda altyazı arka planı açık" seçeneği de taşınmaz, çünkü o PS5'in görüntüsüne göre değişir. Her bilgisayarda Altyazı Alanı → "Otomatik ayarla" ile bulunur. Bu ayarlar dosyaya elle eklense bile yükleme sırasında dikkate alınmaz.
 
+## Yazı okuma modeli
+
+Altyazılar, RapidOCR'daki PP-OCRv6 tiny modelinin oyun altyazılarıyla eğitilmiş hâliyle okunur (`assets/ocr/game_rec_tiny_en.onnx`, Genel → "Yazı okuma motoru" → "Oyunlar için eğitilmiş").
+
+- Model, uygulamayla kaydedilmiş yaklaşık 9.000 altyazı satırıyla ince ayarlandı. Satırların çoğu GTA 6'dan, bir kısmı başka oyunlardan.
+- Yalnızca İngilizce karakterleri ve Türkçe harfleri tanır. Standart modelden hızlıdır ve daha az hata yapar.
+- Ölçüm sonuçları, elle kontrol edilmiş 132 satırda:
+  - tam doğru satır %79,5'ten %96,2'ye çıktı;
+  - satır başına süre 7,9 ms'den 5,9 ms'ye düştü.
+  - Büyük modelle ikinci okuma artık gerekmediği için varsayılan olarak kapalı.
+- Nasıl eğitildiği ve yeniden nasıl eğitileceği `tools/ocr_egitim/README.md` dosyasında.
+
 ## Altyazı okuma ve oyunun altyazı arka planı
 
 Altyazılar varsayılan olarak parlaklık ve renk eşiğiyle okunur (Altyazı Alanı → "Okumayı ayarla").
