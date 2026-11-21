@@ -29,10 +29,19 @@ GAME_START = ASSETS / "speaker_game_colors.json"
 # The stream (Remote Play video) halves the colour of thin letters: a cream "Jason:" arrives nearly white. The
 # measured saturation is multiplied by this to look like the game again (Filtreler -> "Ad rengi canlılığı").
 BOOST = 2.2
-WHITE = 0.05            # a name whose tint is weaker than this is white in the game
+# GTA 6's "white" names are mostly faint pastel tints, steady per person (Kenton light cyan, Dobbs and Cal light
+# pink: 1.6-2.7 % after the stream): a tint from this on counts, when the person's readings agree on the hue.
+WHITE = 0.018
 SCENE_SECONDS = 90.0    # the colour a person had in the last lines within this time (a scene)
 SCENE_LINES = 3
 KEEP_SAMPLES = 40       # per person in the lasting table
+# Labels the game gives anybody: several people in one scene share them ("Local", "Tourist") and the game tells them
+# apart by colour (one Local yellow, the next white), so every line keeps the colour measured on it.
+GENERIC = {"local", "locals", "tourist", "tourists", "stranger", "strangers", "cop", "cops", "driver", "drivers",
+           "pedestrian", "pedestrians", "criminal", "criminals", "mugger", "muggers", "worker", "workers",
+           "staff member", "clerk", "security", "guard", "guards", "gang member", "gang members", "victim", "man",
+           "woman", "guy", "girl", "kid", "biker", "bikers", "dealer", "customer", "passenger", "officer", "trooper",
+           "hostage", "bystander", "witness", "fan", "fans", "protester", "protesters", "inmate", "prisoner"}
 # The hues names come in (yellow measures 48-62 degrees: snapped to one, so it does not switch to gold line by line)
 HUES = (0, 30, 57, 90, 120, 160, 185, 210, 240, 275, 300, 330)
 # Bright, clearly different colors that read well over the game with a dark outline (white is the text itself).
@@ -71,6 +80,11 @@ def name_tint(bgr, box, row_text):
     if hi - a < 6:
         return None
     core = cv2.erode(letters.astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
+    # The name's letters are there: about as many letter blobs as the name has letters (a map icon or a leaf where
+    # the name should be is one or two blobs).
+    count = cv2.connectedComponents(letters[:, a:hi].astype(np.uint8), connectivity=8)[0]
+    if count - 1 < max(2, (colon * 85 // 100) // 2):
+        return None
 
     def brighter_half(px):
         if len(px) < 20:
@@ -110,23 +124,37 @@ def name_color(bgr, box, row_text, boost=BOOST):
     return tint_color(*t, boost) if t else None
 
 
+FAINT = 0.045           # white and a tint weaker than this are told apart by many readings, not by a scene's few
+
+
 def same_kind(a, b):
-    """Two tints are the same colour in the game: both white, or both coloured with a near hue."""
+    """Two tints are the same colour in the game: both white or faint (a faint pastel name reads white now and then:
+    the person's long record decides), or both coloured with a near hue."""
+    if a[1] < FAINT and b[1] < FAINT:
+        return True
     if (a[1] < WHITE) != (b[1] < WHITE):
         return False
-    return a[1] < WHITE or abs((a[0] - b[0] + 180) % 360 - 180) <= 25
+    return abs((a[0] - b[0] + 180) % 360 - 180) <= 25
 
 
 def typical(samples):
     """The usual tint of a list of (hue, saturation): white when most are white, else the circular mean hue and the
-    median saturation of the coloured ones -> (hue, saturation)."""
+    median saturation of the coloured ones -> (hue, saturation), or None when the readings contradict each other."""
     if not samples:
         return None
     coloured = [(h, s) for h, s in samples if s >= WHITE]
-    if len(coloured) * 2 <= len(samples):
+    # A tie goes to the colour: a colour seen is there, a white reading may be a coloured name read faintly.
+    if len(coloured) * 2 < len(samples):
         return 0.0, 0.0
-    x = sum(math.cos(math.radians(h)) for h, _ in coloured)
-    y = sum(math.sin(math.radians(h)) for h, _ in coloured)
+    if len(coloured) == 1 and coloured[0][1] < FAINT:
+        return 0.0, 0.0     # one faint reading alone: a white name read a little off as often as a pastel one
+    # The hue weighted by how strong each reading is: a faint stray reading does not pull a yellow towards orange.
+    x = sum(s * math.cos(math.radians(h)) for h, s in coloured)
+    y = sum(s * math.sin(math.radians(h)) for h, s in coloured)
+    if len(coloured) >= 2 and math.hypot(x, y) / sum(s for _, s in coloured) < 0.75:
+        # The readings disagree on the hue: faint ones only, a white name read a little off -> white; a strong one
+        # among them, something else was read as the name (leaves, a sign behind it) -> unknown (the record decides).
+        return (0.0, 0.0) if all(s < FAINT for _, s in coloured) else None
     return round(math.degrees(math.atan2(y, x)) % 360, 1), round(float(np.median([s for _, s in coloured])), 3)
 
 
@@ -205,7 +233,13 @@ class SpeakerColors:
             kept = typical(self.learned.get(key, []))
             # The scene decides the colour (GTA 6 gives some people another colour in another scene); when it is the
             # one this person usually has, the usual shade is shown, so the name does not change shade line by line.
-            usual = kept if scene is None or (kept is not None and same_kind(scene, kept)) else scene
+            # Another colour than the person's usual one needs two lines of the scene: one reading alone may be a
+            # leaf or a sign where the name is.
+            usual = kept if scene is None or (kept is not None and (same_kind(scene, kept) or len(lines) < 2)) else scene
+            if tint and key in GENERIC:
+                usual = typical([tint])     # "Local", "Tourist"…: this line's own colour (another person maybe)
+            if usual is not None and WHITE <= usual[1] < FAINT and len(self.learned.get(key, [])) < 5:
+                usual = (0.0, 0.0)  # a faint pastel tint is trusted only after a few readings agree on it
         # never measured and not in any table: white, the colour most names have in the game
         return tint_color(*usual, boost) if usual is not None else "#FFFFFF"
 
