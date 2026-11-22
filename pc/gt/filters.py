@@ -2,7 +2,9 @@
 import re
 
 # "Karl: text", "German Infantry: text" - up to four capitalized words before the colon
-_SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-]*(?:\s+[A-Z][\w'’.\-]*){0,3})\s*:\s*(.+)$", re.S)
+# A name: up to four capitalised words, "&" between two of them ("Kolt & Associates": without it the row went into
+# the line above as plain text, "Vicki: … Kolt & Associates: What the fuck?", or on its own without a name, white).
+_SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-]*(?:\s+(?:&\s+)?[A-Z][\w'’.\-]*){0,3})\s*:\s*(.+)$", re.S)
 # A name OCR read a little wrong ("cO Wilson:", "CO wiison:"): one to three words before the colon, a capital in it.
 _LOOSE_SPEAKER = re.compile(r"^\s*([A-Za-z][\w'’.\-]*(?:\s+[A-Za-z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
 # ...but not a sentence with a colon ("Here's the deal: …", "Listen up: …").
@@ -118,7 +120,7 @@ def _clean_name(name):
 
 
 # "In Spanish:" (also after the name: "M7: In Spanish: Let's go!") -> "Spanish"
-_LANGUAGE_IN = re.compile(r"^\s*(?:[A-Z][\w'’.\-]*(?:\s+[A-Z][\w'’.\-]*){0,3}\s*:\s*)?In ([A-Z][a-z]+)\s*:")
+_LANGUAGE_IN = re.compile(r"^\s*(?:[A-Z][\w'’.\-]*(?:\s+(?:&\s+)?[A-Z][\w'’.\-]*){0,3}\s*:\s*)?In ([A-Z][a-z]+)\s*:")
 LANGUAGES_TR = {"Spanish": "İspanyolca", "French": "Fransızca", "Italian": "İtalyanca", "German": "Almanca",
                 "Portuguese": "Portekizce", "Russian": "Rusça", "Chinese": "Çince", "Mandarin": "Çince",
                 "Cantonese": "Kantonca", "Japanese": "Japonca", "Korean": "Korece", "Arabic": "Arapça",
@@ -191,13 +193,14 @@ def utterances(text):
     return [" ".join(g) for g in utterance_rows(text)]
 
 
-def utterance_rows(text):
-    """Like utterances(), but each line as its screen rows -> [[row, ...], ...]."""
+def utterance_rows(text, starts=()):
+    """Like utterances(), but each line as its screen rows -> [[row, ...], ...]. starts: rows known to begin a new
+    subtitle although no name was read in front of them (by the spacing on screen)."""
     groups = []
     for row in (r.strip() for r in text.split("\n")):
         if not row:
             continue
-        if not groups or split_speaker(row)[0] or is_hint(row) or _LANGUAGE.match(row):
+        if not groups or split_speaker(row)[0] or is_hint(row) or _LANGUAGE.match(row) or row in starts:
             groups.append([row])
         elif is_hint(" ".join(groups[-1])):
             groups.append([row])        # dialogue under a hint row

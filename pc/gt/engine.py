@@ -13,8 +13,8 @@ from .capture import WindowGrabber
 from .conductor import Conductor
 from .guards import RepeatGuard, StickyRows, non_speech
 from .logbook import Logbook
-from .ocr import (RowCache, box_mask, changed, keep_boxes, make_ocr, outline_mask, outline_ratio, signature,
-                  subtitle_lines, text_lines, text_mask)
+from .ocr import (RowCache, baseline, box_mask, changed, keep_boxes, make_ocr, outline_mask, outline_ratio,
+                  signature, subtitle_lines, text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
@@ -40,6 +40,10 @@ REPLACE_WORDS = 3
 REPLACE_SECONDS = 3.0
 # A line shown without a name gets its name if the same line is read with one within this time.
 RENAME_SECONDS = 6.0
+# Two subtitles one under the other are further apart than the rows of one: more than this part of the screen height
+# (GTA 6 at 1080p: 48 px within one, 57 between two), or this much more than the rows of one seen so far.
+SUBTITLE_PITCH = 0.0485
+SUBTITLE_GAP = 1.09
 REREAD_SECONDS = 1.0
 FRAME_EVERY = 1.0
 FRAME_LIMIT = 3600
@@ -278,6 +282,7 @@ class Engine:
         # speaker on every line (then a line without a name is not given the previous speaker's name).
         self.names = SpeakerNames()
         self._named = deque(maxlen=60)
+        self._pitches = deque(maxlen=40)     # spacing of the rows of one subtitle (pixels)
         # Lines shown without a name: when the name is read a moment later (it was cut or faded in), the TV writes
         # the line again over its row, with the name and its colour.
         self._unnamed = deque(maxlen=6)
@@ -307,6 +312,7 @@ class Engine:
         self.cfg = cfg
         self.names = SpeakerNames()         # a new session may be another game
         self._named.clear()
+        self._pitches.clear()
         self._unnamed.clear()
         self.conductor.warm(cfg)            # open the online connections / start Gemma before the first line
         self._stop.clear()
@@ -581,21 +587,29 @@ class Engine:
         return text
 
     def _frame_recorder(self, cfg):
-        """While the debug log is on: one JPEG of the subtitle area per second in logs/frames/<session>/ (at most
-        FRAME_LIMIT), to find out afterwards why a line was read late or not at all."""
+        """While the debug log is on: one JPEG of the subtitle area per second in logs/frames/<session>/, the last
+        FRAME_LIMIT of them (the oldest go: it used to stop after the first hour, so a mistake later in the evening had
+        no picture), to find out afterwards why a line was read late, wrong or not at all."""
         if not (self.log and cfg.get("record_frames", True)):
             return None
         import cv2
         folder = self.log.dir / "frames" / self.log.session
         folder.mkdir(parents=True, exist_ok=True)
-        state = {"last": 0.0, "n": 0}
+        state = {"last": 0.0}
+        kept = deque()
 
         def record(bgr, t):
-            if t - state["last"] < FRAME_EVERY or state["n"] >= FRAME_LIMIT:
+            if t - state["last"] < FRAME_EVERY:
                 return
-            state["last"], state["n"] = t, state["n"] + 1
-            name = time.strftime("%H%M%S") + f"-{int(time.time() * 1000) % 1000:03d}.jpg"
-            imgio.write(folder / name, bgr, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            state["last"] = t
+            path = folder / (time.strftime("%H%M%S") + f"-{int(time.time() * 1000) % 1000:03d}.jpg")
+            if imgio.write(path, bgr, [cv2.IMWRITE_JPEG_QUALITY, 80]):
+                kept.append(path)
+            while len(kept) > FRAME_LIMIT:
+                try:
+                    kept.popleft().unlink()
+                except OSError:
+                    pass
 
         return record
 
@@ -680,8 +694,10 @@ class Engine:
         text = "\n".join(row if filters.split_speaker(row)[0] else (self.names.find(row) or row)
                          for row in text.split("\n"))
         # Every speaker's line on its own row, in screen order (a busy scene shows several at once); lines that
-        # stay on screen (or come back) are not translated again.
-        for rows in filters.utterance_rows(text):
+        # stay on screen (or come back) are not translated again. A row the spacing shows to be another subtitle
+        # starts its own line even when its name was not read.
+        starts = self._subtitle_starts(text, frame)
+        for rows in filters.utterance_rows(text, starts):
             language = filters.language_of(rows[0])     # "In Spanish:" -> shown as "İspanyolca:"
             speaker, first = filters.split_speaker(rows[0])
             speaker = self.names.resolve(speaker)   # "CO wiison" -> "CO Wilson", "…ress" -> "Waitress"
@@ -728,6 +744,40 @@ class Engine:
             if self._seen(normalize(english), now):
                 continue
             self._utterance(line, op, now)
+
+    def _subtitle_starts(self, text, frame):
+        """Rows of `text` that begin another subtitle although no name was read in front of them.
+
+        GTA 6 writes the rows of one subtitle closer together than two subtitles one under the other: 48 against 57
+        pixels from baseline to baseline at 1080p (of 723 recorded pairs 719 told apart right; the row's middle moved
+        with "g" and capitals and split three of Jason's own two-row lines). Glued to the line above, such a row put
+        one person's words in another's mouth (Mendez's "What we do know right now," came out as Lucia's). Only in a
+        game that names every speaker: there a row without a name is the same subtitle or a name not read."""
+        if frame is None or len(frame) < 4 or len(frame[3]) < 2 or frame[1] is None or not self.names_always():
+            return set()
+        bgr, mask, _, rows = frame[:4]
+        placed = sorted((y, read.strip()) for y, read in ((baseline(mask, box), read) for box, read in rows)
+                        if y is not None and read.strip())
+        roi = self._read_roi()
+        if len(self._pitches) >= 8:
+            limit = float(np.median(self._pitches)) * SUBTITLE_GAP     # this picture's own spacing of one subtitle
+        elif roi and roi[3] > 0:
+            limit = SUBTITLE_PITCH * bgr.shape[0] / roi[3]
+        else:
+            return set()
+        lines = [r.strip() for r in text.split("\n") if r.strip()]
+        out = set()
+        for (c1, t1), (c2, t2) in zip(placed, placed[1:]):
+            if filters.split_speaker(t2)[0]:
+                continue
+            if t2[:1].islower():
+                self._pitches.append(c2 - c1)      # goes on mid-sentence: one subtitle's spacing
+                continue
+            if c2 - c1 > limit:
+                best = max(lines, key=lambda r: fuzz.ratio(r, t2), default=None)
+                if best is not None and fuzz.ratio(best, t2) >= 80:
+                    out.add(best)
+        return out
 
     @staticmethod
     def _game_tint(read_rows, bgr, speaker):

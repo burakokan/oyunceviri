@@ -182,6 +182,24 @@ def tight_box(mask, box):
     return y0 + top, y0 + bottom, x0, x1
 
 
+def baseline(mask, box):
+    """The line the row's letters stand on: the median bottom of its letters (descenders, dots and specks are the
+    few) -> y in the mask, or None with fewer than 3 letters. Steadier than the row's middle, which moves with
+    "g", "y" and capitals."""
+    y0, y1, x0, x1 = box
+    n, _, stats, _ = cv2.connectedComponentsWithStats(mask[y0:y1, x0:x1], connectivity=8)
+    if n <= 3:
+        return None
+    heights, tops, areas = stats[1:, cv2.CC_STAT_HEIGHT], stats[1:, cv2.CC_STAT_TOP], stats[1:, cv2.CC_STAT_AREA]
+    big = areas >= 12
+    if big.sum() < 3:
+        return None
+    ok = big & (heights >= 0.5 * np.median(heights[big]))
+    if ok.sum() < 3:
+        return None
+    return y0 + float(np.median(tops[ok] + heights[ok]))
+
+
 def letter_height(mask):
     """Median height of the letter blobs in a mask band (0 when there are none)."""
     n, _, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
