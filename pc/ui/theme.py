@@ -44,6 +44,7 @@ class Icon:
     LINK = ""
     HELP = ""
     USB = ""
+    LOCK = ""
 
 
 QSS = f"""

@@ -222,6 +222,7 @@ class SpeakerColors:
         self.record = {}      # name -> {"family": family or None, "color": "#RRGGBB"}: the TV colour, kept for good
         self.shown = {}       # name -> (time, colour) of the last line: the people of the dialogue
         self.pending = {}     # name -> (family, lines in a row) another family than the one on record has won
+        self._seen_names = {}  # name -> as written in the game ("Kolt & Associates"), also "Local" & co.
         self.game_path = game_path
         self._learned_saved = 0.0
         self._learned_dirty = False
@@ -240,6 +241,9 @@ class SpeakerColors:
                 for k, v in (data.get("colors") or {}).items():
                     if isinstance(v, dict) and str(v.get("color", "")).startswith("#"):
                         self.record[str(k)] = {"family": v.get("family"), "color": str(v["color"])}
+                        for extra in ("name", "locked"):
+                            if v.get(extra):
+                                self.record[str(k)][extra] = v[extra]
             except (OSError, ValueError, AttributeError, TypeError):
                 pass
 
@@ -295,7 +299,10 @@ class SpeakerColors:
             scene = typical([(h, s_) for _, h, s_ in lines])
             kept = typical(samples)
             others = {c for k, (t, c) in self.shown.items() if k != key and now - t < SCENE_SECONDS}
-            if key in GENERIC:
+            rec = self.record.get(key)
+            if rec and rec.get("locked"):
+                color = rec["color"]        # the user chose this person's colour (Filtreler -> Konuşmacı renkleri)
+            elif key in GENERIC:
                 color = self._generic(key, tint, others, now)
             else:
                 # The person's own family: the one most of their last readings (up to 40) belong to; a faint one only
@@ -306,7 +313,6 @@ class SpeakerColors:
                 # A scene where the game clearly gives this person another colour (strong colour, two lines or more):
                 # shown for that scene only, the record stays.
                 strong = family_of(scene) if scene is not None and scene[1] >= CLEAR and len(lines) >= 2 else None
-                rec = self.record.get(key)
                 family = own or (rec or {}).get("family")
                 if rec and own and own != rec.get("family"):
                     # Another family than the one on record: only after it wins six lines in a row (a person whose
@@ -331,6 +337,11 @@ class SpeakerColors:
                     color = self._free(family, others, rec["color"] if rec and family is None else None)
                     self.record[key] = {"family": family, "color": color}
                     self._learned_dirty = True
+            written = " ".join(name.split())        # as the game writes it, for the list
+            if key in self.record and self.record[key].get("name") != written:
+                self.record[key]["name"] = written
+                self._learned_dirty = True
+            self._seen_names[key] = written
             self.shown[key] = (now, color)
             self._save_learned(now)
             return color
@@ -360,6 +371,49 @@ class SpeakerColors:
         if family in FAMILIES:
             return free[0]      # the family's own shade first (the game's look); the others when it is taken here
         return min(free, key=lambda c: (used[c], FALLBACK.index(c) if c in FALLBACK else len(FALLBACK)))
+
+    def people(self):
+        """Everyone on record or seen, for Filtreler -> Konuşmacı renkleri: [{"key", "name", "color", "locked",
+        "lines"}], the most heard first. color is None for "Local", "Tourist"… (a colour per line) until one is
+        chosen."""
+        with self._lock:
+            keys = set(self.record) | set(self._seen_names) | set(self.learned)
+            out = []
+            for k in keys:
+                rec = self.record.get(k) or {}
+                color = rec.get("color")
+                if color is None and k not in GENERIC:
+                    # Not on the TV yet this time (known from the app's starting table): the colour they will get.
+                    family = family_of(typical(self.learned.get(k, [])))
+                    color = FAMILIES[family][0] if family else None
+                out.append({"key": k, "name": rec.get("name") or self._seen_names.get(k) or k.title(),
+                            "color": color, "locked": bool(rec.get("locked")), "generic": k in GENERIC,
+                            "lines": len(self.learned.get(k, []))})
+        return sorted(out, key=lambda p: (-p["lines"], p["name"].casefold()))
+
+    def lock(self, key, color):
+        """The user's colour for this person: always this one from now on (also for "Local" & co.)."""
+        key = self._key(key)
+        with self._lock:
+            rec = self.record.setdefault(key, {"family": None, "color": color})
+            rec.update(color=color, family=family_of_color(color), locked=True)
+            if key in self._seen_names:
+                rec.setdefault("name", self._seen_names[key])
+            self.shown.pop(key, None)
+            self._learned_dirty = True
+            self._save_learned(time.monotonic(), force=True)
+
+    def unlock(self, key):
+        """Back to the game's colour, measured as before (the record is started again)."""
+        key = self._key(key)
+        with self._lock:
+            rec = self.record.pop(key, None)
+            if rec and rec.get("name"):
+                self._seen_names.setdefault(key, rec["name"])
+            self.pending.pop(key, None)
+            self.shown.pop(key, None)
+            self._learned_dirty = True
+            self._save_learned(time.monotonic(), force=True)
 
     def _save_learned(self, now, force=False):
         """The lasting table to disk, at most every 20 s while playing (and when the engine stops)."""

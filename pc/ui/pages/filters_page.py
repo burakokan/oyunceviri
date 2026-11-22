@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QLabel, QLineEdit, QSpinBox, QVBoxLayout, QWidget
 from gt import filters
 
 from ..widgets import Card, Divider, ListEditor, SettingRow, Toggle
+from .speaker_colors import SpeakerColorsCard
 
 
 class FiltersPage(QWidget):
@@ -63,7 +64,8 @@ class FiltersPage(QWidget):
                             "tonla yazılır. PS5'in yayını ad renklerini neredeyse beyaza soldurduğu için renk ailesi "
                             "ekrandan anlaşılır, ton canlı seçilir. Her kişinin rengi kaydedilir ve hep aynı kalır; "
                             "bir konuşmada iki kişi aynı rengi almaz; rengi anlaşılamayan kişiye de beyaz değil bir "
-                            "renk verilir. Kapatırsan uygulamanın kendi renkleri kullanılır. TV Görünümü'nde "
+                            "renk verilir. Yanlış kalan rengi aşağıdaki \"Konuşmacı renkleri\" listesinden düzeltebilirsin. "
+                            "Kapatırsan uygulamanın kendi renkleri kullanılır. TV Görünümü'nde "
                             "\"Konuşmacı adları renkli\" açık olmalı.", game_color))
         main.add(Divider())
         names_only = Toggle(f.get("names_only", False))
@@ -109,6 +111,9 @@ class FiltersPage(QWidget):
                             "uzayan satır da aynı satırda düzelir. Kapatırsan her ekran ayrı satır olur.", hold))
         lay.addWidget(main)
 
+        self.speaker_colors = SpeakerColorsCard(win)
+        lay.addWidget(self.speaker_colors)
+
         cut = Card("Kesilecek ifadeler",
                    "Satırda bu ifade görülürse oradan sonrası atılır. Altyazının yanına karışan tuş ipuçları için: "
                    "\"Swap\" → \"…unturned! Swap Gewehr 1943 for…\" satırından ipucu kısmı silinir. Büyük/küçük "
@@ -134,6 +139,10 @@ class FiltersPage(QWidget):
         lay.addWidget(test)
         lay.addStretch(1)
         self._run_test()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.speaker_colors.refresh()      # who spoke since the page was last open
 
     def _set(self, key, value):
         self.cfg["filters"][key] = value
