@@ -15,10 +15,11 @@ DEFAULTS = {
     "capture": "auto",
     "window_process": "chiaki.exe",
     "chiaki_path": os.path.expandvars(r"%LOCALAPPDATA%\Programs\chiaki-ng\chiaki-ng-Win\chiaki.exe"),
-    # Subtitle area as fractions of the captured chiaki-ng window: [x, y, w, h]
-    "roi": None,
+    # Subtitle area as fractions of the captured chiaki-ng window: [x, y, w, h] (the owner's GTA 6 setup: a new
+    # install reads the usual bottom-centre subtitle place at once; "Altyazı Alanı" changes it)
+    "roi": [0.1312, 0.7531, 0.7478, 0.2469],
     # ...and of the PS5 picture with built-in Remote Play (no window frame around it)
-    "roi_builtin": None,
+    "roi_builtin": [0.1221, 0.6719, 0.7752, 0.2531],
     # A pixel counts as subtitle text if it is bright and colorless (white text)
     "text_v_min": 200,
     "text_s_max": 60,
@@ -55,7 +56,7 @@ DEFAULTS = {
         "centered": True,
         # Skip short ALL-CAPS text without punctuation: location / mission banners ("FORT QUITO")
         "skip_titles": True,
-        "min_letters": 2,
+        "min_letters": 1,
         # Keep "Karl:" in front of the line (the name itself is not translated)
         "speaker_names": True,
         "speaker_color_game": True,     # the name's colour on the TV as the game shows it
@@ -94,20 +95,24 @@ DEFAULTS = {
     # shadowed text); keep_lines: the Turkish has as many lines as the English (smaller letters instead of a taller
     # box).
     "regions": {
-        "hint": {"enabled": False, "roi": None, "filter": "dark_box", "text_min": 170, "bg_max": 80,
-                 "skip_menus": True, "ignore": [],
-                 "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
-                 "opacity": 92},
-        "phone": {"enabled": False, "roi": None, "filter": "plain", "text_min": 170, "bg_max": 80,
-                  "skip_menus": True, "ignore": [],
-                  "place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
-                  "opacity": 92},
-        "objective": {"enabled": False, "roi": None, "filter": "outlined", "text_min": 190, "bg_max": 80,
-                      "skip_menus": False, "ignore": [],
-                      "place": "cover", "offset": 8, "align": "center", "size": 100, "fg": "#FFFFFF",
-                      "bg": "#000000", "opacity": 80},
+        # The owner's GTA 6 setup (areas in the PS5 picture): the hint box top left (Turkish under it), message
+        # notifications bottom right (Turkish at the top, faint box), the objective under the subtitles (off).
+        "hint": {"enabled": True, "roi": [0.0096, 0.2313, 0.2443, 0.3094], "filter": "dark_box", "text_min": 178,
+                 "bg_max": 73, "skip_menus": True, "ignore": [],
+                 "place": "below", "offset": 8, "align": "left", "size": 101, "fg": "#FFFFFF", "bg": "#10151C",
+                 "opacity": 92, "keep_lines": True},
+        "phone": {"enabled": True, "roi": [0.7707, 0.7781, 0.2293, 0.2219], "filter": "plain", "text_min": 219,
+                  "bg_max": 80, "skip_menus": True, "ignore": ["STUDIO [0] SELECT [X] BACK"],
+                  "place": "top", "offset": 5, "align": "left", "size": 92, "fg": "#FFFFFF", "bg": "#10151C",
+                  "opacity": 18, "keep_lines": True},
+        "objective": {"enabled": False, "roi": [0.1748, 0.9313, 0.5924, 0.0687], "filter": "plain", "text_min": 145,
+                      "bg_max": 80, "skip_menus": False,
+                      "ignore": ["STOW LONGARMS [0] TAKE AMMO PACK (0)", "STOW LONGARMS", "REMOVE", "REMO", "BD",
+                                 "GD"],
+                      "place": "top", "offset": 8, "align": "center", "size": 85, "fg": "#FFFFFF",
+                      "bg": "#000000", "opacity": 34, "keep_lines": True},
         # GTA 6's phone, found by itself (no area): its messages in Turkish in a panel next to it on the TV
-        "gta_phone": {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 90},
+        "gta_phone": {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61},
     },
     # Lines that are not in a game pack: smart (DeepL + Qwen + OPUS-MT, best of them) | deepl | groq |
     # gemma (Gemma 4 E2B on this PC) | local (OPUS-MT). deadline_ms: the longest wait for an online answer.

@@ -84,7 +84,7 @@ PHONE_EVERY = 0.3
 PHONE_CLOSE = 1.8
 PHONE_SETTLE = 0.45
 PHONE_REREAD = 1.6       # s: read once more when the screen stayed still this long (the stream sharpens it)
-PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 90}
+PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61}
 _GTA6 = re.compile(r"grand theft auto vi\b|\bgta\s*(6|vi)\b", re.I)
 
 
