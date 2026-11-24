@@ -139,8 +139,8 @@ CouchSubs' own records.
 | `death-stranding-directors-cut` | Translated with Claude from the fan transcript at Game Scripts Wiki |
 | `elden-ring` | Translated with Claude from the Carian Archive and Impaler's Archive text dumps. Terminology from the Elden Ring Turkish fan translation by mehmetkrn (MIT) |
 | `marvels-spider-man-2` | Translated with Claude from the Marvel's Spider-Man Wiki script (Fandom, CC BY-SA 3.0) and the CouchSubs subtitle pool |
-| `gta-v` | GTA TR (TechnoGame) and Claude |
-| `gta-6` | CouchSubs GTA 6 pack v8 (21 Nov 2026): CouchSubs shared subtitle pool, Workers AI, CouchSubs PR #387 and PR #614 by lones8888 (lines read from YouTube playthroughs, hand-corrected community pool, translated with Codex, ChatGPT, Claude and Gemma) and Claude Opus 5.5 re-translations; plus CouchSubs' extra-lines pool (pool-gta-6) and the community-pool lines not yet in the pack |
+| `gta-v` | GTA TR (TechnoGame) and Claude; plus CouchSubs' extra-lines pool (pool-gta-5 v3, 24 Nov 2026) |
+| `gta-6` | CouchSubs GTA 6 pack v9 (24 Nov 2026): CouchSubs shared subtitle pool, Workers AI, CouchSubs PR #387 and PR #614 by lones8888 (lines read from YouTube playthroughs, hand-corrected community pool, translated with Codex, ChatGPT, Claude and Gemma), a game text dump translated with Claude Opus 5.5 and Claude Opus 5.5 re-translations; plus CouchSubs' extra-lines pool (pool-gta-6 v5) and the lines of the earlier v8-based pack (with the community pool) that v9 does not have |
 
 ### From GameTranslator
 
