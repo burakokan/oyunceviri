@@ -26,8 +26,9 @@ from .tv_look import ColorButton
 PREVIEW_WIDTH = 1280
 # The areas that can be chosen here: subtitles (read line by line) and the extra areas (translated as one box).
 AREAS = [("subtitle", "Altyazı"), ("objective", "Görev hedefi"), ("hint", "Görev / ipucu kutusu"),
-         ("phone", "Telefon mesajları")]
-LABELS = {"subtitle": "Altyazı alanı", "objective": "Görev hedefi", "hint": "Görev kutusu", "phone": "Telefon"}
+         ("phone", "Telefon mesajları"), ("gta_phone", "GTA 6 telefonu")]
+LABELS = {"subtitle": "Altyazı alanı", "objective": "Görev hedefi", "hint": "Görev kutusu", "phone": "Telefon",
+          "gta_phone": "GTA 6 telefonu"}
 PICK_HINTS = {
     "subtitle": "Oyunda bir altyazı ekrandayken görüntünün üstünde fareyle sürükle. İki satırlık altyazılara yer "
                 "bırak, mermi sayısı gibi HUD yazılarını mümkünse dışarıda bırak. Seçim anında kaydedilir.",
@@ -39,6 +40,8 @@ PICK_HINTS = {
             "çevrilir ve TV'de tek kutuda, tuş simgeleriyle birlikte gösterilir.",
     "phone": "Oyundaki telefona mesaj geldiğinde telefon ekranının (mesajların) olduğu yeri fareyle sürükle. Her "
              "mesaj ayrı çevrilir ve TV'de tek kutuda alt alta gösterilir.",
+    "gta_phone": "Burada alan seçilmez: oyunda telefonu eline alınca program telefonu kendisi bulur (eğik tutulsa, "
+                 "elde oynasa da). Bulduğu telefon görüntüde yeşil çerçeveyle gösterilir.",
 }
 _TOKEN_EN = re.compile(r"⟦\d+\|([^⟧]*)⟧")
 _TOKEN_TR = re.compile(r"⟦\d+⟧")
@@ -147,6 +150,9 @@ class RegionPage(QWidget):
         self.look_card = self._build_look_card()
         self.look_card.hide()
         lay.addWidget(self.look_card)
+        self.phone_card = self._build_phone_card()
+        self.phone_card.hide()
+        lay.addWidget(self.phone_card)
         win.bridge.region_status.connect(self.on_region_status)
 
         self.timer = QTimer(self)
@@ -264,6 +270,89 @@ class RegionPage(QWidget):
         card.add_layout(row)
         return card
 
+    def _build_phone_card(self):
+        card = Card("2 · GTA 6 telefonu",
+                    "Telefonu açınca ekrandaki mesajlar okunur, çevrilir ve Türkçesi TV'de telefonun yanında, boş "
+                    "tarafta bir panelde gösterilir; kaydırınca ya da başka sohbete geçince yenilenir, telefonu "
+                    "indirince panel kalkar. Başında » olanlar senin gönderdiğin ya da seçeceğin mesajlar. Yalnız "
+                    "GTA 6 oynanırken (ya da oyun henüz tanınmadan) çalışır. Gelen mesaj bildirimi için \"Telefon "
+                    "mesajları\" alanı ayrıca durur.")
+        self.phone_toggle = Toggle(True)
+        self.phone_toggle.toggled.connect(lambda v: self._set_phone("enabled", v))
+        card.add(SettingRow("Telefonu çevir", "Kapalıyken telefon aranmaz.", self.phone_toggle))
+        card.add(Divider())
+        self.phone_size, size_row = self._phone_slider("Yazı boyutu", "Sığmazsa kendiliğinden küçülür.", 60, 160,
+                                                       "size", "%")
+        card.add(size_row)
+        self.phone_fg = ColorButton(lambda v: self._set_phone("fg", v))
+        card.add(SettingRow("Yazı rengi", None, self.phone_fg))
+        self.phone_bg = ColorButton(lambda v: self._set_phone("bg", v))
+        card.add(SettingRow("Panel rengi", None, self.phone_bg))
+        self.phone_opacity, opacity_row = self._phone_slider("Panelin opaklığı", "0: panel yok, yazı gölgeli.", 0,
+                                                             100, "opacity", "%")
+        card.add(opacity_row)
+        self.phone_status = QLabel("Durum: —")
+        self.phone_status.setObjectName("muted")
+        card.add(self.phone_status)
+        self.phone_read = QLabel("Okunan: —")
+        self.phone_read.setWordWrap(True)
+        self.phone_read.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        card.add(self.phone_read)
+        return card
+
+    def _phone_slider(self, title, desc, lo, hi, key, unit=""):
+        box = QWidget()
+        h = QHBoxLayout(box)
+        h.setContentsMargins(0, 0, 0, 0)
+        slider = QSlider(Qt.Horizontal)
+        slider.setRange(lo, hi)
+        slider.setMinimumWidth(220)
+        value = QLabel()
+        value.setMinimumWidth(44)
+
+        def changed(v):
+            value.setText(f"{v}{unit}")
+            self._set_phone(key, v)
+
+        slider.valueChanged.connect(changed)
+        slider.value_label = value
+        slider.unit = unit
+        h.addWidget(slider)
+        h.addWidget(value)
+        return slider, SettingRow(title, desc, box)
+
+    def _set_phone(self, key, value):
+        """A GTA 6 phone setting changed: kept at once, the TV panel gets the new look right away."""
+        if self._syncing:
+            return
+        self.cfg.setdefault("regions", {}).setdefault("gta_phone", {})[key] = value
+        self.win.persist_config(("regions", "gta_phone", key))
+        self.win.regions.restyle()
+        if key == "enabled":
+            self._show_phone_status()
+
+    def _sync_phone_card(self):
+        look = self.win.regions.phone_look()
+        self._syncing = True            # showing the saved values, not changing them
+        self.phone_toggle.setChecked(bool(look.get("enabled")))
+        for slider, key in ((self.phone_size, "size"), (self.phone_opacity, "opacity")):
+            slider.setValue(int(look[key]))
+            slider.value_label.setText(f"{int(look[key])}{slider.unit}")
+        self.phone_fg.set_value(look["fg"])
+        self.phone_bg.set_value(look["bg"])
+        self._syncing = False
+        self._show_phone_status()
+
+    def _show_phone_status(self, text=None):
+        if text is None:
+            text = ("kapalı" if not self.win.regions.phone_look().get("enabled") else
+                    "telefon açık" if self.win.regions._phone.get("open") else "telefon bekleniyor")
+        self.phone_status.setText(f"Durum: {text}")
+        last = self.win.regions.last.get("gta_phone")
+        if last:
+            en, tr = last["en"].replace("\n", " / "), last["tr"].replace("\n", " / ")
+            self.phone_read.setText(f"Okunan: {en}\nÇeviri ({last['via']}): {tr}")
+
     def _area_slider(self, title, desc, lo, hi, key, unit="", restyle=False):
         box = QWidget()
         h = QHBoxLayout(box)
@@ -296,6 +385,8 @@ class RegionPage(QWidget):
 
     def current_roi(self, kind=None):
         kind = kind or self.area
+        if kind == "gta_phone":
+            return None                     # found by itself, no area
         if kind == "subtitle":
             return self.cfg.get(self.roi_key)
         return self._area_cfg(kind).get("roi")
@@ -306,12 +397,17 @@ class RegionPage(QWidget):
         if self.pick.hint_label is not None:
             self.pick.hint_label.setText(PICK_HINTS[kind])
         self.selector.set_roi(self.current_roi(), LABELS[kind])
-        self.selector.set_others([(LABELS[k], self.current_roi(k)) for k, _ in AREAS if k != kind])
+        self.selector.set_others([(LABELS[k], self.current_roi(k)) for k, _ in AREAS
+                                  if k not in (kind, "gta_phone")])
+        boxed = kind not in ("subtitle", "gta_phone")
         self.tune.setVisible(kind == "subtitle")
-        self.area_card.setVisible(kind != "subtitle")
-        self.look_card.setVisible(kind != "subtitle")
-        self.win.regions.watching = {kind} if kind != "subtitle" and self.isVisible() else set()
-        if kind != "subtitle":
+        self.area_card.setVisible(boxed)
+        self.look_card.setVisible(boxed)
+        self.phone_card.setVisible(kind == "gta_phone")
+        self.win.regions.watching = {kind} if boxed and self.isVisible() else set()
+        if kind == "gta_phone":
+            self._sync_phone_card()
+        elif kind != "subtitle":
             a = self._area_cfg(kind)
             self._syncing = True            # showing the saved values, not changing them
             self.area_toggle.setChecked(bool(a.get("enabled")))
@@ -382,6 +478,10 @@ class RegionPage(QWidget):
         self.align_row.setVisible(not fixed)
 
     def on_region_status(self, kind, text):
+        if kind == "gta_phone":
+            if self.area == "gta_phone":
+                self._show_phone_status(text)
+            return
         if kind == self.area:
             self.area_status.setText(f"Durum: {text}")
             self._show_last()
@@ -502,6 +602,9 @@ class RegionPage(QWidget):
         return "roi_builtin" if self._builtin else "roi"
 
     def on_roi(self, roi):
+        if self.area == "gta_phone":
+            self.selector.set_roi(None)     # no area to choose: the phone is found by itself
+            return
         if self.area == "subtitle":
             self.cfg[self.roi_key] = roi
             self.win.persist_config(self.roi_key)
@@ -514,6 +617,8 @@ class RegionPage(QWidget):
         self.win.refresh_banner()
 
     def clear_roi(self):
+        if self.area == "gta_phone":
+            return
         if self.area == "subtitle":
             self.cfg[self.roi_key] = None
             self.preview.clear_image("Önce bir alan seç")
@@ -585,6 +690,10 @@ class RegionPage(QWidget):
             return
         frame = item[1]
         h, w = frame.shape[:2]
+        corners = self.win.regions._phone.get("corners") if self.area == "gta_phone" else None
+        if corners is not None and self.win.regions._phone.get("open"):
+            frame = frame.copy()
+            cv2.polylines(frame, [corners.astype("int32")], True, (80, 200, 80), 4)
         scale = min(1.0, PREVIEW_WIDTH / w)
         self.selector.set_frame(cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
                                 if scale < 1 else frame)

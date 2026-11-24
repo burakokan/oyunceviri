@@ -32,6 +32,7 @@ import cv2
 import numpy as np
 from rapidfuzz import fuzz
 
+from . import phone
 from .config import ROOT
 from .screen import group
 from .tracker import normalize
@@ -76,6 +77,15 @@ _LETTER = re.compile(r"[A-Za-z]")
 # The look of an area on the TV when nothing is set (config.DEFAULTS has the same per area).
 LOOK = {"place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
         "opacity": 92}
+# GTA 6's phone, found by itself (gt/phone.py): looked for this often; closed when not seen for PHONE_CLOSE s (a
+# blurred picture while scrolling, the hand shaking); read when its screen has not changed for PHONE_SETTLE s, and
+# once more after PHONE_REREAD s (right after a scroll the stream's picture is still soft: misread letters).
+PHONE_EVERY = 0.3
+PHONE_CLOSE = 1.8
+PHONE_SETTLE = 0.45
+PHONE_REREAD = 1.6       # s: read once more when the screen stayed still this long (the stream sharpens it)
+PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 90}
+_GTA6 = re.compile(r"grand theft auto vi\b|\bgta\s*(6|vi)\b", re.I)
 
 
 _MENU_SMALL = {"of", "and", "&", "the", "a", "an", "to", "in", "on", "for", "with", "or", "by"}
@@ -506,8 +516,12 @@ class RegionTranslator:
         # reading {"time", "size": (w, h) of the crop, "rows": [{"rect", "ok", "why", "text"}]}.
         self.watching = set()
         self.debug = {}
+        self._phone = self._phone_state()
+        self._phone_box = None
+        self._phone_reader = None
         threading.Thread(target=self._loop, daemon=True).start()
         threading.Thread(target=self._translate_loop, daemon=True).start()
+        threading.Thread(target=self._phone_loop, daemon=True).start()
 
     # ---- control ----
 
@@ -543,6 +557,9 @@ class RegionTranslator:
 
     def restyle(self):
         """The place setting changed: send the boxes again."""
+        with self._lock:
+            if self._phone_box is not None and self._phone["corners"] is not None:
+                self._phone_box = self._phone_panel(self._phone["corners"], self._phone_box["tr"])
         self._sent = None
         self._send()
 
@@ -693,6 +710,131 @@ class RegionTranslator:
         for kind in KINDS:
             self._hide(kind)
 
+    # ---- GTA 6's phone ----
+
+    @staticmethod
+    def _phone_state():
+        return {"hits": 0, "open": False, "seen_at": 0.0, "corners": None, "sig": None, "changed_at": 0.0,
+                "read_sig": None, "read_at": 0.0, "sharp": False, "english": "", "title": None, "messages": []}
+
+    def phone_look(self):
+        """The phone panel's settings (cfg regions.gta_phone, missing keys from PHONE_LOOK)."""
+        return {**PHONE_LOOK, **(self.cfg.get("regions", {}).get("gta_phone") or {})}
+
+    def phone_active(self):
+        """On, and the game is GTA 6 (or not known yet): another game's light, upright panel full of text is not
+        taken for the phone."""
+        if not self.phone_look().get("enabled"):
+            return False
+        title = self.engine.game_title(self.cfg) if self.engine else ""
+        return not title or bool(_GTA6.search(title))
+
+    def _phone_loop(self):
+        while True:
+            time.sleep(PHONE_EVERY)
+            try:
+                if not self.phone_active() or self.rp is None or not self.rp.seq:
+                    self._phone_close()
+                    continue
+                _, frame = self.rp.frame()
+                if frame is None:
+                    continue
+                self._size = (frame.shape[1], frame.shape[0])
+                self._phone_look_once(frame)
+            except Exception as e:  # noqa: BLE001 - shown in the UI, the loop goes on
+                self.on_status("gta_phone", f"Hata: {e}")
+                time.sleep(2)
+
+    def _phone_look_once(self, frame, reader=None):
+        st = self._phone
+        now = time.monotonic()
+        found = phone.find_phone(frame)
+        if not found:
+            st["hits"] = 0
+            if st["open"] and now - st["seen_at"] > PHONE_CLOSE:
+                self._phone_close()
+            return
+        corners = found[0]
+        st["hits"] += 1
+        st["seen_at"] = now
+        if st["corners"] is None or float(np.abs(corners - st["corners"]).max()) > 0.04 * frame.shape[0]:
+            st["corners"] = corners         # the panel follows a phone that moved, not the hand shaking
+            if self._phone_box is not None:
+                with self._lock:
+                    self._phone_box = self._phone_panel(corners, self._phone_box["tr"])
+                self._send()
+        if not st["open"]:
+            if st["hits"] < 2:
+                return
+            st["open"] = True
+            self.on_status("gta_phone", "Telefon açık")
+        screen = phone.upright(frame, corners, phone.SCREEN)
+        sig = phone.signature(screen)
+        if phone.changed(sig, st["sig"]):
+            st["changed_at"] = now          # scrolling / a new message: read when it stops
+        st["sig"] = sig
+        still = now - st["changed_at"]
+        if still < PHONE_SETTLE:
+            return
+        if not phone.changed(sig, st["read_sig"], 3.0):
+            # the same screen: once more when it has been still for a while, if the first reading was early
+            if st["sharp"] or still < PHONE_REREAD or st["read_at"] - st["changed_at"] >= PHONE_REREAD:
+                return
+            st["sharp"] = True
+        else:
+            st["sharp"] = still >= PHONE_REREAD
+        st["read_sig"], st["read_at"] = sig, now
+        if reader is None:
+            if self._phone_reader is None:
+                self._phone_reader = AreaReader()   # ~1 s, the first time the phone is up
+            reader = self._phone_reader
+        title, messages = phone.read_screen(reader, screen)
+        english = "\n".join(m["text"] for m in messages)
+        if not english:
+            return                          # the home screen, a picture: the last panel stays until it closes
+        if english == st["english"] and title == st["title"]:
+            return
+        self.debug["gta_phone"] = {"time": now, "title": title, "messages": messages}
+        missing = [m["text"] for m in messages if m["text"] not in self._cache]
+        if missing:
+            self.on_status("gta_phone", "Çevriliyor…")
+        via = set()
+        for text in missing:
+            tr, used = self._translate_block("phone", text)
+            self._cache[text] = tr
+            via.add(used)
+        if missing:
+            self._save_cache()
+        turkish = {m["text"]: self._cache.get(m["text"], m["text"]) for m in messages}
+        st.update(english=english, title=title, messages=messages)
+        text = phone.panel_text(title, messages, turkish)
+        self.last["gta_phone"] = {"en": english, "tr": text, "via": " + ".join(sorted(via)) or "önbellek"}
+        with self._lock:
+            self._phone_box = self._phone_panel(st["corners"], text)
+        self.on_status("gta_phone", f"Çevrildi · {self.last['gta_phone']['via']}")
+        self._send()
+
+    def _phone_panel(self, corners, text):
+        """The TV box next to the phone: full width of its side, letters sized for the TV (the box grows down with
+        the text, smaller letters when it does not fit the phone's height)."""
+        w, h = self._size
+        look = self.phone_look()
+        x0, y0, pw, ph = phone.panel_place(corners, w, h)
+        line = 0.034 * h * max(0.5, min(2.0, float(look.get("size", 100)) / 100))
+        opacity = max(0, min(100, int(look.get("opacity", 90))))
+        return {"id": "gta_phone", "x": x0 / w, "y": y0 / h, "w": pw / w, "h": line / h, "mw": pw / w,
+                "mh": ph / h, "lines": 1, "tr": text, "icons": {}, "fg": look.get("fg", "#FFFFFF"),
+                "bg": look.get("bg", "#10151C"), "alpha": opacity / 100, "scale": 1.0, "shadow": opacity == 0,
+                "align": "left"}
+
+    def _phone_close(self):
+        if self._phone["open"] or self._phone_box is not None:
+            self._phone = self._phone_state()
+            with self._lock:
+                self._phone_box = None
+            self.on_status("gta_phone", "Telefon kapalı")
+            self._send()
+
     # ---- translating ----
 
     def _client(self):
@@ -814,12 +956,18 @@ class RegionTranslator:
                 if a.english and a.tr and a.rect:
                     pitch = statistics.median(a.pitches) if a.pitches else None
                     boxes.append(self._box(kind, a.rect, a.rows, a.tr, a.icons, w, h, pitch))
+            if self._phone_box is not None:
+                boxes.append(self._phone_box)
         key = json.dumps(boxes, sort_keys=True)
         if key == self._sent:
             return
         self._sent = key
         self.server.send({"type": "regions", "boxes": boxes})
         for b in boxes:
+            if b["id"] == "gta_phone":
+                self._log("gta_phone", en=self._phone["english"], tr=b["tr"],
+                          box=[round(b[k], 4) for k in ("x", "y", "w", "mh")])
+                continue
             a = self._areas[b["id"]]
             self._log(b["id"], en=a.english, tr=b["tr"], rows=b["lines"], scale=b["scale"],
                       box=[round(b[k], 4) for k in ("x", "y", "w", "h")],

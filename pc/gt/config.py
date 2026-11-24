@@ -106,6 +106,8 @@ DEFAULTS = {
                       "skip_menus": False, "ignore": [],
                       "place": "cover", "offset": 8, "align": "center", "size": 100, "fg": "#FFFFFF",
                       "bg": "#000000", "opacity": 80},
+        # GTA 6's phone, found by itself (no area): its messages in Turkish in a panel next to it on the TV
+        "gta_phone": {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 90},
     },
     # Lines that are not in a game pack: smart (DeepL + Qwen + OPUS-MT, best of them) | deepl | groq |
     # gemma (Gemma 4 E2B on this PC) | local (OPUS-MT). deadline_ms: the longest wait for an online answer.
