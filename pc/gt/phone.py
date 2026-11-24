@@ -89,8 +89,11 @@ def find_phone(frame):
 
 
 def signature(screen):
-    """A small grey picture of the screen: tells a scroll / a new message from the hand shaking a little."""
-    return cv2.resize(cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY), (24, 48), interpolation=cv2.INTER_AREA).astype(np.int16)
+    """A small grey picture of the screen's middle: tells a scroll / a new message from the hand shaking a little
+    (the edges, where a shake shows the scene behind, are left out)."""
+    h, w = screen.shape[:2]
+    middle = screen[int(0.08 * h):int(0.92 * h), int(0.08 * w):int(0.92 * w)]
+    return cv2.resize(cv2.cvtColor(middle, cv2.COLOR_BGR2GRAY), (24, 48), interpolation=cv2.INTER_AREA).astype(np.int16)
 
 
 def changed(a, b, limit=6.0):

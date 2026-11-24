@@ -78,12 +78,12 @@ _LETTER = re.compile(r"[A-Za-z]")
 LOOK = {"place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFFFFF", "bg": "#10151C",
         "opacity": 92}
 # GTA 6's phone, found by itself (gt/phone.py): looked for this often; closed when not seen for PHONE_CLOSE s (a
-# blurred picture while scrolling, the hand shaking); read when its screen has not changed for PHONE_SETTLE s, and
-# once more after PHONE_REREAD s (right after a scroll the stream's picture is still soft: misread letters).
+# blurred picture while scrolling, the hand shaking); read when its screen has not changed for PHONE_SETTLE s (right
+# after a scroll the stream's picture is still soft: misread letters).
 PHONE_EVERY = 0.3
 PHONE_CLOSE = 1.8
-PHONE_SETTLE = 0.45
-PHONE_REREAD = 1.6       # s: read once more when the screen stayed still this long (the stream sharpens it)
+PHONE_SETTLE = 0.6
+PHONE_SAME = 88         # % alike: a new reading of what is shown (letters read a little differently) changes nothing
 PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61}
 _GTA6 = re.compile(r"grand theft auto vi\b|\bgta\s*(6|vi)\b", re.I)
 
@@ -715,7 +715,7 @@ class RegionTranslator:
     @staticmethod
     def _phone_state():
         return {"hits": 0, "open": False, "seen_at": 0.0, "corners": None, "sig": None, "changed_at": 0.0,
-                "read_sig": None, "read_at": 0.0, "sharp": False, "english": "", "title": None, "messages": []}
+                "read_sig": None, "english": "", "title": None, "messages": [], "known": [], "moved": None}
 
     def phone_look(self):
         """The phone panel's settings (cfg regions.gta_phone, missing keys from PHONE_LOOK)."""
@@ -757,12 +757,22 @@ class RegionTranslator:
         corners = found[0]
         st["hits"] += 1
         st["seen_at"] = now
-        if st["corners"] is None or float(np.abs(corners - st["corners"]).max()) > 0.04 * frame.shape[0]:
-            st["corners"] = corners         # the panel follows a phone that moved, not the hand shaking
-            if self._phone_box is not None:
-                with self._lock:
-                    self._phone_box = self._phone_panel(corners, self._phone_box["tr"])
-                self._send()
+        far = 0.04 * frame.shape[0]
+        if st["corners"] is None:
+            st["corners"] = corners
+        elif float(np.abs(corners - st["corners"]).max()) > far:
+            # The panel follows a phone that moved (seen there twice in a row), not the hand shaking or one look
+            # that found only a part of the screen.
+            moved = st.get("moved")
+            st["moved"] = corners
+            if moved is not None and float(np.abs(corners - moved).max()) <= far:
+                st["corners"], st["moved"] = corners, None
+                if self._phone_box is not None:
+                    with self._lock:
+                        self._phone_box = self._phone_panel(corners, self._phone_box["tr"])
+                    self._send()
+        else:
+            st["moved"] = None
         if not st["open"]:
             if st["hits"] < 2:
                 return
@@ -773,17 +783,9 @@ class RegionTranslator:
         if phone.changed(sig, st["sig"]):
             st["changed_at"] = now          # scrolling / a new message: read when it stops
         st["sig"] = sig
-        still = now - st["changed_at"]
-        if still < PHONE_SETTLE:
+        if now - st["changed_at"] < PHONE_SETTLE or not phone.changed(sig, st["read_sig"], 3.0):
             return
-        if not phone.changed(sig, st["read_sig"], 3.0):
-            # the same screen: once more when it has been still for a while, if the first reading was early
-            if st["sharp"] or still < PHONE_REREAD or st["read_at"] - st["changed_at"] >= PHONE_REREAD:
-                return
-            st["sharp"] = True
-        else:
-            st["sharp"] = still >= PHONE_REREAD
-        st["read_sig"], st["read_at"] = sig, now
+        st["read_sig"] = sig
         if reader is None:
             if self._phone_reader is None:
                 self._phone_reader = AreaReader()   # ~1 s, the first time the phone is up
@@ -792,20 +794,31 @@ class RegionTranslator:
         english = "\n".join(m["text"] for m in messages)
         if not english:
             return                          # the home screen, a picture: the last panel stays until it closes
-        if english == st["english"] and title == st["title"]:
+        # The same screen read again (the hand moved it a little): a letter or a line break read differently must not
+        # change the TV, so a reading this much like the shown one is left alone.
+        if st["english"] and fuzz.ratio(normalize(english.replace("\n", " ")),
+                                        normalize(st["english"].replace("\n", " "))) >= PHONE_SAME:
             return
+        # A message seen before in this phone session keeps its first reading and its translation (after a scroll
+        # the old messages are read again, a little differently).
+        for m in messages:
+            seen = max(st["known"], key=lambda k: fuzz.ratio(normalize(k), normalize(m["text"])), default=None)
+            if seen is not None and fuzz.ratio(normalize(seen), normalize(m["text"])) >= PHONE_SAME:
+                m["text"] = seen
+        english = "\n".join(m["text"] for m in messages)
         self.debug["gta_phone"] = {"time": now, "title": title, "messages": messages}
-        missing = [m["text"] for m in messages if m["text"] not in self._cache]
+        missing = [m["text"] for m in messages if "phone:" + m["text"] not in self._cache]
         if missing:
             self.on_status("gta_phone", "Çevriliyor…")
         via = set()
         for text in missing:
-            tr, used = self._translate_block("phone", text)
-            self._cache[text] = tr
+            tr, used = self._translate_phone(text, title)
+            self._cache["phone:" + text] = tr
             via.add(used)
         if missing:
             self._save_cache()
-        turkish = {m["text"]: self._cache.get(m["text"], m["text"]) for m in messages}
+        turkish = {m["text"]: self._cache.get("phone:" + m["text"], m["text"]) for m in messages}
+        st["known"] = (st["known"] + [m["text"] for m in messages if m["text"] not in st["known"]])[-200:]
         st.update(english=english, title=title, messages=messages)
         text = phone.panel_text(title, messages, turkish)
         self.last["gta_phone"] = {"en": english, "tr": text, "via": " + ".join(sorted(via)) or "önbellek"}
@@ -813,6 +826,20 @@ class RegionTranslator:
             self._phone_box = self._phone_panel(st["corners"], text)
         self.on_status("gta_phone", f"Çevrildi · {self.last['gta_phone']['via']}")
         self._send()
+
+    def _translate_phone(self, english, title=None):
+        """A phone message: DeepL first (the packs hold spoken dialogue, not texts), then the pack / local model."""
+        deepl = self._client()
+        if deepl is not None and deepl.up:
+            context = self._context("phone") + (f" Chat: {title}." if title else "")
+            try:
+                turkish = from_xml(deepl.translate_xml(to_xml(english), context))
+                if self.engine is not None:
+                    turkish = self.engine.polish(english, turkish, self.cfg)
+                return turkish, "DeepL"
+            except Exception:  # noqa: BLE001 - the pack / local model below
+                pass
+        return self._translate_block("phone", english)
 
     def _phone_panel(self, corners, text):
         """The TV box next to the phone: full width of its side, letters sized for the TV (the box grows down with
