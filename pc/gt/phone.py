@@ -45,6 +45,11 @@ def letters(picture):
     return count, inside / max(1, int(dark.sum()))
 
 
+# The screen is the light part; how light depends on the scene (~155 in a dim room, ~175 in daylight). On sunlit
+# grey pavement as light as the phone the two run together at the lowest level: the higher ones cut the screen out.
+LIGHT_LEVELS = (130, 160, 185)
+
+
 def find_phone(frame):
     """-> (corners 4x2 in frame pixels, info) or None. Tested on recorded GTA 6 play: 91 of 101 pictures with the
     phone up found (the rest: blurred while scrolling, the home screen of icons), none of 655 without it."""
@@ -53,9 +58,11 @@ def find_phone(frame):
     small = cv2.resize(frame, (SCALE_W, round(H * k)), interpolation=cv2.INTER_AREA)
     h, w = small.shape[:2]
     hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
-    bright = ((hsv[:, :, 2] >= 130) & (hsv[:, :, 1] <= 70)).astype(np.uint8) * 255
-    bright = cv2.morphologyEx(bright, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    contours, _ = cv2.findContours(bright, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = []
+    for level in LIGHT_LEVELS:
+        bright = ((hsv[:, :, 2] >= level) & (hsv[:, :, 1] <= 70)).astype(np.uint8) * 255
+        bright = cv2.morphologyEx(bright, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+        contours += cv2.findContours(bright, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
     best = None
     for c in contours:
         area = cv2.contourArea(c)
@@ -135,19 +142,42 @@ def read_screen(reader, screen):
         colours = [c for c in (_around(lab, r["rect"]) for r in b["rows"]) if c is not None]
         c = np.median(colours, axis=0) if colours else np.array([255.0, 128.0, 128.0])
         mine = c[0] < 130 and float(np.hypot(c[1] - 128, c[2] - 128)) > 25
+        rows_ = b["rows"]
+        sender = None
+        if not mine and len(rows_) >= 2 and _is_sender(lab, rows_[0]):
+            sender, rows_ = _text(rows_[0]), rows_[1:]
         # a piece of an icon read as a mark in front of the text (")Swamp Meditation Spot")
-        text = " ".join(_text(r) for r in b["rows"]).lstrip(")]}|>•·-–—_~ ")
+        text = " ".join(_text(r) for r in rows_).lstrip(")]}|>•·-–—_~ ")
         if sum(ch.isalpha() for ch in text) >= 2:
-            out.append({"text": text, "mine": bool(mine)})
+            out.append({"text": text, "mine": bool(mine), "sender": sender})
+    if out and out[0]["text"][:1].islower():
+        out = out[1:]       # the end of a message scrolled up under the title bar ("it")
     return title, out
 
 
+def _is_sender(lab, row):
+    """The sender's name on top of a group chat bubble: a short row of capitalised words in colour (green "Lucia",
+    purple "Billy"); message text is dark grey."""
+    words = _text(row).split()
+    if not 1 <= len(words) <= 3 or not all(w[:1].isupper() for w in words) or words[-1][-1:] in ".!?,":
+        return False
+    x0, y0, x1, y1 = row["rect"]
+    px = lab[y0:y1, x0:x1].reshape(-1, 3)
+    if len(px) < 20:
+        return False
+    ink = px[px[:, 0] <= np.percentile(px[:, 0], 10)]        # the letters: the darkest tenth
+    a, b = np.median(ink[:, 1]) - 128, np.median(ink[:, 2]) - 128
+    return float(np.hypot(a, b)) > 12          # names 18-28, dark grey message text 2-4
+
+
 def panel_text(title, messages, turkish):
-    """What the TV panel shows: the chat's name, then every message (its Turkish) on its own line."""
+    """What the TV panel shows: the chat's name, then every message (its Turkish) on its own line, the sender's name
+    in front in a group chat."""
     lines = [title] if title else []
     for m in messages:
         tr = (turkish.get(m["text"]) or m["text"]).strip()
-        lines.append(("» " if m["mine"] else "• ") + tr)
+        name = f"{m['sender']}: " if m.get("sender") else ""
+        lines.append(("» " if m["mine"] else "• ") + name + tr)
     return "\n".join(lines)
 
 
