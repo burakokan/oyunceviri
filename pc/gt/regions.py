@@ -768,6 +768,8 @@ class RegionTranslator:
             st["moved"] = corners
             if moved is not None and float(np.abs(corners - moved).max()) <= far:
                 st["corners"], st["moved"] = corners, None
+                if st["open"]:
+                    self._phone_hole(corners)
                 if self._phone_box is not None:
                     with self._lock:
                         self._phone_box = self._phone_panel(corners, self._phone_box)
@@ -778,6 +780,7 @@ class RegionTranslator:
             if st["hits"] < 2:
                 return
             st["open"] = True
+            self._phone_hole(st["corners"])
             self.on_status("gta_phone", "Telefon açık")
         screen = phone.upright(frame, corners, phone.SCREEN)
         sig = phone.signature(screen)
@@ -860,7 +863,23 @@ class RegionTranslator:
                                   "fg": look.get("fg", "#FFFFFF"), "bg": look.get("bg", "#10151C"),
                                   "alpha": opacity / 100, "scale": 1.0, "shadow": opacity == 0, "align": "left"}])
 
+    def _phone_hole(self, corners):
+        """The phone's screen, left out of the subtitle reading while it is up: its text goes to the chat bubbles. A
+        little inside the screen's edges, so a subtitle line just under or beside the phone is not cut."""
+        if self.engine is None:
+            return
+        if corners is None:
+            self.engine.phone_hole = None
+            return
+        w, h = self._size
+        xs, ys = corners[:, 0], corners[:, 1]
+        inset_x, inset_y = 0.04 * (xs.max() - xs.min()), 0.02 * (ys.max() - ys.min())
+        x0, x1 = (float(xs.min()) + inset_x) / w, (float(xs.max()) - inset_x) / w
+        y0, y1 = (float(ys.min()) + inset_y) / h, (float(ys.max()) - inset_y) / h
+        self.engine.phone_hole = [x0, y0, x1 - x0, y1 - y0] if x1 > x0 and y1 > y0 else None
+
     def _phone_close(self):
+        self._phone_hole(None)
         if self._phone["open"] or self._phone_box is not None:
             self._phone = self._phone_state()
             with self._lock:

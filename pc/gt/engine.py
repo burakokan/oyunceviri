@@ -293,6 +293,9 @@ class Engine:
         # the line again over its row, with the name and its colour.
         self._unnamed = deque(maxlen=6)
         self._recolor = None        # the shown line whose name colour is being made sure
+        # GTA 6's phone while it is up ([x, y, w, h] of the picture, set by the area translator): its text is shown
+        # in the TV's chat bubbles, so the subtitle reader leaves it out (a news article or a chat was read as dialogue)
+        self.phone_hole = None
         self._sticky = StickyRows()     # objectives / notices that stay while people talk
         # Genel → "Diyalog görüntülerini topla": pictures of the dialogue for tuning (off until asked for).
         self.snaps = Snapshots()
@@ -634,8 +637,8 @@ class Engine:
         h, w = shape[:2]
         x, y, rw, rh = roi
         out = []
-        for a in (self.cfg.get("regions") or {}).values():
-            r = a.get("roi") if a.get("enabled") else None
+        areas = [a.get("roi") if a.get("enabled") else None for a in (self.cfg.get("regions") or {}).values()]
+        for r in areas + [self.phone_hole]:
             if not r or rw <= 0 or rh <= 0:
                 continue
             x0, x1 = max(0, int((r[0] - x) / rw * w)), min(w, int((r[0] + r[2] - x) / rw * w))
