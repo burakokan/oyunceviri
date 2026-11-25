@@ -18,7 +18,7 @@ from .ocr import (RowCache, baseline, box_mask, changed, keep_boxes, make_ocr, o
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
-from .speakers import SpeakerColors, SpeakerNames, name_tint
+from .speakers import SpeakerColors, SpeakerNames, name_tint, typical
 from .tracker import SubtitleTracker, normalize, same_line, similar
 from .winutil import find_window
 
@@ -40,6 +40,12 @@ REPLACE_WORDS = 3
 REPLACE_SECONDS = 3.0
 # A line shown without a name gets its name if the same line is read with one within this time.
 RENAME_SECONDS = 6.0
+# A shown line's name colour is measured again on the next pictures (every RECOLOR_EVERY s, until RECOLOR_SAMPLES
+# readings or RECOLOR_SECONDS): when they agree on another colour than the first picture gave, the line - if it is
+# still the newest on the TV - gets that colour. The line itself is never held back for this.
+RECOLOR_EVERY = 0.25
+RECOLOR_SAMPLES = 4
+RECOLOR_SECONDS = 1.6
 # Two subtitles one under the other are further apart than the rows of one: more than this part of the screen height
 # (GTA 6 at 1080p: 48 px within one, 57 between two), or this much more than the rows of one seen so far.
 SUBTITLE_PITCH = 0.0485
@@ -286,6 +292,7 @@ class Engine:
         # Lines shown without a name: when the name is read a moment later (it was cut or faded in), the TV writes
         # the line again over its row, with the name and its colour.
         self._unnamed = deque(maxlen=6)
+        self._recolor = None        # the shown line whose name colour is being made sure
         self._sticky = StickyRows()     # objectives / notices that stay while people talk
         # Genel → "Diyalog görüntülerini topla": pictures of the dialogue for tuning (off until asked for).
         self.snaps = Snapshots()
@@ -551,6 +558,8 @@ class Engine:
                             self.snaps.offer(t_frame, bgr, raw, last_text, boxes, kind, cfg, self._whole_picture(),
                                              self._last_msg)
                     last_sig = sig
+                    if self._recolor is not None:
+                        self._settle_color(bgr, frame)
                     event = tracker.feed(t_frame, last_text)
                     if t_frame - last_preview > PREVIEW_INTERVAL:
                         last_preview = t_frame
@@ -779,6 +788,34 @@ class Engine:
                     out.add(best)
         return out
 
+    def _settle_color(self, bgr, frame):
+        """The newest line's name colour, made sure on a few more pictures (the first one may be a stream picture that
+        washed the thin letters out, or a sign behind the name). Readings that disagree change nothing and are not
+        kept; agreeing ones go into the person's lasting colour and fix the line when it is still the newest."""
+        rc = self._recolor
+        now = time.perf_counter()
+        if rc is None or now < rc["next"]:
+            return
+        rc["next"] = now + RECOLOR_EVERY
+        rows = frame[3] if frame is not None and len(frame) > 3 else []
+        tint = self._game_tint(rows, bgr, rc["speaker"])
+        if tint:
+            rc["samples"].append(tuple(tint))
+        if len(rc["samples"]) < RECOLOR_SAMPLES and now < rc["until"]:
+            return
+        self._recolor = None
+        sure = typical(rc["samples"]) if len(rc["samples"]) >= 2 else None
+        if sure is None:
+            return
+        color = self.colors.pick(rc["speaker"], sure, True, sure=True, again=True)
+        last = self._last_sent
+        if color and color != rc["color"] and last and last["id"] == rc["id"]:
+            msg = dict(rc["msg"], color=color, replaces=rc["id"], update=True, recolor=True)
+            self.server.send(msg)
+            self._last_msg = (now, msg)
+            if self.log:
+                self.log.note(recolor={"id": rc["id"], "speaker": rc["speaker"], "from": rc["color"], "to": color})
+
     @staticmethod
     def _game_tint(read_rows, bgr, speaker):
         """The tint the game gave this speaker's name on screen now -> (hue, saturation) or None (not measured)."""
@@ -989,6 +1026,16 @@ class Engine:
             msg["color"] = color
         self.server.send(msg)
         self._last_msg = (now, msg)
+        if color and shown_speaker and cfg["filters"].get("speaker_color_game", True):
+            tint = line.get("name_tint")
+            old = self._recolor
+            if old is not None and len(old["samples"]) >= 2:
+                # The line before did not get its pictures in (a quick reply): what it has is still learned.
+                sure = typical(old["samples"])
+                if sure is not None:
+                    self.colors.learn(old["speaker"], sure)
+            self._recolor = {"id": job["id"], "speaker": shown_speaker, "samples": [tuple(tint)] if tint else [],
+                             "next": now + RECOLOR_EVERY, "until": now + RECOLOR_SECONDS, "msg": msg, "color": color}
         info = {
             "id": job["id"], "time": time.strftime("%H:%M:%S"), "speaker": shown_speaker,
             "en": english, "tr": turkish, "ocr_ms": line["ocr_ms"], "tr_ms": tr_ms,

@@ -28,12 +28,16 @@ GAME_PATH = ROOT / "speaker_game_colors.json"
 GAME_START = ASSETS / "speaker_game_colors.json"
 # The stream (Remote Play video) all but wipes out the colour of thin letters: a name the TV shows in a clear lake
 # green ("Shirley:") arrives nearly white (R254 G253 B244 next to the text's R255 G252 B250). Only the family of the
-# colour can be told from the stream, so the TV gets a saturated shade of that family. Several shades per family:
-# two people of one family in a dialogue get different ones. The first shade is the game's look on the TV.
+# colour can be told from the stream, so the TV gets a saturated shade of that family: the first one. Two people
+# of one family keep the same colour, like in the game (the other shades are only for colours chosen by hand / old
+# tables). Measured on 281 labelled lines of a GTA 6 hour (hue in the stream, 10-90 %): lavender 291-300, pink
+# 349-356, lime 69-71, yellow 60-65, cream 77-97 but faint (~0.07), mint 156-178, cyan 180-185.
 FAMILIES = {
     "teal": ["#3FD5C4", "#4FC3F7", "#80DEEA", "#26A69A"],
-    "pink": ["#F48FB1", "#F06292", "#CE93D8", "#FF8A80"],
-    "yellow": ["#FFD54F", "#FFCA28", "#FFB74D"],
+    "pink": ["#F48FB1", "#F06292", "#FF8A80"],
+    "purple": ["#CE93D8", "#BA68C8", "#B39DDB"],
+    "yellow": ["#FFD54F", "#FFCA28"],
+    "lime": ["#D4E157", "#C0CA33"],
     "cream": ["#FFF59D", "#FFF176", "#E6EE9C"],
     "green": ["#9CCC65", "#81C784", "#AED581"],
     "blue": ["#64B5F6", "#7986CB", "#90CAF9"],
@@ -41,8 +45,7 @@ FAMILIES = {
 }
 # For a name whose colour cannot be told (or that the game writes white): a colour all the same, never white.
 # (none of them is a shade of a family above, so a stand-in colour is never taken for a family's)
-FALLBACK = ["#B39DDB", "#A5D6A7", "#FFCCBC", "#B2DFDB", "#D1C4E9", "#B3E5FC", "#F8BBD0", "#DCE775", "#FFE0B2",
-            "#C5CAE9"]
+FALLBACK = ["#A5D6A7", "#FFCCBC", "#B2DFDB", "#D1C4E9", "#B3E5FC", "#F8BBD0", "#DCE775", "#FFE0B2", "#C5CAE9"]
 CREAM = 0.15            # a yellow weaker than this in the stream is the game's cream (Jason), stronger: yellow (Kyle)
 CLEAR = 0.12            # a colour this strong in the stream is clear (yellow names), not a washed-out pastel
 BOOST = 2.2             # kept for old callers; the shades above are used now
@@ -82,24 +85,36 @@ def name_tint(bgr, box, row_text):
     if colon < 1 or bgr is None:
         return None
     y0, y1, x0, x1 = box
-    part = bgr[y0:y1, x0:x1]
+    # Only the name and a few words after it are looked at (the white text there is the reference): the whole row
+    # took ~16 ms, this part ~4.
+    width = x1 - x0
+    part = bgr[y0:y1, x0:x0 + min(width, int(width * (colon + 14) / max(len(row_text), 1)) + 24)]
     if part.size == 0:
         return None
     v = part.max(axis=2)
     outlined = (v >= 140) & (cv2.erode(v, _OUTLINE) < 60)
     letters = _letters_only((outlined * 255).astype(np.uint8)) > 0
+    marks = outlined                    # with the small marks (the colon's dots) the letter filter leaves out
     if np.count_nonzero(letters) < 60:
         # Letters without a dark outline (on the game's semi-transparent box over a bright scene): the pixels clearly
         # brighter than the background right around them.
         ground = cv2.morphologyEx(v, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
         lifted = ((v.astype(np.int16) - ground) >= 45) & (v >= 170)
         letters = _letters_only((lifted * 255).astype(np.uint8)) > 0
+        marks = lifted
     cols = np.flatnonzero(letters.any(axis=0))
     if cols.size < 10:
         return None
-    a, b = int(cols[0]), int(cols[-1])
-    end = a + (b - a) * colon / max(len(row_text), 1)
-    hi = int(a + 0.85 * (end - a))
+    a, b = int(cols[0]), max(int(cols[-1]), width - 1)     # b: the row's end (the part may stop before it)
+    found = _colon_at(marks)
+    guess = a + (b - a) * colon / max(len(row_text), 1)
+    if found is not None and found[0] - a >= 6 and abs(found[0] - guess) <= 0.3 * (guess - a):
+        # The colon itself: the name is everything left of it (a wide "W" or a narrow "i" no longer moves the end).
+        end, hi = float(found[1]), found[0] - 1
+    else:
+        # Guessed from the share of characters: only its first 85 %, so the white text is never in it.
+        end = a + (b - a) * colon / max(len(row_text), 1)
+        hi = int(a + 0.85 * (end - a))
     if hi - a < 6:
         return None
     core = cv2.erode(letters.astype(np.uint8), np.ones((2, 2), np.uint8)) > 0
@@ -130,6 +145,45 @@ def name_tint(bgr, box, row_text):
     return round(h * 360, 1), round(sat, 3)
 
 
+def _colon_at(marks):
+    """The colon after the name in a row's mask of bright marks: two small dots one above the other, the first such
+    pair from the left with letters before it -> (x0, x1) or None. A full stop, a comma, "..." or an apostrophe is a
+    single dot or dots side by side."""
+    n, _, stats, cent = cv2.connectedComponentsWithStats(marks.astype(np.uint8), connectivity=8)
+    if n < 5:
+        return None
+    heights = stats[1:, cv2.CC_STAT_HEIGHT]
+    tall = heights[heights >= 4]
+    if tall.size < 3:
+        return None
+    size = float(np.percentile(tall, 75))           # a capital / tall letter's height
+    letters = [m for m in range(1, n) if stats[m, cv2.CC_STAT_HEIGHT] >= 0.5 * size]
+    if len(letters) < 2:
+        return None
+    base = float(np.median([stats[m, cv2.CC_STAT_TOP] + stats[m, cv2.CC_STAT_HEIGHT] for m in letters]))
+    dots = [i for i in range(1, n) if stats[i, cv2.CC_STAT_WIDTH] <= 0.4 * size
+            and stats[i, cv2.CC_STAT_HEIGHT] <= 0.4 * size and stats[i, cv2.CC_STAT_AREA] >= 2
+            and 0.4 <= stats[i, cv2.CC_STAT_WIDTH] / stats[i, cv2.CC_STAT_HEIGHT] <= 2.5]
+    dots.sort(key=lambda i: cent[i][0])
+    for k, i in enumerate(dots):
+        for j in dots[k + 1:]:
+            if cent[j][0] - cent[i][0] > 0.3 * size:
+                break
+            up, low = (i, j) if cent[i][1] < cent[j][1] else (j, i)
+            a_up, a_low = stats[up, cv2.CC_STAT_AREA], stats[low, cv2.CC_STAT_AREA]
+            # the lower dot sits on the letters' baseline, the upper one about half a letter above, both alike
+            if (0.25 * size <= cent[low][1] - cent[up][1] <= 0.9 * size and max(a_up, a_low) <= 2.5 * min(a_up, a_low)
+                    and abs(stats[low, cv2.CC_STAT_TOP] + stats[low, cv2.CC_STAT_HEIGHT] - base) <= 0.2 * size):
+                x0 = min(stats[i, cv2.CC_STAT_LEFT], stats[j, cv2.CC_STAT_LEFT])
+                before = sum(1 for m in range(1, n) if stats[m, cv2.CC_STAT_LEFT] + stats[m, cv2.CC_STAT_WIDTH] <= x0
+                             and stats[m, cv2.CC_STAT_HEIGHT] >= 0.5 * size)
+                if before >= 2:
+                    x1 = max(stats[i, cv2.CC_STAT_LEFT] + stats[i, cv2.CC_STAT_WIDTH],
+                             stats[j, cv2.CC_STAT_LEFT] + stats[j, cv2.CC_STAT_WIDTH])
+                    return int(x0), int(x1)
+    return None
+
+
 def tint_color(hue, sat, boost=BOOST):
     """The colour for the TV: white below WHITE, else the measured hue with the saturation brought back (rounded, so
     one person does not flicker between shades line by line)."""
@@ -146,16 +200,22 @@ def family_of(tint):
     if tint is None or tint[1] < WHITE:
         return None
     h, sat = tint
-    if 40 <= h < 80:
+    if 60 <= h < 100 and sat < 0.10:
+        return "cream"      # cream (Jason, Boobie) reads faint and a little green in the stream: 77-97, ~0.07
+    if 40 <= h < 67:
         return "cream" if sat < CREAM else "yellow"
+    if 67 <= h < 90:
+        return "lime"
     if 20 <= h < 40:
         return "orange"
-    if 80 <= h < 215:
+    if 90 <= h < 215:
         # The game's lake green ("Shirley:") reads anywhere from green to cyan in the washed-out stream (97 in one
         # picture, 180 in the next): one family.
         return "teal"
     if 215 <= h < 265:
         return "blue"
+    if 265 <= h < 322:
+        return "purple"     # lavender ("Stranger" at night): 291-300
     return "pink"
 
 
@@ -271,14 +331,16 @@ class SpeakerColors:
             self._recent[key] = now
             return color
 
-    def pick(self, name, tint=None, from_game=True, boost=BOOST, now=None):
+    def pick(self, name, tint=None, from_game=True, boost=BOOST, now=None, sure=False, again=False):
         """The colour sent to the TV.
 
-        With the game's colours: the family of the colour this person has in the scene (the usual one of their last
-        lines, this one's measured tint included; their long record when the scene is unclear), shown as a saturated
-        shade of that family. Every person keeps their shade for good (the record), and two people of one dialogue
-        never get the same colour. A person whose colour cannot be told gets a colour all the same (never white),
-        kept too. Without the game's colours: the app's own colour for the person."""
+        With the game's colours: the family of the colour this person has in the scene (a clear colour from the first
+        line, a pale one from two lines; their long record when the scene is unclear), shown as the family's shade.
+        Two people of one family keep the same colour, like in the game. A person whose colour cannot be told gets a
+        colour all the same (never white), kept too. Without the game's colours: the app's own colour for the person.
+        sure: the tint was made sure on several pictures of the line; only such readings go into the lasting record
+        (one picture's reading counts for the scene only). again: the same line once more with its surer tint (it
+        takes the place of the line's first reading, it is not another line)."""
         if not name or not name.strip():
             return None
         if not from_game:
@@ -290,11 +352,15 @@ class SpeakerColors:
             while lines and now - lines[0][0] > SCENE_SECONDS:
                 lines.popleft()
             if tint:
-                lines.append((now, float(tint[0]), float(tint[1])))
-                seen = self.learned.setdefault(key, [])
-                seen.append([float(tint[0]), float(tint[1])])
-                del seen[:-KEEP_SAMPLES]
-                self._learned_dirty = True
+                if again and lines:
+                    lines[-1] = (now, float(tint[0]), float(tint[1]))
+                else:
+                    lines.append((now, float(tint[0]), float(tint[1])))
+                if sure:
+                    seen = self.learned.setdefault(key, [])
+                    seen.append([float(tint[0]), float(tint[1])])
+                    del seen[:-KEEP_SAMPLES]
+                    self._learned_dirty = True
             samples = self.learned.get(key, [])
             scene = typical([(h, s_) for _, h, s_ in lines])
             kept = typical(samples)
@@ -310,16 +376,17 @@ class SpeakerColors:
                 # (someone new: from their third reading, when most of their readings agree on a family)
                 faint_ok = kept is not None and (kept[1] >= FAINT or len(samples) >= 3)
                 own = family_of(kept) if faint_ok else None
-                # A scene where the game clearly gives this person another colour (strong colour, two lines or more):
-                # shown for that scene only, the record stays.
-                strong = family_of(scene) if scene is not None and scene[1] >= CLEAR and len(lines) >= 2 else None
+                # The colour the game gives this person in this scene (GTA 6 changes it from scene to scene): a clear
+                # colour, from the first line on. Shown for the scene; the record stays. (A pale one is left to the
+                # person's lasting readings: a white name the stream tints a little would change colour line by line.)
+                strong = family_of(scene) if scene is not None and scene[1] >= CLEAR else None
                 family = own or (rec or {}).get("family")
                 if rec and own and own != rec.get("family"):
                     # Another family than the one on record: only after it wins six lines in a row (a person whose
                     # readings are half pink, half lake green must not swap colours back and forth); from a stand-in
                     # colour (the family was not known yet) after three.
                     pending = self.pending.get(key)
-                    count = pending[1] + 1 if pending and pending[0] == own else 1
+                    count = (pending[1] if again else pending[1] + 1) if pending and pending[0] == own else 1
                     self.pending[key] = (own, count)
                     if count < (1 if rec.get("family") is None and len(samples) <= 5 else
                                 3 if rec.get("family") is None else 6):
@@ -327,12 +394,14 @@ class SpeakerColors:
                 else:
                     self.pending.pop(key, None)
                 if strong and strong != family:
-                    color = self._free(strong, others)
+                    color = FAMILIES[strong][0]
                 elif rec and rec.get("family") in (family, None) and \
                         (family is None or family_of_color(rec["color"]) == family):
-                    # This person's colour, as always; when someone else of this dialogue has it (two people of one
-                    # family), another shade for now: the record stays.
-                    color = rec["color"] if rec["color"] not in others else self._free(family, others)
+                    # This person's colour, as always (the family's shade; an old table may still hold another one).
+                    color = FAMILIES[family][0] if family in FAMILIES else rec["color"]
+                    if color != rec["color"]:
+                        rec["color"] = color
+                        self._learned_dirty = True
                 else:
                     color = self._free(family, others, rec["color"] if rec and family is None else None)
                     self.record[key] = {"family": family, "color": color}
@@ -346,31 +415,40 @@ class SpeakerColors:
             self._save_learned(now)
             return color
 
+    def learn(self, name, tint):
+        """A reading made sure on several pictures, kept in the person's lasting record (the line it belongs to is no
+        longer the newest, so its colour is not changed on the TV)."""
+        if not name or not tint:
+            return
+        with self._lock:
+            seen = self.learned.setdefault(self._key(name), [])
+            seen.append([float(tint[0]), float(tint[1])])
+            del seen[:-KEEP_SAMPLES]
+            self._learned_dirty = True
+
     def _generic(self, key, tint, others, now):
         """"Local", "Tourist"…: several people of one scene, told apart by colour in the game. Each line gets the
-        family measured on it; another family or an unclear one is another person, so not the last one's colour."""
+        family measured on it; an unclear one is another person, so not the last one's stand-in colour."""
         family = family_of(typical([tint])) if tint else None
+        if family in FAMILIES:
+            return FAMILIES[family][0]
         last = self.shown.get(key)
         recent = last is not None and now - last[0] < SCENE_SECONDS
-        if tint is None and recent and now - last[0] < 10 and last[1] not in others:
+        if tint is None and recent and now - last[0] < 10:
             return last[1]          # unmeasured: the same "Local" still talking, most likely
-        if recent and family_of_color(last[1]) == family and last[1] not in others:
-            return last[1]          # the same colour as the last "Local" (or unclear again): the same one
-        if recent and (family is None or family_of_color(last[1]) != family):
-            others = others | {last[1]}
-        return self._free(family, others)
+        return self._free(None, others | ({last[1]} if recent else set()))
 
     def _free(self, family, others, previous=None):
-        """A shade of the family (any colour when unknown) no one else in the dialogue has, the one used least by
-        the people on record (so people stay told apart in later dialogues too)."""
-        shades = FAMILIES.get(family) or FALLBACK
-        used = Counter(r["color"] for r in self.record.values())
-        free = [c for c in shades if c not in others] or [c for c in FALLBACK if c not in others] or shades
-        if previous in free and family is None:
-            return previous
+        """The family's shade (the game's look: two people of one family keep the same colour); for a colour that
+        cannot be told, a stand-in colour no one else in the dialogue has, the one used least by the people on
+        record."""
         if family in FAMILIES:
-            return free[0]      # the family's own shade first (the game's look); the others when it is taken here
-        return min(free, key=lambda c: (used[c], FALLBACK.index(c) if c in FALLBACK else len(FALLBACK)))
+            return FAMILIES[family][0]
+        used = Counter(r["color"] for r in self.record.values())
+        free = [c for c in FALLBACK if c not in others] or FALLBACK
+        if previous in free:
+            return previous
+        return min(free, key=lambda c: (used[c], FALLBACK.index(c)))
 
     def people(self):
         """Everyone on record or seen, for Filtreler -> Konuşmacı renkleri: [{"key", "name", "color", "locked",
