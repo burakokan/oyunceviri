@@ -70,14 +70,78 @@ def text_lines(mask, min_height=8, max_gap=3, pad=6):
                 start, gap = None, 0
     if start is not None:
         runs.append((start, h - gap))
-    lines = []
+    split = []
     for y0, y1 in runs:
+        rows = _baseline_rows(mask, y0, y1) if y1 - y0 >= 3 * min_height else []
+        # Only a band clearly taller than the lines of letters in it is replaced (a normal line stays as it was).
+        if rows and (y1 - y0) > 1.6 * max(b - t for t, b in rows):
+            split.extend((t, b, True) for t, b in rows)
+        else:
+            split.append((y0, y1, False))
+    lines = []
+    for i, (y0, y1, cut) in enumerate(split):
         if y1 - y0 < min_height:
             continue
         cols = np.flatnonzero(on[y0:y1].any(axis=0))
-        lines.append((max(0, y0 - pad), min(h, y1 + pad),
-                      max(0, cols[0] - 2 * pad), min(w, cols[-1] + 2 * pad)))
+        top, bottom = max(0, y0 - pad), min(h, y1 + pad)
+        # lines cut out of one band: the margin stops at the neighbour's letters (the top of the next line's letters
+        # in this crop was read as a line of its own: "@@ele ee ecme ine")
+        if cut and i > 0 and split[i - 1][2]:
+            top = max(top, split[i - 1][1])
+        if cut and i + 1 < len(split) and split[i + 1][2]:
+            bottom = min(bottom, split[i + 1][0])
+        lines.append((top, bottom, max(0, cols[0] - 2 * pad), min(w, cols[-1] + 2 * pad)))
     return lines
+
+
+def _baseline_rows(mask, y0, y1):
+    """The lines of letters inside a band of the mask -> [(top, bottom)] (empty: no clear line).
+
+    On a bright, busy scene (sunlit pavement, foliage, a shirt's print) specks of the scene fill the pixel rows above
+    and below the subtitle, and the band of filled rows ran from the top of the area to the bottom: the recognizer got
+    a crop four lines tall and read nothing (the line was lost whatever the brightness settings). The letters of a
+    line stand on one baseline: a bottom shared by many letter-sized blobs spread along the row marks a line; the
+    scene's specks share none."""
+    n, _, st, _ = cv2.connectedComponentsWithStats(mask[y0:y1], connectivity=8)
+    if n <= 5:
+        return []
+    tops, hs = st[1:, cv2.CC_STAT_TOP], st[1:, cv2.CC_STAT_HEIGHT]
+    xs, ws, areas = st[1:, cv2.CC_STAT_LEFT], st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_AREA]
+    ok = (areas >= 12) & (hs >= 6) & (hs <= 0.6 * mask.shape[0])
+    if ok.sum() < 5:
+        return []
+    tops, hs, xs, ws = tops[ok], hs[ok], xs[ok], ws[ok]
+    bottoms = tops + hs
+    votes = np.convolve(np.bincount(bottoms, minlength=y1 - y0 + 1).astype(float), np.ones(5), mode="same")
+    rows, taken = [], []
+    # a second line has letters too: a few blobs on one bottom next to a full line is the scene
+    least = max(5.0, 0.25 * float(votes.max()))
+    for b in np.argsort(-votes, kind="stable"):
+        if votes[b] < least:
+            break
+        near = np.abs(bottoms - b) <= 2
+        if near.sum() < least:
+            continue
+        cap = float(np.percentile(hs[near], 75))
+        # the next line of a subtitle stands about two letter heights lower; closer bottoms belong to this line
+        # (descenders, the scene right under it)
+        if any(abs(b - t) < 1.4 * max(cap, c) for t, c in taken):
+            continue
+        # spread along the row like words (not a fence or a kerb: many blobs, but bunched together)
+        left, right = int(xs[near].min()), int((xs[near] + ws[near]).max())
+        if right - left < 4 * cap:
+            continue
+        taken.append((int(b), cap))
+        rows.append((max(0, int(b - 1.3 * cap)), min(y1 - y0, int(b + 0.45 * cap) + 1)))
+    rows.sort()
+    # two lines that overlap after the margins: the second one starts where the first one's letters end
+    out = []
+    for top, bottom in rows:
+        if out and top < out[-1][1]:
+            top = out[-1][1]
+        if bottom - top >= 6:
+            out.append((top, bottom))
+    return [(y0 + top, y0 + bottom) for top, bottom in out]
 
 
 def _runs(filled, gap):

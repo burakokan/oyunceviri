@@ -14,7 +14,11 @@ def similar(a, b, threshold=0.9):
         return True
     if not a or not b:
         return False
-    return difflib.SequenceMatcher(None, a, b).ratio() >= threshold
+    # cheap upper bounds first (same answer, less work on a busy scene)
+    if 2 * min(len(a), len(b)) < threshold * (len(a) + len(b)):
+        return False
+    m = difflib.SequenceMatcher(None, a, b)
+    return m.quick_ratio() >= threshold and m.ratio() >= threshold
 
 
 def same_line(a, b):

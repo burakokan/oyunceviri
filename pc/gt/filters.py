@@ -91,7 +91,12 @@ def _clean_row(text, f):
         tokens = text.split()
         # A speaker's name in front stays, also one with a digit ("M7: Let's go!" lost its "M7:" as a HUD token).
         name = [tokens.pop(0)] if tokens and _NAME_TAG.match(tokens[0]) else []
-        while tokens and _is_hud_token(tokens[0]):
+        # A one-letter name the speaker talks to or about ("Jason: D, what's going on?", "D said she left."): a
+        # capital followed by a comma or by a lowercase word, after a speaker's name (button prompts have none).
+        # Not "J" / "S" (the music note in front of lyrics), nor "O" / "X" (the circle / cross buttons).
+        keep_first = (name and len(tokens) > 1 and re.fullmatch(r"[B-HK-NP-RT-WYZ],?", tokens[0]) is not None
+                      and (tokens[0].endswith(",") or tokens[1][:1].islower()))
+        while tokens and not keep_first and _is_hud_token(tokens[0]):
             tokens.pop(0)
         while tokens and _is_hud_token(tokens[-1]) and not tokens[-1].endswith((".", "!", "?", "…")):
             tokens.pop()

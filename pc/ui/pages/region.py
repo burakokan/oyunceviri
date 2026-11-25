@@ -273,13 +273,20 @@ class RegionPage(QWidget):
     def _build_phone_card(self):
         card = Card("2 · GTA 6 telefonu",
                     "Telefonu açınca ekrandaki mesajlar okunur, çevrilir ve Türkçesi TV'de telefonun yanında, boş "
-                    "tarafta bir panelde gösterilir; kaydırınca ya da başka sohbete geçince yenilenir, telefonu "
-                    "indirince panel kalkar. Başında » olanlar senin gönderdiğin ya da seçeceğin mesajlar. Yalnız "
+                    "tarafta gösterilir: her mesaj telefondaki kendi hizasında bir baloncukta (gelenler açık renk, "
+                    "seninkiler mavi). Kaydırınca ya da başka sohbete geçince yenilenir, telefonu indirince kalkar. "
+                    "Yalnız "
                     "GTA 6 oynanırken (ya da oyun henüz tanınmadan) çalışır. Gelen mesaj bildirimi için \"Telefon "
                     "mesajları\" alanı ayrıca durur.")
         self.phone_toggle = Toggle(True)
         self.phone_toggle.toggled.connect(lambda v: self._set_phone("enabled", v))
         card.add(SettingRow("Telefonu çevir", "Kapalıyken telefon aranmaz.", self.phone_toggle))
+        self.phone_bubbles = Toggle(True)
+        self.phone_bubbles.toggled.connect(lambda v: self._set_phone("bubbles", v))
+        card.add(SettingRow("Mesajlar baloncuk olsun",
+                            "Açık: her mesaj telefondaki yerinin hizasında, telefonun renklerinde ayrı bir baloncuk; "
+                            "sohbetin adı ve \"Yeni mesaj\" gibi yazılar koyu etiket. Kapalı: bütün mesajlar tek "
+                            "panelde alt alta (başında » olanlar senin mesajların).", self.phone_bubbles))
         card.add(Divider())
         self.phone_size, size_row = self._phone_slider("Yazı boyutu", "Sığmazsa kendiliğinden küçülür.", 60, 160,
                                                        "size", "%")
@@ -287,8 +294,10 @@ class RegionPage(QWidget):
         self.phone_fg = ColorButton(lambda v: self._set_phone("fg", v))
         card.add(SettingRow("Yazı rengi", None, self.phone_fg))
         self.phone_bg = ColorButton(lambda v: self._set_phone("bg", v))
-        card.add(SettingRow("Panel rengi", None, self.phone_bg))
-        self.phone_opacity, opacity_row = self._phone_slider("Panelin opaklığı", "0: panel yok, yazı gölgeli.", 0,
+        card.add(SettingRow("Panel / etiket rengi", "Baloncuklarda sohbetin adı ve kısa yazıların etiketi.",
+                            self.phone_bg))
+        self.phone_opacity, opacity_row = self._phone_slider("Panelin opaklığı",
+                                                             "0: panel yok, yazı gölgeli. Baloncuklar en az %85.", 0,
                                                              100, "opacity", "%")
         card.add(opacity_row)
         self.phone_status = QLabel("Durum: —")
@@ -335,6 +344,7 @@ class RegionPage(QWidget):
         look = self.win.regions.phone_look()
         self._syncing = True            # showing the saved values, not changing them
         self.phone_toggle.setChecked(bool(look.get("enabled")))
+        self.phone_bubbles.setChecked(bool(look.get("bubbles", True)))
         for slider, key in ((self.phone_size, "size"), (self.phone_opacity, "opacity")):
             slider.setValue(int(look[key]))
             slider.value_label.setText(f"{int(look[key])}{slider.unit}")

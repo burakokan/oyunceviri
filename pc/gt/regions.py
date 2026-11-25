@@ -84,7 +84,8 @@ PHONE_EVERY = 0.3
 PHONE_CLOSE = 1.8
 PHONE_SETTLE = 0.6
 PHONE_SAME = 88         # % alike: a new reading of what is shown (letters read a little differently) changes nothing
-PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61}
+# bubbles: every message beside its own place on the phone, in the phone's colours (off: one panel of text)
+PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61, "bubbles": True}
 _GTA6 = re.compile(r"grand theft auto vi\b|\bgta\s*(6|vi)\b", re.I)
 
 
@@ -559,7 +560,7 @@ class RegionTranslator:
         """The place setting changed: send the boxes again."""
         with self._lock:
             if self._phone_box is not None and self._phone["corners"] is not None:
-                self._phone_box = self._phone_panel(self._phone["corners"], self._phone_box["tr"])
+                self._phone_box = self._phone_panel(self._phone["corners"], self._phone_box)
         self._sent = None
         self._send()
 
@@ -769,7 +770,7 @@ class RegionTranslator:
                 st["corners"], st["moved"] = corners, None
                 if self._phone_box is not None:
                     with self._lock:
-                        self._phone_box = self._phone_panel(corners, self._phone_box["tr"])
+                        self._phone_box = self._phone_panel(corners, self._phone_box)
                     self._send()
         else:
             st["moved"] = None
@@ -822,8 +823,9 @@ class RegionTranslator:
         st.update(english=english, title=title, messages=messages)
         text = phone.panel_text(title, messages, turkish)
         self.last["gta_phone"] = {"en": english, "tr": text, "via": " + ".join(sorted(via)) or "önbellek"}
+        view = {"tr": text, "title": title, "messages": messages, "turkish": turkish}
         with self._lock:
-            self._phone_box = self._phone_panel(st["corners"], text)
+            self._phone_box = self._phone_panel(st["corners"], view)
         self.on_status("gta_phone", f"Çevrildi · {self.last['gta_phone']['via']}")
         self._send()
 
@@ -841,18 +843,22 @@ class RegionTranslator:
                 pass
         return self._translate_block("phone", english)
 
-    def _phone_panel(self, corners, text):
-        """The TV box next to the phone: full width of its side, letters sized for the TV (the box grows down with
-        the text, smaller letters when it does not fit the phone's height)."""
+    def _phone_panel(self, corners, view):
+        """What the TV shows next to the phone -> view with its "boxes": chat bubbles at the height of their messages
+        (phone.bubble_boxes), or one panel of text the full width of that side (letters sized for the TV, the box
+        grows down with the text, smaller letters when it does not fit the phone's height)."""
         w, h = self._size
         look = self.phone_look()
+        if look.get("bubbles", True) and view.get("messages"):
+            return dict(view, boxes=phone.bubble_boxes(view.get("title"), view["messages"], view.get("turkish") or {},
+                                                       corners, w, h, look))
         x0, y0, pw, ph = phone.panel_place(corners, w, h)
         line = 0.034 * h * max(0.5, min(2.0, float(look.get("size", 100)) / 100))
         opacity = max(0, min(100, int(look.get("opacity", 90))))
-        return {"id": "gta_phone", "x": x0 / w, "y": y0 / h, "w": pw / w, "h": line / h, "mw": pw / w,
-                "mh": ph / h, "lines": 1, "tr": text, "icons": {}, "fg": look.get("fg", "#FFFFFF"),
-                "bg": look.get("bg", "#10151C"), "alpha": opacity / 100, "scale": 1.0, "shadow": opacity == 0,
-                "align": "left"}
+        return dict(view, boxes=[{"id": "gta_phone", "x": x0 / w, "y": y0 / h, "w": pw / w, "h": line / h,
+                                  "mw": pw / w, "mh": ph / h, "lines": 1, "tr": view["tr"], "icons": {},
+                                  "fg": look.get("fg", "#FFFFFF"), "bg": look.get("bg", "#10151C"),
+                                  "alpha": opacity / 100, "scale": 1.0, "shadow": opacity == 0, "align": "left"}])
 
     def _phone_close(self):
         if self._phone["open"] or self._phone_box is not None:
@@ -983,17 +989,22 @@ class RegionTranslator:
                 if a.english and a.tr and a.rect:
                     pitch = statistics.median(a.pitches) if a.pitches else None
                     boxes.append(self._box(kind, a.rect, a.rows, a.tr, a.icons, w, h, pitch))
+            phone_tr = self._phone_box["tr"] if self._phone_box is not None else ""
             if self._phone_box is not None:
-                boxes.append(self._phone_box)
+                boxes.extend(self._phone_box["boxes"])
         key = json.dumps(boxes, sort_keys=True)
         if key == self._sent:
             return
         self._sent = key
         self.server.send({"type": "regions", "boxes": boxes})
+        phone_logged = False
         for b in boxes:
-            if b["id"] == "gta_phone":
-                self._log("gta_phone", en=self._phone["english"], tr=b["tr"],
-                          box=[round(b[k], 4) for k in ("x", "y", "w", "mh")])
+            if b["id"].startswith("gta_phone"):
+                if not phone_logged:
+                    phone_logged = True
+                    self._log("gta_phone", en=self._phone["english"], tr=phone_tr,
+                              bubbles=[[round(x["y"], 4), x["bg"], x["tr"][:40]] for x in boxes
+                                       if x["id"].startswith("gta_phone")])
                 continue
             a = self._areas[b["id"]]
             self._log(b["id"], en=a.english, tr=b["tr"], rows=b["lines"], scale=b["scale"],

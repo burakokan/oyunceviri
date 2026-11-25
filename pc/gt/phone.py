@@ -112,10 +112,14 @@ def _around(lab, rect):
 
 
 def read_screen(reader, screen):
-    """The upright screen -> (chat title or None, [{"text", "mine"}]) top to bottom. mine: a dark blue bubble, the
-    player's own text."""
-    h = screen.shape[0]
-    rows = [r for r in reader.read(screen, {"filter": "any"}) if r.get("ok", True) and _text(r)]
+    """The upright screen -> (chat title or None, [{"text", "mine", "sender", "rect", "bg", "note"}]) top to bottom.
+    mine: a blue bubble, the player's own text (light blue: sent; dark blue: a reply to choose). rect: the message's
+    text (x0, y0, x1, y1) on the upright screen; bg: its bubble's colour ("#rrggbb"); note: a short centred line with
+    no bubble around it ("New message", a time)."""
+    h, w = screen.shape[:2]
+    # a line cut by the screen's bottom edge is read wrong ("hunting" -> "buntina"): left out
+    rows = [r for r in reader.read(screen, {"filter": "any"}) if r.get("ok", True) and _text(r)
+            and r["rect"][3] < h - 2]
     rows.sort(key=lambda r: r["rect"][1])
     if not rows:
         return None, []
@@ -144,7 +148,9 @@ def read_screen(reader, screen):
     for b in bubbles:
         colours = [c for c in (_around(lab, r["rect"]) for r in b["rows"]) if c is not None]
         c = np.median(colours, axis=0) if colours else np.array([255.0, 128.0, 128.0])
-        mine = c[0] < 130 and float(np.hypot(c[1] - 128, c[2] - 128)) > 25
+        chroma = float(np.hypot(c[1] - 128, c[2] - 128))
+        # dark blue (a reply to choose) or light blue (sent: "Left the Phoenix at your place"); grey / white: theirs
+        mine = (c[0] < 130 and chroma > 25) or (chroma > 9 and c[2] < 121)
         rows_ = b["rows"]
         sender = None
         if not mine and len(rows_) >= 2 and _is_sender(lab, rows_[0]):
@@ -152,7 +158,14 @@ def read_screen(reader, screen):
         # a piece of an icon read as a mark in front of the text (")Swamp Meditation Spot")
         text = " ".join(_text(r) for r in rows_).lstrip(")]}|>•·-–—_~ ")
         if sum(ch.isalpha() for ch in text) >= 2:
-            out.append({"text": text, "mine": bool(mine), "sender": sender})
+            x0 = min(r["rect"][0] for r in b["rows"])
+            x1 = max(r["rect"][2] for r in b["rows"])
+            y0, y1 = b["rows"][0]["rect"][1], b["rows"][-1]["rect"][3]
+            bgr = cv2.cvtColor(np.uint8([[np.clip(c, 0, 255)]]), cv2.COLOR_LAB2BGR)[0, 0]
+            note = (not mine and len(b["rows"]) == 1 and len(text.split()) <= 4 and x1 - x0 < 0.6 * w
+                    and abs((x0 + x1) / 2 - w / 2) < 0.07 * w)
+            out.append({"text": text, "mine": bool(mine), "sender": sender, "rect": (int(x0), int(y0), int(x1), int(y1)),
+                        "bg": "#%02X%02X%02X" % (int(bgr[2]), int(bgr[1]), int(bgr[0])), "note": bool(note)})
     if out and out[0]["text"][:1].islower():
         out = out[1:]       # the end of a message scrolled up under the title bar ("it")
     return title, out
@@ -195,3 +208,72 @@ def panel_place(corners, w, h, width=0.34):
     y0 = max(0.05 * h, float(ys.min()))
     ph = max(0.3 * h, min(0.9 * h - y0, float(ys.max() - ys.min())))
     return float(x0), float(y0), float(pw), float(ph)
+
+
+# The TV's chat bubbles: the phone's own look, not the stream's dim greys (a light phone screen comes through grey).
+BUBBLE_THEIRS = ("#EEF0F3", "#1B1D21")      # (background, letters)
+BUBBLE_SENT = ("#CFE2FA", "#0D3B85")        # the player's sent message (light blue)
+BUBBLE_REPLY = ("#1F4E9E", "#FFFFFF")       # a reply to choose (dark blue)
+
+
+def _screen_to_frame(corners):
+    sw, sh = SCREEN
+    return cv2.getPerspectiveTransform(np.float32([[0, 0], [sw, 0], [sw, sh], [0, sh]]), np.float32(corners))
+
+
+def bubble_boxes(title, messages, turkish, corners, w, h, look):
+    """The phone shown on the TV as chat bubbles beside it (TV "regions" boxes, coordinates as fractions of the
+    picture): every message's Turkish at the height of its message on the phone, theirs light, the player's blue and
+    moved toward the phone side, short centred lines ("New message") and the chat's name as dark labels. A bubble may
+    use the room down to the next one: a longer Turkish text gets smaller letters, it never covers the next bubble."""
+    x0, _, pw, _ = panel_place(corners, w, h)
+    scale = max(0.5, min(2.0, float(look.get("size", 100)) / 100))
+    line = 0.034 * h * scale
+    gap = 0.3 * line
+    alpha = max(0.85, max(0, min(100, int(look.get("opacity", 90)))) / 100)
+    label = (look.get("bg", "#10151C"), look.get("fg", "#FFFFFF"))
+    to_frame = _screen_to_frame(corners)
+    items = []
+    top = max(0.04 * h, float(corners[:, 1].min()))
+    if title:
+        items.append({"kind": "label", "text": title, "y": top})
+    for m in messages:
+        x_a, y_a, x_b, _ = m["rect"]
+        y = float(cv2.perspectiveTransform(np.float32([[[(x_a + x_b) / 2, y_a]]]), to_frame)[0, 0, 1]) - 0.2 * line
+        tr = (turkish.get(m["text"]) or m["text"]).strip()
+        if m.get("sender"):
+            tr = f"{m['sender']}: {tr}"
+        if m.get("note"):
+            kind = "label"
+        elif m["mine"]:
+            dark = int(m.get("bg", "#FFFFFF")[1:3], 16) + int(m.get("bg", "#FFFFFF")[3:5], 16) < 200
+            kind = "reply" if dark else "sent"
+        else:
+            kind = "theirs"
+        items.append({"kind": kind, "text": tr, "y": y})
+    # top to bottom, a line apart at least (the letters on the TV can be bigger than on the phone)
+    prev = None
+    for it in items:
+        if prev is not None:
+            it["y"] = max(it["y"], prev + line + gap)
+        prev = it["y"]
+    bottom = max(float(corners[:, 1].max()), top + 4 * line)
+    boxes = []
+    for i, it in enumerate(items):
+        y = it["y"]
+        if y + line > 0.97 * h:
+            break
+        nxt = items[i + 1]["y"] if i + 1 < len(items) else min(0.97 * h, max(bottom, y + 4 * line))
+        room = max(line, nxt - y - gap)
+        if it["kind"] == "label":
+            bg, fg = label
+            bx, bw, mw, align = x0 + pw / 2 - line / 2, line, pw, "center"
+        elif it["kind"] == "theirs":
+            (bg, fg), bx, bw, mw, align = BUBBLE_THEIRS, x0, line, 0.82 * pw, "left"
+        else:
+            bg, fg = BUBBLE_SENT if it["kind"] == "sent" else BUBBLE_REPLY
+            bx, bw, mw, align = x0 + 0.18 * pw, line, 0.82 * pw, "left"
+        boxes.append({"id": f"gta_phone_{i}", "x": bx / w, "y": y / h, "w": bw / w, "h": line / h, "mw": mw / w,
+                      "mh": room / h, "lines": 1, "tr": it["text"], "icons": {}, "fg": fg, "bg": bg, "alpha": alpha,
+                      "scale": 1.0, "shadow": False, "align": align})
+    return boxes
