@@ -52,8 +52,22 @@ def changed(sig, last):
     return diff >= max(3, 0.05 * max(int(sig.sum()), int(last.sum())))
 
 
+class Rows(list):
+    """Text lines [(y0, y1, x0, x1)]; cut: the (y0, y1) of the lines cut out of a taller band of the scene
+    (_baseline_rows), which are read only when the recognizer is sure (CUT_SCORE)."""
+
+    def __init__(self, items=(), cut=()):
+        super().__init__(items)
+        self.cut = set(cut)
+
+
+# A line cut out of a busy scene is kept only with a sure reading: real subtitles there read at 0.94-0.98, a map's
+# labels or a car's plate cut the same way at 0.64-0.82 ("Cr-stown", "A eL").
+CUT_SCORE = 0.9
+
+
 def text_lines(mask, min_height=8, max_gap=3, pad=6):
-    """Split a subtitle mask into text lines -> [(y0, y1, x0, x1)], top to bottom."""
+    """Split a subtitle mask into text lines -> Rows [(y0, y1, x0, x1)], top to bottom."""
     h, w = mask.shape
     on = mask > 0
     rows = on.sum(axis=1) > max(3, w * 0.004)
@@ -78,7 +92,7 @@ def text_lines(mask, min_height=8, max_gap=3, pad=6):
             split.extend((t, b, True) for t, b in rows)
         else:
             split.append((y0, y1, False))
-    lines = []
+    lines, cut_rows = [], []
     for i, (y0, y1, cut) in enumerate(split):
         if y1 - y0 < min_height:
             continue
@@ -91,7 +105,9 @@ def text_lines(mask, min_height=8, max_gap=3, pad=6):
         if cut and i + 1 < len(split) and split[i + 1][2]:
             bottom = min(bottom, split[i + 1][0])
         lines.append((top, bottom, max(0, cols[0] - 2 * pad), min(w, cols[-1] + 2 * pad)))
-    return lines
+        if cut:
+            cut_rows.append((top, bottom))
+    return Rows(lines, cut_rows)
 
 
 def _baseline_rows(mask, y0, y1):
@@ -114,8 +130,9 @@ def _baseline_rows(mask, y0, y1):
     bottoms = tops + hs
     votes = np.convolve(np.bincount(bottoms, minlength=y1 - y0 + 1).astype(float), np.ones(5), mode="same")
     rows, taken = [], []
-    # a second line has letters too: a few blobs on one bottom next to a full line is the scene
-    least = max(5.0, 0.25 * float(votes.max()))
+    # A line of dialogue has ten letters and more; a few blobs on one bottom are a map's place name, a car's plate or
+    # the scene (read as "Cr-stown", "TM oOT" and shown as a line). A second line is a fair share of the first one.
+    least = max(10.0, 0.25 * float(votes.max()))
     for b in np.argsort(-votes, kind="stable"):
         if votes[b] < least:
             break
@@ -127,9 +144,15 @@ def _baseline_rows(mask, y0, y1):
         # (descenders, the scene right under it)
         if any(abs(b - t) < 1.4 * max(cap, c) for t, c in taken):
             continue
-        # spread along the row like words (not a fence or a kerb: many blobs, but bunched together)
-        left, right = int(xs[near].min()), int((xs[near] + ws[near]).max())
-        if right - left < 4 * cap:
+        # Letters stand close together along the line: the longest run of these blobs with gaps under three letter
+        # heights must be long and mostly letters (a subtitle's letters cover 50-70 % of its length; a map's roads
+        # and labels or a plate with the scene around it 13-26 %).
+        order = np.argsort(xs[near], kind="stable")
+        x0s, x1s = xs[near][order], (xs[near] + ws[near])[order]
+        breaks = np.flatnonzero(x0s[1:] - np.maximum.accumulate(x1s)[:-1] > 3 * cap) + 1
+        chain = max(np.split(np.arange(len(x0s)), breaks), key=len)
+        left, right = int(x0s[chain].min()), int(x1s[chain].max())
+        if len(chain) < least or right - left < 4 * cap or (x1s[chain] - x0s[chain]).sum() < 0.4 * (right - left):
             continue
         taken.append((int(b), cap))
         rows.append((max(0, int(b - 1.3 * cap)), min(y1 - y0, int(b + 0.45 * cap) + 1)))
@@ -171,8 +194,9 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
     h, w = mask.shape
     cx = center * w
     colored = None
-    out = []
-    for y0, y1, _, _ in text_lines(mask):
+    found = text_lines(mask)
+    out = Rows(cut=found.cut)
+    for y0, y1, _, _ in found:
         # Words of one line are closer than this; measured on the letters, not the row (a HUD notice a little
         # higher, like a phone call's "Chuck's Gun Shop", made the row tall and was glued to the dialogue).
         letters = letter_height(mask[y0:y1])
@@ -367,7 +391,8 @@ class RapidLineOcr:
             if text is None:
                 y0, y1, x0, x1 = tight_box(mask, box)
                 r = engine(bgr[y0:y1, x0:x1], use_det=False, use_cls=False)
-                text = r.txts[0].strip() if r.txts and r.scores[0] >= self.min_score else ""
+                least = CUT_SCORE if (box[0], box[1]) in getattr(boxes, "cut", ()) else self.min_score
+                text = r.txts[0].strip() if r.txts and r.scores[0] >= least else ""
                 if cache is not None:
                     cache.put(mask, box, text)
             rows.append((tuple(int(v) for v in box), text))
