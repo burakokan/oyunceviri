@@ -48,6 +48,9 @@ def letters(picture):
 # The screen is the light part; how light depends on the scene (~155 in a dim room, ~175 in daylight). On sunlit
 # grey pavement as light as the phone the two run together at the lowest level: the higher ones cut the screen out.
 LIGHT_LEVELS = (130, 160, 185)
+# A sunset or a lamp tints the white screen warm (saturation ~80 of 255 instead of ~20): a second, looser colour limit
+# finds it there (the shape and the letters on it keep a beige wall or sand from passing).
+GREY_LIMITS = (70, 100)
 
 
 def find_phone(frame):
@@ -59,12 +62,14 @@ def find_phone(frame):
     h, w = small.shape[:2]
     hsv = cv2.cvtColor(small, cv2.COLOR_BGR2HSV)
     contours = []
-    for level in LIGHT_LEVELS:
-        bright = ((hsv[:, :, 2] >= level) & (hsv[:, :, 1] <= 70)).astype(np.uint8) * 255
-        bright = cv2.morphologyEx(bright, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-        contours += cv2.findContours(bright, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
+    for grey in GREY_LIMITS:
+        for level in LIGHT_LEVELS:
+            bright = ((hsv[:, :, 2] >= level) & (hsv[:, :, 1] <= grey)).astype(np.uint8) * 255
+            bright = cv2.morphologyEx(bright, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+            contours += [(c, grey > GREY_LIMITS[0]) for c in
+                         cv2.findContours(bright, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]]
     best = None
-    for c in contours:
+    for c, tinted in contours:
         area = cv2.contourArea(c)
         if area < 0.03 * w * h:
             continue
@@ -76,11 +81,13 @@ def find_phone(frame):
         tilt = angle if rw < rh else angle - 90
         tilt = (tilt + 90) % 180 - 90
         fill = area / (rw * rh)
-        if abs(tilt) > 30 or fill < 0.72:
+        # the looser colour limit takes in more of the scene: only a clean screen shape full of text passes there (a
+        # grey concrete wall passed at fill 0.74 / text share 0.07; the tinted phone: 0.95 / 0.49)
+        if abs(tilt) > 30 or fill < (0.85 if tinted else 0.72):
             continue
         corners = order(cv2.boxPoints(((cx, cy), (rw, rh), angle)) / k)
         count, share = letters(upright(frame, corners, WARP))
-        if count < MIN_LETTERS or share < 0.02:
+        if count < MIN_LETTERS or share < (0.15 if tinted else 0.02):
             continue
         score = count * fill
         if best is None or score > best[2]:
@@ -144,13 +151,19 @@ def read_screen(reader, screen):
                 continue
         bubbles.append({"rows": [r], "x0": x0, "x1": x1})
     lab = cv2.cvtColor(screen, cv2.COLOR_BGR2LAB).astype(np.float32)
-    out = []
     for b in bubbles:
         colours = [c for c in (_around(lab, r["rect"]) for r in b["rows"]) if c is not None]
-        c = np.median(colours, axis=0) if colours else np.array([255.0, 128.0, 128.0])
+        b["colour"] = np.median(colours, axis=0) if colours else np.array([255.0, 128.0, 128.0])
+    # The scene's light tints the whole screen (a sunset: everything warm), so a light blue bubble is told by being
+    # bluer than the others on the same screen, and by its place: the player's bubbles stand on the right.
+    usual_b = float(np.median([b["colour"][2] for b in bubbles])) if bubbles else 128.0
+    out = []
+    for b in bubbles:
+        c = b["colour"]
         chroma = float(np.hypot(c[1] - 128, c[2] - 128))
+        right = b["x0"] >= 0.2 * w and b["x1"] >= 0.85 * w
         # dark blue (a reply to choose) or light blue (sent: "Left the Phoenix at your place"); grey / white: theirs
-        mine = (c[0] < 130 and chroma > 25) or (chroma > 9 and c[2] < 121)
+        mine = (c[0] < 130 and chroma > 25) or (right and c[2] - usual_b <= -6)
         rows_ = b["rows"]
         sender = None
         if not mine and len(rows_) >= 2 and _is_sender(lab, rows_[0]):
