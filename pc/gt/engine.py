@@ -13,8 +13,8 @@ from .capture import WindowGrabber
 from .conductor import Conductor
 from .guards import RepeatGuard, StickyRows, non_speech
 from .logbook import Logbook
-from .ocr import (RowCache, baseline, box_mask, changed, keep_boxes, make_ocr, outline_mask, outline_ratio,
-                  signature, subtitle_lines, text_lines, text_mask)
+from .ocr import (LetterFinder, RowCache, baseline, box_mask, changed, keep_boxes, letter_finder_model, make_ocr,
+                  outline_mask, outline_ratio, signature, subtitle_lines, text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
@@ -438,11 +438,30 @@ class Engine:
         return speaker, body, turkish, ms
 
     @staticmethod
-    def lines(cfg, crop, mask, roi=None):
+    def lines(cfg, crop, mask, roi=None, widen=True, runs_mask=None):
         """Subtitle text lines in the area (edge HUD dropped when the subtitle is centered)."""
         if cfg["filters"].get("centered", True):
-            return subtitle_lines(crop, mask, screen_center(roi or active_roi(cfg)), cfg["text_v_min"])
+            return subtitle_lines(crop, mask, screen_center(roi or active_roi(cfg)), cfg["text_v_min"], widen=widen,
+                                  runs_mask=runs_mask)
         return text_lines(mask)
+
+    def finder(self, cfg):
+        """The trained subtitle letter finder when it is chosen ("text_detect": "ai") and its file is there."""
+        if cfg.get("text_detect", "ai") != "ai":
+            return None
+        if getattr(self, "_finder", None) is None:      # loaded once (~50 ms), on the first frame
+            path = letter_finder_model()
+            self._finder = LetterFinder(path) if path else False
+        return self._finder or None
+
+    @staticmethod
+    def find_letters(finder, cfg, crop, roi):
+        """The letter mask and rows from the trained finder. It sees the picture as at 1080p / 2, whatever the
+        capture's size (the area's height over its share of the picture gives the picture's height)."""
+        roi = roi or active_roi(cfg)
+        scale = max(0.25, min(1.0, 540 * (roi[3] if roi else 0.25) / max(1, crop.shape[0])))
+        mask, cells = finder.find(crop, scale)
+        return mask, Engine.lines(cfg, crop, mask, roi, widen=False, runs_mask=cells)
 
     # ---- pipeline ----
 
@@ -521,15 +540,21 @@ class Engine:
                         recorder(bgr, t_frame)
                     boxes, kind = None, None
                     holes = self._holes(roi, bgr.shape)
-                    if cfg.get("text_box"):
+                    finder = self.finder(cfg)
+                    if finder is not None:
+                        # the trained finder: no thresholds, the game's subtitle background on or off
+                        mask, cells = finder.find(bgr, max(0.25, min(1.0, 540 * roi[3] / bgr.shape[0])))
+                        mask, cells = punch(mask, holes), punch(cells, holes)
+                        boxes, kind = self.lines(cfg, bgr, mask, roi, widen=False, runs_mask=cells), "ai"
+                    elif cfg.get("text_box"):
                         # The game's own subtitle background is on: letters are read against the box, no fixed
                         # thresholds (a dim or colour-cast picture reads too; coloured names stay).
                         mask = punch(box_mask(bgr), holes)
                         boxes, kind = self.lines(cfg, bgr, mask, roi), "box"
-                    if outlined and not boxes:
+                    if outlined and not boxes and finder is None:
                         mask = punch(outline_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
                         boxes, kind = self.lines(cfg, bgr, mask, roi), "outline"
-                    if not boxes:
+                    if not boxes and finder is None:
                         mask = punch(text_mask(bgr, cfg["text_v_min"], cfg["text_s_max"]), holes)
                         boxes, kind = self.lines(cfg, bgr, mask, roi), "white"
                     beat["rows"] = max(beat["rows"], len(boxes))
@@ -545,7 +570,7 @@ class Engine:
                         beat["ocr"] += 1
                         beat["read_rows"] += rows_cache.last_read
                         before, last_text = last_text, self._unstick(filters.clean(raw, cfg["filters"]), t_frame)
-                        if not outlined and last_text and last_text != before:
+                        if not outlined and finder is None and last_text and last_text != before:
                             ratio = outline_ratio(bgr, mask, boxes)
                             if ratio is not None:
                                 votes.append(ratio >= 0.9)

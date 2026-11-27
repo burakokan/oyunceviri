@@ -182,7 +182,7 @@ def _runs(filled, gap):
     return runs
 
 
-def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
+def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12, widen=True, runs_mask=None):
     """Text lines of a centered subtitle -> [(y0, y1, x0, x1)].
 
     Games center their subtitles, while HUD text (location names, ammo, button hints) sits
@@ -190,6 +190,11 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
     rows with nothing near the center are dropped. The block is then widened with
     bright letters of any color on the same row, so colored speaker names ("Raiza:") are read too.
     center: horizontal screen center as a fraction of the crop width.
+    widen: False for the trained letter finder's mask, which holds coloured names and dots already (widening by
+    brightness would let a sunlit scene pull the row sideways).
+    runs_mask: where a row's words are told apart (the finder's letter cells: a word is one block there, so the space
+    after "Jason:" never splits it off); the rows themselves still come from the letters (two lines close together
+    are two rows).
     """
     h, w = mask.shape
     cx = center * w
@@ -199,13 +204,18 @@ def subtitle_lines(bgr, mask, center, v_min, max_offset=0.12):
     for y0, y1, _, _ in found:
         # Words of one line are closer than this; measured on the letters, not the row (a HUD notice a little
         # higher, like a phone call's "Chuck's Gun Shop", made the row tall and was glued to the dialogue).
-        letters = letter_height(mask[y0:y1])
+        words = mask if runs_mask is None else runs_mask
+        letters = letter_height(words[y0:y1])
         gap = max(12, int(2.2 * letters)) if letters else max(12, int(1.6 * (y1 - y0)))
-        runs = _runs(mask[y0:y1].any(axis=0), gap)
+        runs = _runs(words[y0:y1].any(axis=0), gap)
         if not runs:
             continue
         x0, x1 = min(runs, key=lambda r: 0 if r[0] <= cx <= r[1] else min(abs(r[0] - cx), abs(r[1] - cx)))
         if not (x0 <= cx <= x1) and min(abs(x0 - cx), abs(x1 - cx)) > max_offset * w:
+            continue
+        if not widen:
+            pad = (y1 - y0) // 3
+            out.append((y0, y1, max(0, x0 - pad), min(w, x1 + pad)))
             continue
         if colored is None:
             v = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)[..., 2]
@@ -440,6 +450,69 @@ class WinOcr:
 
     async def _recognize(self, bitmap):
         return await self.engine.recognize_async(bitmap)
+
+
+def letter_finder_model():
+    """The trained subtitle letter finder (assets/ocr/altyazi_bulucu.onnx), or None when the file is missing."""
+    from .config import ASSETS
+    path = ASSETS / "ocr" / "altyazi_bulucu.onnx"
+    return path if path.is_file() else None
+
+
+class LetterFinder:
+    """Finds subtitle letters with a small network trained on GTA 6 recordings and synthetic subtitles (white letters
+    with an outline, on the game's subtitle background or without, on every kind of scene): no brightness / colour
+    thresholds to set. The network marks the 4 x 4 cells holding subtitle letters (~5-10 ms a frame); inside those
+    cells, row by row, the letters are the brighter part (the row's own Otsu threshold: white or coloured letters
+    against their dark outline / the box). -> a letter mask like text_mask(), for the same row finder and reader."""
+
+    def __init__(self, path, threads=4):
+        import onnxruntime as ort
+        opts = ort.SessionOptions()
+        opts.intra_op_num_threads = threads
+        self.session = ort.InferenceSession(str(path), opts, providers=["CPUExecutionProvider"])
+        self.name = self.session.get_inputs()[0].name
+        self.cells = None           # the last frame's letter cells (full size, 0 / 255), for the preview
+
+    def letter_cells(self, bgr, scale=0.5):
+        """The network's letter cells at the picture's size. scale: the network sees the picture as at 1080p / 2."""
+        h, w = bgr.shape[:2]
+        sh, sw = max(16, round(h * scale)), max(16, round(w * scale))
+        small = cv2.resize(bgr, (sw, sh), interpolation=cv2.INTER_AREA)
+        H, W = -(-sh // 16) * 16, -(-sw // 16) * 16
+        small = cv2.copyMakeBorder(small, 0, H - sh, 0, W - sw, cv2.BORDER_REFLECT)
+        x = (small.astype(np.float32) / 255 - 0.5).transpose(2, 0, 1)[None]
+        logit = self.session.run(None, {self.name: x})[0][0, 0]
+        cells = (logit[:-(-sh // 2), :-(-sw // 2)] > 0).astype(np.uint8)
+        return cv2.resize(cells, (w, h), interpolation=cv2.INTER_NEAREST) * 255
+
+    def find(self, bgr, scale=0.5):
+        """-> (letter mask, letter cells). The rows are found on the cells (a word is one solid block there, so the
+        space after "Jason:" never splits a line); the letters are what the reader and the change tests use."""
+        letters = self.letters(bgr, scale)
+        return letters, self.cells
+
+    def letters(self, bgr, scale=0.5):
+        cells = self.letter_cells(bgr, scale)
+        self.cells = cells
+        out = np.zeros_like(cells)
+        rows = cells.any(axis=1)
+        if not rows.any():
+            return out
+        h, w = cells.shape
+        for y0, y1 in _runs(rows, 1):
+            # only around this band of cells (not the whole picture)
+            y0, y1 = max(0, y0 - 1), min(h, y1 + 1)
+            cols = np.flatnonzero(cells[y0:y1].any(axis=0))
+            x0, x1 = max(0, int(cols[0]) - 1), min(w, int(cols[-1]) + 2)
+            sel = cv2.dilate(cells[y0:y1, x0:x1], np.ones((3, 3), np.uint8)) > 0
+            v = bgr[y0:y1, x0:x1].max(axis=2)
+            vals = v[sel]
+            if vals.size < 16:
+                continue
+            thr, _ = cv2.threshold(vals.reshape(-1, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            out[y0:y1, x0:x1][sel & (v > thr)] = 255
+        return out
 
 
 def make_ocr(name, accurate=True):

@@ -23,6 +23,7 @@ DEFAULTS = {
     # A pixel counts as subtitle text if it is bright and colorless (white text)
     "text_v_min": 200,
     "text_s_max": 60,
+    "text_detect": "ai",        # "ai": the trained subtitle letter finder; "threshold": brightness / colour limits
     "text_box": False,          # the game's own subtitle background is on: read the letters against it
     # How many consecutive frames must read the same before a line is shown
     "stable_reads": 2,

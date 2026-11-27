@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QButtonGroup, QComboBox, QHBoxLayout, QLabel, QLi
 from gt import config
 from gt.capture import WindowGrabber
 from gt.engine import Engine, calibrate
-from gt.ocr import box_mask, make_ocr, text_mask
+from gt.ocr import box_mask, letter_finder_model, make_ocr, text_mask
 from gt.regions import FILTERS, area_cfg
 from gt.remoteplay import RemotePlaySource, needs_link, uses_builtin
 from gt.winutil import find_window
@@ -112,6 +112,14 @@ class RegionPage(QWidget):
         self.read_label.setWordWrap(True)
         self.read_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         tune.add(self.read_label)
+        self.ai_toggle = Toggle(self.cfg.get("text_detect", "ai") == "ai")
+        self.ai_toggle.toggled.connect(self._set_ai)
+        self.ai_row = SettingRow("Altyazıyı yapay zekâ bulsun (önerilen)",
+                                 "GTA 6 kayıtlarında ve binlerce farklı sahnede eğitilmiş bir model altyazı harflerini "
+                                 "kendisi bulur: parlaklık ya da renk ayarı gerekmez; oyunda altyazı arka planı açık da "
+                                 "olsa kapalı da olsa, açık renkli ve kalabalık sahnelerde de çalışır. Kapatırsan "
+                                 "aşağıdaki eşiklerle okunur.", self.ai_toggle)
+        tune.add(self.ai_row)
         self.v_slider, v_row = self._slider(
             "Parlaklık eşiği", "Altyazı harfleri bu değerden parlak olmalı. Arka plan da okunuyorsa yükselt, "
             "harfler kopuk görünüyorsa düşür.", 100, 255, "text_v_min")
@@ -122,7 +130,7 @@ class RegionPage(QWidget):
         tune.add(s_row)
         self.text_box = Toggle(bool(self.cfg.get("text_box")))
         self.text_box.toggled.connect(self._set_text_box)
-        tune.add(SettingRow("Oyunda altyazı arka planı açık",
+        tune.add(box_row := SettingRow("Oyunda altyazı arka planı açık",
                             "Oyunun altyazı ayarlarında arka planı (yarı saydam ya da koyu kutu) açtıysan bunu da aç. "
                             "Harfler arkalarındaki kutuya göre okunur: görüntü soluk ya da renk tonu kaymış olsa da "
                             "eşik gerekmez, renkli konuşmacı adları kaçmaz. Oyunda kutu kapalıysa kapalı tut.",
@@ -142,6 +150,8 @@ class RegionPage(QWidget):
         buttons.addWidget(look)
         buttons.addStretch(1)
         tune.add_layout(buttons)
+        self._threshold_controls = [v_row, s_row, box_row, auto, defaults]
+        self._show_ai()
         lay.addWidget(tune, 2)
 
         self.area_card = self._build_area_card()
@@ -526,6 +536,10 @@ class RegionPage(QWidget):
 
     def reverted(self):
         """Settings went back to the saved ones: show the saved thresholds."""
+        self.ai_toggle.blockSignals(True)
+        self.ai_toggle.setChecked(self.cfg.get("text_detect", "ai") == "ai")
+        self.ai_toggle.blockSignals(False)
+        self._show_ai()
         self.text_box.blockSignals(True)
         self.text_box.setChecked(bool(self.cfg.get("text_box")))
         self.text_box.blockSignals(False)
@@ -561,6 +575,29 @@ class RegionPage(QWidget):
     def _set_text_box(self, on):
         self.cfg["text_box"] = bool(on)
         self.win.save_config()
+
+    def _ai(self):
+        """The trained finder is on and its file is there."""
+        engine = getattr(self.win, "engine", None)
+        return engine.finder(self.cfg) if engine is not None else None
+
+    def _set_ai(self, on):
+        self.cfg["text_detect"] = "ai" if on else "threshold"
+        self.win.save_config()
+        self._show_ai()
+
+    def _show_ai(self):
+        """With the trained finder on, the threshold controls are not needed (hidden); without its file there is
+        nothing to choose."""
+        has_model = letter_finder_model() is not None
+        self.ai_row.setVisible(has_model)
+        ai = has_model and self.cfg.get("text_detect", "ai") == "ai"
+        for w in self._threshold_controls:
+            w.setVisible(not ai)
+        self.tune.hint_label.setText(
+            "Alttaki görüntüde yapay zekânın bulduğu harfler siyah görünür ve her altyazı satırı yeşil kutuya alınır."
+            if ai else "Alttaki görüntüde harfler siyah, geri kalan her yer beyaz olmalı ve her satır yeşil kutuya "
+                       "alınmalı. Değilse kaydırıcılarla ayarla.")
 
     def auto_thresholds(self):
         """Tries every brightness / colour pair on the last moments of the subtitle area and keeps the best."""
@@ -719,10 +756,13 @@ class RegionPage(QWidget):
             return
         self._crops = (self._crops + [crop.copy()])[-12:]       # the last moments, for "Otomatik ayarla"
         boxes = None
-        if self.cfg.get("text_box"):
+        finder = self._ai()
+        if finder is not None:
+            mask, boxes = Engine.find_letters(finder, self.cfg, crop, roi)
+        elif self.cfg.get("text_box"):
             mask = box_mask(crop)
             boxes = Engine.lines(self.cfg, crop, mask, roi)
-        if not boxes:
+        if not boxes and finder is None:
             mask = text_mask(crop, self.cfg["text_v_min"], self.cfg["text_s_max"])
             boxes = Engine.lines(self.cfg, crop, mask, roi)
         self.preview.set_image(draw_lines_preview(crop, mask, boxes))
