@@ -37,6 +37,27 @@ def _checks(cfg):
         return repr(make_ocr("trained", accurate=False).read(img, text_mask(img, 160, 60)))
     yield "Yazı okuma (OCR)", ocr
 
+    def finder():
+        """The trained subtitle letter finder: a white, outlined line on a light, busy picture (where thresholds
+        fail) must be found and read."""
+        import cv2
+        from .ocr import LetterFinder, letter_finder_model, make_ocr, subtitle_lines
+        path = letter_finder_model()
+        if path is None:
+            raise RuntimeError("assets/ocr/altyazi_bulucu.onnx yok")
+        rng = np.random.default_rng(3)
+        img = np.clip(rng.normal(175, 35, (274, 1719, 3)), 0, 255).astype(np.uint8)
+        for color, width in (((20, 20, 20), 6), ((250, 250, 250), 2)):
+            cv2.putText(img, "Jason: Keep your head down, okay?", (520, 240), cv2.FONT_HERSHEY_SIMPLEX, 1.1, color,
+                        width, cv2.LINE_AA)
+        start = time.perf_counter()
+        f = LetterFinder(path)
+        mask, cells = f.find(img, 0.5)
+        rows = subtitle_lines(img, mask, 0.489, 120, widen=False, runs_mask=cells)
+        found = (time.perf_counter() - start) * 1000
+        return f"{make_ocr('trained', accurate=False).read(img, mask, boxes=rows)!r} · {found:.0f} ms"
+    yield "Altyazı bulucu (yapay zekâ)", finder
+
     def packs():
         from .packs import PackLibrary
         lib = PackLibrary()

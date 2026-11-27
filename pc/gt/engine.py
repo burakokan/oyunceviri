@@ -60,6 +60,24 @@ _ASIDE = re.compile(r"^\(.*\)$", re.S)
 _ELLIPSIS = re.compile(r"\s*(\.{2,}|…)\s*$")
 _SENTENCE_END = re.compile(r"[.!?]['\"”’)]*$")
 _TURKISH = re.compile(r"[çğışöüÇĞİŞÖÜ]")
+_TR_WORD = re.compile(r"[a-zçğıöşü']+")
+# Common English words: a line holding some is English even when the reader gave one letter as Turkish ("I'm in
+# the same exact boat, nıgga." - the reader also knows Turkish letters, for the PS5's Turkish menus).
+_ENGLISH_WORDS = set("""the you i a to and it in is that of my me with for what this be not are we he she they
+your just so do no don't i'm it's gonna yeah get got know like all was have can here there out up but if at man oh
+come go how why who when now one about right let's see think want need will would could ain't y'all already done
+did does from his her him them their our us an or as by were been had has then than too very more some any good well
+back look over off still really only even said say tell take make where which way thing things gotta wanna hey okay
+fuck shit""".split())
+
+
+def looks_turkish(text):
+    """Turkish (a PS5 menu, a Turkish-language game): Turkish letters and hardly any common English word."""
+    if not _TURKISH.search(text):
+        return False
+    words = _TR_WORD.findall(text.translate(str.maketrans("ıİ", "iI")).lower())
+    english = sum(1 for w in words if w in _ENGLISH_WORDS)
+    return english < max(1, 0.2 * len(words))
 _LEADING_DASH = re.compile(r"^\s*[-–—]\s+|(?<=[.!?])\s+[-–—]\s+")
 # Speech cut off by someone else ("I promise I got-"): over, nothing follows on the next screen.
 _CUT_OFF = re.compile(r"\w[-–—]['\"”’)]*$")
@@ -930,8 +948,12 @@ class Engine:
         if not hint and replaces is None:
             self._named.append(bool(line["speaker"]))
         english = line["english"]
-        if _TURKISH.search(english):
+        if looks_turkish(english):
             return  # already Turkish (PS5 menus, Turkish-language games): nothing to translate
+        if _TURKISH.search(english):
+            # an English line with a letter read as Turkish ("nıgga"): the plain letter
+            english = english.translate(str.maketrans("ıİ", "iI"))
+            line = dict(line, english=english)
         context = self._context(english, cfg, replaces["english"] if replaces else None)
         self._history = ([h for h in self._history if now - h[1] < HINT_SECONDS][-HISTORY_MAX:]
                          + [(normalize(english), now, hint)])
