@@ -14,7 +14,7 @@ from .conductor import Conductor
 from .guards import RepeatGuard, StickyRows, non_speech
 from .logbook import Logbook
 from .ocr import (LetterFinder, RowCache, baseline, box_mask, changed, keep_boxes, letter_finder_model, make_ocr,
-                  outline_mask, outline_ratio, signature, subtitle_lines, text_lines, text_mask)
+                  outline_mask, outline_ratio, row_light, signature, subtitle_lines, text_lines, text_mask)
 from .packs import Hit, PackLibrary
 from .remoteplay import RemotePlaySource, active_roi, needs_link, uses_builtin
 from .snapshots import Snapshots
@@ -50,6 +50,14 @@ RECOLOR_SECONDS = 1.6
 # (GTA 6 at 1080p: 48 px within one, 57 between two), or this much more than the rows of one seen so far.
 SUBTITLE_PITCH = 0.0485
 SUBTITLE_GAP = 1.09
+# GTA 6 writes another person's short answer ("Uh-huh.", "Oh shit.") right under the speaker's line, with the same
+# spacing but in grey and without a name: a row whose letters are darker than this share of the brightest row's on
+# the same picture (white 252-255, grey 156; names in colour stay bright).
+FAINT_SHARE = 0.72
+FAINT_MIN_BRIGHT = 150
+# Who said a grey answer, in the list of lines shown: nobody's name, but not the speaker either ("Lucia: Okay." right
+# after a grey "Okay." is said again).
+OTHER = "~başkası~"
 REREAD_SECONDS = 1.0
 FRAME_EVERY = 1.0
 FRAME_LIMIT = 3600
@@ -261,6 +269,28 @@ def compatible(speaker_a, speaker_b):
     return not (speaker_a and speaker_b and speaker_a != speaker_b)
 
 
+# A word of a name as the game writes it: "Lucia", "Dre'Quan", "McKittrick", "Bae-Luxe", "Mr.", "PTT", "M7", "&".
+_NAME_WORD = re.compile(r"^(?:[A-Z][a-z]*(?:['’\-.]?[A-Z]?[a-z]+)*\.?|[A-Z0-9]{1,4}\.?|&)$")
+
+
+def plain_name(name):
+    """Not a name read with HUD text or specks glued to it ("IYPE dason", "WCR COMPACT REVOoLVERcals")."""
+    return all(_NAME_WORD.match(w) for w in name.split())
+
+
+def other_person(speaker_a, speaker_b):
+    """Two names read for two people - not one name read two ways ("Homeowner" / "Honaeownor", "Mutandis Agent" /
+    "Agent" with the start cut off, "Jason" / "IYPE dason" with HUD text in front). OTHER: a grey answer."""
+    if not speaker_a or not speaker_b:
+        return False
+    if OTHER in (speaker_a, speaker_b):
+        return speaker_a != speaker_b
+    if not (plain_name(speaker_a) and plain_name(speaker_b)):
+        return False
+    a, b = speaker_a.casefold(), speaker_b.casefold()
+    return not (a == b or a.endswith(b) or b.endswith(a) or fuzz.ratio(a, b) >= 70)
+
+
 def screen_center(roi):
     """Horizontal screen center as a fraction of the subtitle-area width."""
     x, _, w, _ = roi
@@ -320,7 +350,8 @@ class Engine:
         self._last_msg = None           # (time, message) of the last line the TV got
         self.repeats = RepeatGuard()    # signs / billboards read again and again
         self._cleared = True  # the screen was empty since the previous line
-        self._history = []     # (line, time, hint) shown recently, so lines left on screen are not re-translated
+        # (line, time, hint, speaker) shown recently, so lines left on screen are not re-translated
+        self._history = []
         self._last_clear = 0.0
         self._last_sent = None   # the line the TV shows last (translation thread)
         self._sent_tr = {}       # line id -> the Turkish sent for it (a growing sentence adds its rest under it)
@@ -701,12 +732,15 @@ class Engine:
         x0, x1 = max(0.0, x - ROI_MARGIN), min(1.0, x + w + ROI_MARGIN)
         return [x0, y, x1 - x0, h]
 
-    def _seen(self, chunk, now, hint=False):
+    def _seen(self, chunk, now, hint=False, speaker=None):
         """True if this line (or a longer version of it, or a slightly different reading of it) was shown recently.
-        A short line said again after the screen was empty (a new "Got it.") is not a repeat."""
-        for old, t, was_hint in self._history:
+        A short line said again after the screen was empty (a new "Got it.") is not a repeat, nor is someone else
+        saying it again (Lucia repeating Bailey's mantra line by line used to be left out)."""
+        for old, t, was_hint, who in self._history:
             age = now - t
             if age >= (HINT_SECONDS if (hint or was_hint) else HISTORY_SECONDS):
+                continue
+            if other_person(speaker, who):
                 continue
             if not (hint or was_hint) and len(chunk) < 25 and self._last_clear > t and age > 6:
                 continue
@@ -751,16 +785,24 @@ class Engine:
         # Every speaker's line on its own row, in screen order (a busy scene shows several at once); lines that
         # stay on screen (or come back) are not translated again. A row the spacing shows to be another subtitle
         # starts its own line even when its name was not read.
-        starts = self._subtitle_starts(text, frame)
+        # Another person's grey answer under the speaker's line ("Uh-huh.", "Oh shit.") is their own line, not the
+        # end of the speaker's: it was glued on ("…come to you. Oh shit." as the agent's).
+        faint, faint_starts = self._faint_rows(text, frame)
+        starts = self._subtitle_starts(text, frame) | faint_starts
         for rows in filters.utterance_rows(text, starts):
+            other = rows[0] in faint
+            # who said it, for "shown already?": someone else saying the same words again is a new line
             language = filters.language_of(rows[0])     # "In Spanish:" -> shown as "İspanyolca:"
             speaker, first = filters.split_speaker(rows[0])
             speaker = self.names.resolve(speaker)   # "CO wiison" -> "CO Wilson", "…ress" -> "Waitress"
             rows = [first] + rows[1:]
+            # The same words twice, one row under the other (two people saying the mantra together): once.
+            rows = [r for i, r in enumerate(rows) if i == 0 or not similar(normalize(r), normalize(rows[i - 1]))]
             if len(rows) > 1:
                 # Two people's unnamed lines read as one block ("You can still walk away" over "Do you know how bad
                 # this will look?", shown a moment ago): rows already shown are left out, the new ones go on.
-                fresh = [r for r in rows if len(normalize(r)) < 12 or not self._seen(normalize(r), now)]
+                who = speaker or (OTHER if other else None)
+                fresh = [r for r in rows if len(normalize(r)) < 12 or not self._seen(normalize(r), now, speaker=who)]
                 if not fresh:
                     continue
                 rows = fresh
@@ -771,7 +813,7 @@ class Engine:
             hint = not speaker and filters.is_hint(english)
             line = {"speaker": speaker, "english": english, "ocr": "\n".join(rows), "t_first": t_first,
                     "since": now, "ocr_ms": ocr_ms, "crop": frame[0] if frame is not None else None, "hint": hint,
-                    "lang": language,
+                    "lang": language, "other": other and not speaker,
                     "name_tint": self._game_tint(read_rows, frame[0] if frame is not None else None, speaker)}
             if hint:
                 # Objectives / button hints: shown at once (they have no full stop), never joined with dialogue.
@@ -787,7 +829,8 @@ class Engine:
                     self._unnamed.remove(late)
                     self._show(line, replaces=late)
                     continue
-            op = self._open_for(speaker, now)
+            # Someone else's grey answer never completes the speaker's unfinished line, only their own grey one.
+            op = self._open_for(speaker, now, line["other"])
             if op and rereads(op["english"], english):
                 # The unfinished line on the TV again: written over it when this reading is longer or now ends the
                 # sentence ("…you're-" -> "…you're- you're the only one…", "You're a jokel" -> "You're a joke!").
@@ -796,9 +839,41 @@ class Engine:
                     self._show(dict(line, speaker=speaker or op["speaker"], grows=rest_of(op["english"], english)),
                                replaces=op)
                 continue
-            if self._seen(normalize(english), now):
+            if self._seen(normalize(english), now, speaker=speaker or (OTHER if line["other"] else None)):
                 continue
             self._utterance(line, op, now)
+
+    def _faint_rows(self, text, frame):
+        """Rows of `text` written in grey under (or over) white ones: another person's answer (GTA 6 writes it without
+        a name, with the same spacing as the speaker's own rows) -> (the grey rows, the rows where the colour
+        changes: each begins a line of its own). Only told against a bright row on the same picture (a dim or dark
+        picture, or a subtitle fading in, makes every row darker alike)."""
+        if frame is None or len(frame) < 4 or len(frame[3]) < 2 or frame[1] is None:
+            return set(), set()
+        bgr, mask, _, rows = frame[:4]
+        measured = sorted((box[0], read.strip(), row_light(bgr, mask, box)) for box, read in rows if read.strip())
+        lights = [v for _, _, v in measured if v is not None]
+        if len(lights) < 2 or max(lights) < FAINT_MIN_BRIGHT:
+            return set(), set()
+        limit = FAINT_SHARE * max(lights)
+        lines = [r.strip() for r in text.split("\n") if r.strip()]
+
+        def in_text(read):
+            best = max(lines, key=lambda r: fuzz.ratio(r, read), default=None)
+            return best if best is not None and fuzz.ratio(best, read) >= 80 else None
+
+        faint, starts, before = set(), set(), None
+        for _, read, v in measured:
+            grey = v is not None and v < limit
+            row = in_text(read)
+            if row is not None:
+                if grey:
+                    faint.add(row)
+                if before is not None and grey != before:
+                    starts.add(row)
+            if v is not None:
+                before = grey
+        return faint, starts
 
     def _subtitle_starts(self, text, frame):
         """Rows of `text` that begin another subtitle although no name was read in front of them.
@@ -885,13 +960,14 @@ class Engine:
         # over his line. The game's habit shows over a longer stretch.
         return sum(named) >= 6 and sum(named) >= 0.7 * len(named)
 
-    def _open_for(self, speaker, now):
+    def _open_for(self, speaker, now, other=False):
         """The newest unfinished line on the TV this line may complete: the same speaker's (a line without a name:
-        the newest one)."""
+        the newest one). other: a grey answer of the person listening ("Listen, Kyle," … "those guys outside…")
+        completes only such a line, and white lines never one of those."""
         if not self.cfg["hold_unfinished"]:
             return None
         for op in reversed(self._opens):
-            if now - op["time"] >= CONTINUATION_SECONDS:
+            if now - op["time"] >= CONTINUATION_SECONDS or bool(op.get("other")) != bool(other):
                 continue
             if not speaker or not op["speaker"] or op["speaker"] == speaker:
                 return op
@@ -932,7 +1008,7 @@ class Engine:
         hint = bool(line.get("hint"))
         speaker = line["speaker"]
         if (not speaker and not hint and last and not self._cleared and now - last["time"] < CONTINUATION_SECONDS
-                and not self.names_always()):
+                and not self.names_always() and not line.get("other")):
             # Games drop the name when the same person keeps talking and the line is replaced directly. A game
             # that names the speaker on every line (GTA 6) does not: there a line without a name had its name
             # misread or cut off, and giving it the previous speaker's name put one person's words in another's
@@ -956,7 +1032,7 @@ class Engine:
             line = dict(line, english=english)
         context = self._context(english, cfg, replaces["english"] if replaces else None)
         self._history = ([h for h in self._history if now - h[1] < HINT_SECONDS][-HISTORY_MAX:]
-                         + [(normalize(english), now, hint)])
+                         + [(normalize(english), now, hint, speaker or (OTHER if line.get("other") else None))])
         if not hint:
             self._last = {"speaker": speaker, "english": english, "time": now}
         self._cleared = False
@@ -964,7 +1040,8 @@ class Engine:
                 and self.log):
             self.log.note(repeat_blocked=english[:60])
         self.line_id += 1
-        if not hint and not speaker:
+        if not hint and not speaker and not line.get("other"):
+            # (a grey answer is someone else's: never "the same line, its name read late")
             self._unnamed.append({"id": self.line_id, "english": english, "norm": normalize(english), "time": now,
                                   "parts": parts or [english]})
         incomplete = False
@@ -978,7 +1055,7 @@ class Engine:
             # "…you're- you're the only one…"), it is just not shown as unfinished.
             if cfg["hold_unfinished"] and unfinished(english):
                 self._opens.append({"id": self.line_id, "speaker": speaker, "english": english,
-                                    "parts": parts or [english], "time": now})
+                                    "parts": parts or [english], "time": now, "other": bool(line.get("other"))})
         self._jobs.put({"id": self.line_id, "line": line, "speaker": speaker, "english": english,
                         "context": context, "hint": hint, "queued": now, "parts": parts, "partial": incomplete,
                         "replaces": replaces["id"] if replaces else None})
@@ -1039,10 +1116,11 @@ class Engine:
             turkish, tr_ms = self.translate_text(english, cfg, job["context"], job.get("parts"))
         if similar(normalize(turkish), normalize(english)):
             # Nobody translated it. Longer: not English (a Turkish menu), unless it is only names ("Lucia Caminos.").
-            # One word without a speaker: a car's badge, a sign or a plate read as a subtitle ("Canboniare!").
+            # One word without a speaker: a car's badge, a sign or a plate read as a subtitle ("Canboniare!") - not
+            # someone's grey answer under a subtitle ("Huh.", "Whoa-whoa!" left as they are).
             if len(english) > 12 and not (speaker and _NAME_ONLY.match(english.strip())):
                 return
-            if not line["speaker"] and len(english.split()) <= 1 and not job["hint"]:
+            if not line["speaker"] and len(english.split()) <= 1 and not job["hint"] and not line.get("other"):
                 return
         partial = job["partial"]
         if line.get("lang") and not (line.get("grows") and shown) and not turkish.startswith(line["lang"]):

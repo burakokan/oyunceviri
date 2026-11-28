@@ -298,6 +298,18 @@ def baseline(mask, box):
     return y0 + float(np.median(tops[ok] + heights[ok]))
 
 
+def row_light(bgr, mask, box):
+    """How bright the row's letters are: the median of the brighter half of its letter pixels (the brightest of B, G,
+    R, so a coloured name counts as bright) -> 0-255, or None with too few letter pixels. GTA 6 writes another
+    person's short answer under the speaker's line in grey ("Oh shit." 156 under white 254)."""
+    y0, y1, x0, x1 = box
+    letters = mask[y0:y1, x0:x1] > 0
+    if np.count_nonzero(letters) < 30:
+        return None
+    v = bgr[y0:y1, x0:x1].max(axis=2)[letters]
+    return float(np.median(v[v >= np.median(v)]))
+
+
 def letter_height(mask):
     """Median height of the letter blobs in a mask band (0 when there are none)."""
     n, _, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
@@ -504,6 +516,8 @@ class LetterFinder:
             # only around this band of cells (not the whole picture)
             y0, y1 = max(0, y0 - 1), min(h, y1 + 1)
             cols = np.flatnonzero(cells[y0:y1].any(axis=0))
+            if cols.size == 0:
+                continue
             x0, x1 = max(0, int(cols[0]) - 1), min(w, int(cols[-1]) + 2)
             sel = cv2.dilate(cells[y0:y1, x0:x1], np.ones((3, 3), np.uint8)) > 0
             v = bgr[y0:y1, x0:x1].max(axis=2)

@@ -2,11 +2,12 @@
 import re
 
 # "Karl: text", "German Infantry: text" - up to four capitalized words before the colon
-# A name: up to four capitalised words, "&" between two of them ("Kolt & Associates": without it the row went into
-# the line above as plain text, "Vicki: … Kolt & Associates: What the fuck?", or on its own without a name, white).
-_SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-]*(?:\s+(?:&\s+)?[A-Z][\w'’.\-]*){0,3})\s*:\s*(.+)$", re.S)
+# A name: up to four capitalised words ("$" is a read "s"), "&" between two of them ("Kolt & Associates": without it
+# the row went into the line above as plain text, "Vicki: … Kolt & Associates: What the fuck?", or on its own without
+# a name, white).
+_SPEAKER = re.compile(r"^\s*([A-Z][\w'’.\-$]*(?:\s+(?:&\s+)?[A-Z][\w'’.\-$]*){0,3})\s*:\s*(.+)$", re.S)
 # A name OCR read a little wrong ("cO Wilson:", "CO wiison:"): one to three words before the colon, a capital in it.
-_LOOSE_SPEAKER = re.compile(r"^\s*([A-Za-z][\w'’.\-]*(?:\s+[A-Za-z][\w'’.\-]*){0,2})\s*:\s*(.+)$", re.S)
+_LOOSE_SPEAKER = re.compile(r"^\s*([A-Za-z][\w'’.\-$]*(?:\s+[A-Za-z][\w'’.\-$]*){0,2})\s*:\s*(.+)$", re.S)
 # ...but not a sentence with a colon ("Here's the deal: …", "Listen up: …").
 _NOT_NAME = {"a", "an", "the", "it", "is", "up", "to", "me", "you", "this", "that", "now", "here", "there", "and",
              "or", "of", "so", "what", "my", "your", "we", "i", "deal", "thing", "is", "are", "was", "do", "go",
@@ -150,6 +151,8 @@ def split_speaker(text):
     name, body = _split_speaker(_LEAD_JUNK.sub("", text))
     if not name:
         return None, text
+    # "PTT Youngin$:" was no name: the row went out as text, "PTT Youngin$: Oh shit…"
+    name = name.replace("$", "s")
     return name, _LANGUAGE.sub("", body, count=1)
 
 
