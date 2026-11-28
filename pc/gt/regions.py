@@ -201,10 +201,10 @@ def plain_look(crop, rect):
     bg = cv2.erode((~text).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
     if text.sum() < 15 or bg.sum() < 15:
         return None
-    s = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)[..., 1]
+    hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
     return {"plain": True, "contrast": float(abs(np.median(gray[text]) - np.median(gray[bg]))),
             "bg_spread": float(np.percentile(gray[bg], 90) - np.percentile(gray[bg], 10)),
-            "bg_s": float(np.median(s[bg]))}
+            "bg_s": float(np.median(hsv[..., 1][bg])), "bg_v": float(np.median(hsv[..., 2][bg]))}
 
 
 def accepts(look, a):
@@ -219,8 +219,10 @@ def accepts(look, a):
             return False, "yazı zemine karışıyor"
         if look["bg_spread"] > 70:
             return False, "zemin düz değil"
-        if look["bg_s"] > 70:
-            return False, "zemin renkli"      # a green road sign, a coloured poster
+        # A green road sign, a coloured poster: colourful AND light. A dark, see-through card (the phone's
+        # notification) over a red wall is "colourful" by saturation too, but dark: it is read.
+        if look["bg_s"] > 70 and look.get("bg_v", 255) > 75:
+            return False, "zemin renkli"
         return True, ""
     if look is None or not look["bright"]:
         return False, "açık renk yazı yok"
@@ -593,7 +595,9 @@ class RegionTranslator:
                 continue
             self._size = (frame.shape[1], frame.shape[0])
             for kind in KINDS:
-                if kind not in kinds:
+                # the phone in the hand: its screen goes to the chat bubbles; the corner where a message pops up is
+                # not read meanwhile (the held phone often reaches into it)
+                if kind not in kinds or (kind == "phone" and self._phone.get("read")):
                     self._hide(kind)
                     continue
                 try:
@@ -716,7 +720,8 @@ class RegionTranslator:
     @staticmethod
     def _phone_state():
         return {"hits": 0, "open": False, "seen_at": 0.0, "corners": None, "sig": None, "changed_at": 0.0,
-                "read_sig": None, "english": "", "title": None, "messages": [], "known": [], "moved": None}
+                "read_sig": None, "english": "", "title": None, "messages": [], "known": [], "moved": None,
+                "read": False}      # read: text was read off it (only then is it left out of the other readers)
 
     def phone_look(self):
         """The phone panel's settings (cfg regions.gta_phone, missing keys from PHONE_LOOK)."""
@@ -768,7 +773,7 @@ class RegionTranslator:
             st["moved"] = corners
             if moved is not None and float(np.abs(corners - moved).max()) <= far:
                 st["corners"], st["moved"] = corners, None
-                if st["open"]:
+                if st["read"]:
                     self._phone_hole(corners)
                 if self._phone_box is not None:
                     with self._lock:
@@ -780,7 +785,6 @@ class RegionTranslator:
             if st["hits"] < 2:
                 return
             st["open"] = True
-            self._phone_hole(st["corners"])
             self.on_status("gta_phone", "Telefon açık")
         screen = phone.upright(frame, corners, phone.SCREEN)
         sig = phone.signature(screen)
@@ -798,6 +802,10 @@ class RegionTranslator:
         english = "\n".join(m["text"] for m in messages)
         if not english:
             return                          # the home screen, a picture: the last panel stays until it closes
+        if not st["read"]:
+            # text on it: a phone for sure (not a dark shutter or a door) - now the subtitle reader leaves it out
+            st["read"] = True
+            self._phone_hole(st["corners"])
         # The same screen read again (the hand moved it a little): a letter or a line break read differently must not
         # change the TV, so a reading this much like the shown one is left alone.
         if st["english"] and fuzz.ratio(normalize(english.replace("\n", " ")),
@@ -966,6 +974,11 @@ class RegionTranslator:
         gap = int(0.012 * h)
         roi = a.get("roi") or [0, 0, 1, 1]
         center = a.get("align") == "center"
+        if place == "cover":
+            # a few pixels past the English on every side: its letters' edges must not show beside the Turkish
+            m = max(4, int(0.006 * w))
+            x0, y0 = max(0, x0 - m), max(0, y0 - m)
+            bw, bh = min(w - x0, bw + 2 * m), min(h - y0, bh + 2 * m)
         if place == "below":
             y0 = min(h - bh, y1 + gap)
         elif place == "above":

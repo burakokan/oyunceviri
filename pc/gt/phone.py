@@ -11,6 +11,8 @@ reader when it stopped changing (not in the middle of a scroll) and its rows are
 one bubble touch, two bubbles have the bubbles' padding between them. The title bar gives the chat's name. A dark
 blue bubble is the player's own text (a sent message or a reply to choose): "»" in front of it on the TV.
 """
+import re
+
 import cv2
 import numpy as np
 
@@ -18,6 +20,11 @@ SCALE_W = 480           # px: the frame is searched at this width
 WARP = (300, 600)       # the screen's picture for telling it from blinds / doors
 SCREEN = (420, 840)     # the screen's picture that is read
 MIN_LETTERS = 30
+MIN_MARKS = 12          # the trained finder's screen must hold this many letter-like marks (either way round)
+# The trained finder's mean certainty over the screen it marked. On the training frames, clean and in every scene
+# (night, sun, very dark, a car, neon, fog): phones 0.967 and more, false alarms (a car park from above, blinds, a dark
+# door) 0.83 and less.
+MIN_SCORE = 0.9
 
 
 def order(box):
@@ -53,7 +60,135 @@ LIGHT_LEVELS = (130, 160, 185)
 GREY_LIMITS = (70, 100)
 
 
+def lift(picture, spread=160):
+    """A dark or washed-out picture (night, a very dark room, haze, glare) spread over the full range of grey, or None
+    when it already uses that much of it."""
+    small = cv2.resize(picture, (192, max(1, round(192 * picture.shape[0] / picture.shape[1]))),
+                       interpolation=cv2.INTER_AREA)
+    lo, hi = np.percentile(small, (1, 99.5))
+    if hi - lo >= spread:
+        return None
+    k = 235 / max(hi - lo, 12)
+    return cv2.LUT(picture, np.clip((np.arange(256) - lo) * k, 0, 255).astype(np.uint8))
+
+
+def phone_model():
+    """The trained phone finder (assets/ocr/telefon_bulucu.onnx), or None when the file is missing."""
+    from .config import ASSETS
+    path = ASSETS / "ocr" / "telefon_bulucu.onnx"
+    return path if path.is_file() else None
+
+
+class PhoneFinder:
+    """GTA 6's phone found by a small network trained on recorded play and on real phones put into other scenes - in a
+    dark room, a sunset's or a lamp's tint, moving, tilted, partly out of the picture, a finger over it, a dark
+    screen - and on light panels full of text that are not a phone (car stats, menus). It marks the phone's screen on
+    the frame at 384 x 216 (~5 ms); the screen's corners come from that mark."""
+
+    SIZE = (384, 216)
+
+    def __init__(self, path, threads=2):
+        import onnxruntime as ort
+        opts = ort.SessionOptions()
+        opts.intra_op_num_threads = threads
+        self.session = ort.InferenceSession(str(path), opts, providers=["CPUExecutionProvider"])
+        self.name = self.session.get_inputs()[0].name
+
+    def screen(self, frame):
+        """-> (corners 4x2 in frame pixels, info) or None. A dark or washed-out frame (night, a dark room, haze, the
+        sun on the screen) is looked at a second time spread over the full range of grey."""
+        got = self._look(frame)
+        if got is None:
+            lifted = lift(frame)
+            if lifted is not None:
+                got = self._look(lifted)
+                if got is not None:
+                    got[1]["lifted"] = True
+        return got
+
+    def _look(self, frame):
+        H, W = frame.shape[:2]
+        w, h = self.SIZE
+        small = cv2.resize(frame, (w, h), interpolation=cv2.INTER_AREA)
+        small = cv2.copyMakeBorder(small, 0, -(-h // 16) * 16 - h, 0, 0, cv2.BORDER_REFLECT)
+        x = (small.astype(np.float32) / 255 - 0.5).transpose(2, 0, 1)[None]
+        logit = self.session.run(None, {self.name: x})[0][0, 0][:h // 2, :w // 2]
+        mark = (logit > 0).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mark, connectivity=8)
+        if n <= 1:
+            return None
+        k = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        gh, gw = mark.shape
+        if st[k, cv2.CC_STAT_AREA] < 0.03 * gw * gh:
+            return None
+        blob = (lab == k).astype(np.uint8)
+        contours = cv2.findContours(blob, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+        (cx, cy), (rw, rh), angle = cv2.minAreaRect(max(contours, key=cv2.contourArea))
+        long_, short = max(rw, rh), min(rw, rh)
+        tilt = angle if rw < rh else angle - 90
+        tilt = (tilt + 90) % 180 - 90
+        fill = float(st[k, cv2.CC_STAT_AREA]) / max(1.0, rw * rh)
+        # the shape of a phone's screen held up (not a wide panel or a strip)
+        if short < 4 or not (1.3 <= long_ / short <= 2.9) or long_ < 0.3 * gh or abs(tilt) > 35 or fill < 0.7:
+            return None
+        box = self._fine_box(logit, blob)
+        if box is None:
+            box = cv2.boxPoints(((cx + 0.5, cy + 0.5), (rw, rh), angle)) * np.float32([W / gw, H / gh])
+        else:
+            box = box * np.float32([W / gw, H / gh])
+        box = order(box)
+        score = float(1 / (1 + np.exp(-logit[blob > 0])).mean())
+        if score < MIN_SCORE:
+            return None
+        # Something to read on it, dark on light or light on dark: a dark shutter, a shirt's back or a door is a dark
+        # upright rectangle too. (A splash screen with only a logo is left out as well: nothing to translate there.)
+        pic = upright(frame, box, WARP)
+        marks = max(letters(pic)[0], letters(255 - pic)[0])
+        if marks < MIN_MARKS:
+            return None
+        return box, {"tilt": round(float(tilt), 1), "fill": round(fill, 2), "score": round(score, 3),
+                     "marks": marks, "model": True}
+
+
+    @staticmethod
+    def _fine_box(logit, blob, up=4):
+        """The screen's rectangle finer than the mark's grid (one cell is 10 px of a 1080p frame: the corners jumped by
+        that much between looks at a still phone, and the screen read as changed): the mark's edge where the network's
+        answer crosses zero, from its answer enlarged 4x. -> 4 corners in grid cells, or None."""
+        gh, gw = blob.shape
+        fine = cv2.resize(logit, (gw * up, gh * up), interpolation=cv2.INTER_LINEAR) > 0
+        near = cv2.resize(cv2.dilate(blob, np.ones((3, 3), np.uint8)), (gw * up, gh * up),
+                          interpolation=cv2.INTER_NEAREST) > 0
+        mask = (fine & near).astype(np.uint8)
+        contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[0]
+        if not contours:
+            return None
+        rect = cv2.minAreaRect(max(contours, key=cv2.contourArea))
+        return (cv2.boxPoints(rect) + 0.5) / up
+
+
+_finder = {"model": None, "path": None}
+
+
+def _model_finder():
+    path = phone_model()
+    if path is None:
+        return None
+    if _finder["path"] != path:
+        _finder["model"], _finder["path"] = PhoneFinder(path), path
+    return _finder["model"]
+
+
 def find_phone(frame):
+    """The trained finder when its file is there (whatever it says: the light-screen test below took a car's stats
+    panel or a menu for the phone, and missed it in a dark room); otherwise the light-screen test."""
+    finder = _model_finder()
+    if finder is not None:
+        return finder.screen(frame)
+    return find_light_screen(frame)
+
+
+def find_light_screen(frame):
     """-> (corners 4x2 in frame pixels, info) or None. Tested on recorded GTA 6 play: 91 of 101 pictures with the
     phone up found (the rest: blurred while scrolling, the home screen of icons), none of 655 without it."""
     H, W = frame.shape[:2]
@@ -118,12 +253,19 @@ def _around(lab, rect):
     return np.median(band, axis=0) if band.size else None
 
 
+_NOT_LATIN = re.compile("[^\x00-\u024f\u2013-\u201f\u2026\u20ac\u00a3$]+")
+
+
 def read_screen(reader, screen):
     """The upright screen -> (chat title or None, [{"text", "mine", "sender", "rect", "bg", "note"}]) top to bottom.
     mine: a blue bubble, the player's own text (light blue: sent; dark blue: a reply to choose). rect: the message's
     text (x0, y0, x1, y1) on the upright screen; bg: its bubble's colour ("#rrggbb"); note: a short centred line with
     no bubble around it ("New message", a time)."""
     h, w = screen.shape[:2]
+    # at night / in a dark room / under the sun's glare the letters stand out little: spread over the range of grey
+    lifted = lift(screen)
+    if lifted is not None:
+        screen = lifted
     # a line cut by the screen's bottom edge is read wrong ("hunting" -> "buntina"): left out
     rows = [r for r in reader.read(screen, {"filter": "any"}) if r.get("ok", True) and _text(r)
             and r["rect"][3] < h - 2]
@@ -170,6 +312,8 @@ def read_screen(reader, screen):
             sender, rows_ = _text(rows_[0]), rows_[1:]
         # a piece of an icon read as a mark in front of the text (")Swamp Meditation Spot")
         text = " ".join(_text(r) for r in rows_).lstrip(")]}|>•·-–—_~ ")
+        # an icon read as a Chinese / Japanese sign by the general reader ("白 Standard Ryde")
+        text = " ".join(_NOT_LATIN.sub(" ", text).split())
         if sum(ch.isalpha() for ch in text) >= 2:
             x0 = min(r["rect"][0] for r in b["rows"])
             x1 = max(r["rect"][2] for r in b["rows"])

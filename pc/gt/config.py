@@ -104,8 +104,9 @@ DEFAULTS = {
                  "opacity": 92, "keep_lines": True},
         "phone": {"enabled": True, "roi": [0.7707, 0.7781, 0.2293, 0.2219], "filter": "plain", "text_min": 219,
                   "bg_max": 80, "skip_menus": True, "ignore": ["STUDIO [0] SELECT [X] BACK"],
-                  "place": "top", "offset": 5, "align": "left", "size": 92, "fg": "#FFFFFF", "bg": "#10151C",
-                  "opacity": 18, "keep_lines": True},
+                  # over the message itself, opaque enough to hide the English (the notification's own dark grey)
+                  "place": "cover", "offset": 5, "align": "left", "size": 92, "fg": "#FFFFFF", "bg": "#1D1F23",
+                  "opacity": 100, "keep_lines": True},
         "objective": {"enabled": False, "roi": [0.1748, 0.9313, 0.5924, 0.0687], "filter": "plain", "text_min": 145,
                       "bg_max": 80, "skip_menus": False,
                       "ignore": ["STOW LONGARMS [0] TAKE AMMO PACK (0)", "STOW LONGARMS", "REMOVE", "REMO", "BD",

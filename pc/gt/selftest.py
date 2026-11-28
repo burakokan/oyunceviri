@@ -58,6 +58,22 @@ def _checks(cfg):
         return f"{make_ocr('trained', accurate=False).read(img, mask, boxes=rows)!r} · {found:.0f} ms"
     yield "Altyazı bulucu (yapay zekâ)", finder
 
+    def phone_finder():
+        """The trained GTA 6 phone finder loads and runs; a picture with no phone in it has none."""
+        from .phone import PhoneFinder, phone_model
+        path = phone_model()
+        if path is None:
+            raise RuntimeError("assets/ocr/telefon_bulucu.onnx yok")
+        img = np.clip(np.random.default_rng(5).normal(90, 40, (1080, 1920, 3)), 0, 255).astype(np.uint8)
+        f = PhoneFinder(path)
+        f.screen(img)
+        start = time.perf_counter()
+        got = f.screen(img)
+        if got is not None:
+            raise RuntimeError("telefonsuz resimde telefon buldu")
+        return f"çalışıyor · {(time.perf_counter() - start) * 1000:.0f} ms"
+    yield "Telefon bulucu (yapay zekâ)", phone_finder
+
     def packs():
         from .packs import PackLibrary
         lib = PackLibrary()
