@@ -282,21 +282,32 @@ class RegionPage(QWidget):
 
     def _build_phone_card(self):
         card = Card("2 · GTA 6 telefonu",
-                    "Telefonu açınca ekrandaki mesajlar okunur, çevrilir ve Türkçesi TV'de telefonun yanında, boş "
-                    "tarafta gösterilir: her mesaj telefondaki kendi hizasında bir baloncukta (gelenler açık renk, "
-                    "seninkiler mavi). Kaydırınca ya da başka sohbete geçince yenilenir, telefonu indirince kalkar. "
-                    "Yalnız "
-                    "GTA 6 oynanırken (ya da oyun henüz tanınmadan) çalışır. Gelen mesaj bildirimi için \"Telefon "
-                    "mesajları\" alanı ayrıca durur.")
+                    "Telefonu açınca ekrandaki mesajlar okunur, çevrilir ve Türkçesi TV'de gösterilir: varsayılan "
+                    "olarak telefonun kendi üstünde, her mesaj kendi balonunda, balonun renginde ve telefonun "
+                    "eğikliğinde (oyunun telefonu Türkçe gibi). Kaydırırken Türkçe kalkar, durunca yeniden çizilir; "
+                    "telefonu indirince kalkar. Yalnız GTA 6 oynanırken (ya da oyun henüz tanınmadan) çalışır. Gelen "
+                    "mesaj bildirimi için \"Telefon mesajları\" alanı ayrıca durur.")
         self.phone_toggle = Toggle(True)
         self.phone_toggle.toggled.connect(lambda v: self._set_phone("enabled", v))
         card.add(SettingRow("Telefonu çevir", "Kapalıyken telefon aranmaz.", self.phone_toggle))
-        self.phone_bubbles = Toggle(True)
-        self.phone_bubbles.toggled.connect(lambda v: self._set_phone("bubbles", v))
-        card.add(SettingRow("Mesajlar baloncuk olsun",
-                            "Açık: her mesaj telefondaki yerinin hizasında, telefonun renklerinde ayrı bir baloncuk; "
-                            "sohbetin adı ve \"Yeni mesaj\" gibi yazılar koyu etiket. Kapalı: bütün mesajlar tek "
-                            "panelde alt alta (başında » olanlar senin mesajların).", self.phone_bubbles))
+        self.map_toggle = Toggle(True)
+        self.map_toggle.toggled.connect(self._set_map)
+        card.add(SettingRow("Haritadaki yer kartlarını çevir",
+                            "Haritada imleci bir dükkânın, garajın ya da görevin üstüne getirince çıkan kartın "
+                            "açıklaması ve etiketleri Türkçe olarak kartın kendi yerinde, kartın renginde gösterilir; "
+                            "yerin adı (başlık) olduğu gibi kalır. Harita kımıldarken kalkar, durunca gelir.",
+                            self.map_toggle))
+        self.phone_place = QComboBox()
+        for value, label in (("on", "Telefonun üstünde (oyundaki gibi)"), ("bubbles", "Yanında, baloncuklarda"),
+                             ("panel", "Yanında, tek panelde")):
+            self.phone_place.addItem(label, value)
+        self.phone_place.currentIndexChanged.connect(
+            lambda _: self._set_phone("place", self.phone_place.currentData()))
+        card.add(SettingRow("Nerede",
+                            "Üstünde: her mesajın Türkçesi İngilizcesinin yerine, kendi balonunda. Yanında, "
+                            "baloncuklarda: telefonun boş tarafında, her mesaj kendi hizasında. Tek panelde: bütün "
+                            "mesajlar alt alta (başında » olanlar senin mesajların). Aşağıdaki boyut ve renkler "
+                            "yalnız \"yanında\" için.", self.phone_place))
         card.add(Divider())
         self.phone_size, size_row = self._phone_slider("Yazı boyutu", "Sığmazsa kendiliğinden küçülür.", 60, 160,
                                                        "size", "%")
@@ -350,11 +361,19 @@ class RegionPage(QWidget):
         if key == "enabled":
             self._show_phone_status()
 
+    def _set_map(self, on):
+        """GTA 6's map cards on / off: kept at once."""
+        if self._syncing:
+            return
+        self.cfg.setdefault("regions", {}).setdefault("gta_map", {})["enabled"] = bool(on)
+        self.win.persist_config(("regions", "gta_map", "enabled"))
+
     def _sync_phone_card(self):
         look = self.win.regions.phone_look()
         self._syncing = True            # showing the saved values, not changing them
+        self.map_toggle.setChecked(bool((self.cfg.get("regions", {}).get("gta_map") or {}).get("enabled", True)))
         self.phone_toggle.setChecked(bool(look.get("enabled")))
-        self.phone_bubbles.setChecked(bool(look.get("bubbles", True)))
+        self.phone_place.setCurrentIndex(max(0, self.phone_place.findData(look.get("place", "on"))))
         for slider, key in ((self.phone_size, "size"), (self.phone_opacity, "opacity")):
             slider.setValue(int(look[key]))
             slider.value_label.setText(f"{int(look[key])}{slider.unit}")

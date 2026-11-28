@@ -253,6 +253,12 @@ def _around(lab, rect):
     return np.median(band, axis=0) if band.size else None
 
 
+def _header(text):
+    """A chat list's heading ("Suggested", "Messages"), an icon read in front of it or not ("@Suggested")."""
+    return re.sub(r"^[^a-z]+|[^a-z]+$", "", text.casefold()) in LIST_HEADERS
+
+
+LIST_HEADERS = {"suggested", "messages", "contacts", "recent", "favorites", "favourites", "chats"}
 _NOT_LATIN = re.compile("[^\x00-\u024f\u2013-\u201f\u2026\u20ac\u00a3$]+")
 
 
@@ -299,6 +305,9 @@ def read_screen(reader, screen):
     # The scene's light tints the whole screen (a sunset: everything warm), so a light blue bubble is told by being
     # bluer than the others on the same screen, and by its place: the player's bubbles stand on the right.
     usual_b = float(np.median([b["colour"][2] for b in bubbles])) if bubbles else 128.0
+    # The chat list ("Suggested", "Messages"): every row is a contact's name over the start of the last message; the
+    # name is kept as the sender, the message is translated.
+    listing = _header(title or "") or any(len(b["rows"]) == 1 and _header(_text(b["rows"][0])) for b in bubbles)
     out = []
     for b in bubbles:
         c = b["colour"]
@@ -308,7 +317,7 @@ def read_screen(reader, screen):
         mine = (c[0] < 130 and chroma > 25) or (right and c[2] - usual_b <= -6)
         rows_ = b["rows"]
         sender = None
-        if not mine and len(rows_) >= 2 and _is_sender(lab, rows_[0]):
+        if not mine and len(rows_) >= 2 and (listing or _is_sender(lab, rows_[0])):
             sender, rows_ = _text(rows_[0]), rows_[1:]
         # a piece of an icon read as a mark in front of the text (")Swamp Meditation Spot")
         text = " ".join(_text(r) for r in rows_).lstrip(")]}|>•·-–—_~ ")
@@ -322,7 +331,9 @@ def read_screen(reader, screen):
             note = (not mine and len(b["rows"]) == 1 and len(text.split()) <= 4 and x1 - x0 < 0.6 * w
                     and abs((x0 + x1) / 2 - w / 2) < 0.07 * w)
             out.append({"text": text, "mine": bool(mine), "sender": sender, "rect": (int(x0), int(y0), int(x1), int(y1)),
-                        "bg": "#%02X%02X%02X" % (int(bgr[2]), int(bgr[1]), int(bgr[0])), "note": bool(note)})
+                        "bg": "#%02X%02X%02X" % (int(bgr[2]), int(bgr[1]), int(bgr[0])), "note": bool(note),
+                        "rows": [tuple(int(v) for v in r["rect"]) for r in rows_],
+                        "sender_row": tuple(int(v) for v in b["rows"][0]["rect"]) if sender else None})
     if out and out[0]["text"][:1].islower():
         out = out[1:]       # the end of a message scrolled up under the title bar ("it")
     return title, out
@@ -434,3 +445,132 @@ def bubble_boxes(title, messages, turkish, corners, w, h, look):
                       "mh": room / h, "lines": 1, "tr": it["text"], "icons": {}, "fg": fg, "bg": bg, "alpha": alpha,
                       "scale": 1.0, "shadow": False, "align": align})
     return boxes
+
+
+# ---- the Turkish on the phone itself ----
+# Every message's Turkish is painted over its English on the upright screen, in the bubble's own colour and letters
+# (gt/paint.py), and that picture is bent back onto the phone: on the TV the phone looks like the game's, in Turkish.
+
+MAX_BUBBLE = 0.8        # a message bubble is at most this share of the screen wide
+
+
+def _plain(img, rect):
+    """The background colour inside a text's box (BGR floats): what most of its pixels are."""
+    x0, y0, x1, y1 = rect
+    px = img[y0:y1, x0:x1].reshape(-1, 3).astype(np.float32)
+    if len(px) == 0:
+        return np.array([240.0, 240.0, 240.0])
+    lum = px.mean(axis=1)
+    keep = px[np.abs(lum - np.median(lum)) <= 18]
+    return np.median(keep if len(keep) else px, axis=0)
+
+
+def _same(a, b):
+    """The Turkish is the English (letters and digits alike, case and marks aside)."""
+    def key(t):
+        return "".join(ch for ch in t.casefold() if ch.isalnum())
+    return key(a) == key(b)
+
+
+def _union(rects, w, h):
+    return (max(0, min(r[0] for r in rects)), max(0, min(r[1] for r in rects)),
+            min(w, max(r[2] for r in rects)), min(h, max(r[3] for r in rects)))
+
+
+def _pitch(messages, tight_h):
+    """The distance between two lines of a message (px on the upright screen): from the messages of two lines or
+    more, else from a line's letters."""
+    steps = []
+    for m in messages:
+        rows = m.get("rows") or []
+        if len(rows) >= 2:
+            centres = [(r[1] + r[3]) / 2 for r in rows]
+            steps.append((centres[-1] - centres[0]) / (len(rows) - 1))
+    if steps:
+        return float(np.median(steps))
+    return 1.3 * float(np.median(tight_h)) if tight_h else 30.0
+
+
+def cover_layer(screen, messages, turkish, title_bottom=0):
+    """The upright screen's messages in Turkish -> (BGRA picture as big as the screen, transparent where nothing is
+    painted, [patch rects for the log]). Each message: its bubble's colour over its English, its Turkish in its
+    letters' colour and size; a longer text gets smaller letters, then the patch grows down over the gap below, never
+    over the next message."""
+    from . import paint
+
+    h, w = screen.shape[:2]
+    lifted = lift(screen)
+    look = lifted if lifted is not None else screen
+    items = []
+    for m in messages:
+        tr = (turkish.get(m["text"]) or "").strip()
+        if not tr or _same(tr, m["text"]):
+            continue                        # a name ("'72 Tulip"): the game's own text stays
+        rows = m.get("rows") or [m["rect"]]
+        rect = _union(rows, w, h)
+        ceiling = 0
+        if m.get("sender_row"):
+            # the sender's name over the message (its row's box may reach into the message's): left as it is
+            name = m["sender_row"]
+            ceiling = paint.tight(look, name, _plain(look, name))[3] + 2
+            rect = (rect[0], max(rect[1], ceiling), rect[2], rect[3])
+        if rect[2] - rect[0] < 4 or rect[3] - rect[1] < 4:
+            continue
+        bg_look = _plain(look, rect)
+        tight = paint.tight(look, rect, bg_look)
+        items.append({"m": m, "rect": rect, "tight": tight, "bg_look": bg_look, "rows": len(rows), "ceiling": ceiling})
+    if not items:
+        return None, []
+    pitch = _pitch([i["m"] for i in items], [i["tight"][3] - i["tight"][1] for i in items if i["rows"] == 1])
+    lab = cv2.cvtColor(look, cv2.COLOR_BGR2LAB).astype(np.float32)
+    img, draw = paint.canvas(w, h)
+    s = paint.SUPER
+    patches = []
+    for k, it in enumerate(items):
+        m, (tx0, ty0, tx1, ty1) = it["m"], it["tight"]
+        bg = _plain(screen, it["rect"])
+        fg = paint.ink(screen, it["tight"], bg)
+        room = paint.room(look, it["tight"], it["bg_look"], (0, title_bottom, w, h), lab=lab)
+        pad = int(max(2, min(0.3 * pitch, tx0 - room[0], ty0 - room[1])))
+        right = min(room[2] - pad, tx0 + MAX_BUBBLE * w - 2 * pad, w - pad)
+        width = max(tx1 - tx0, right - tx0)
+        note = bool(m.get("note"))
+        # a short line in a card ("Map Pin Unavailable") stays one line: smaller letters, it never grows out of its card
+        height = ty1 - ty0 if note else max(ty1 - ty0, room[3] - pad - ty0)
+        nxt = items[k + 1]["tight"][1] - 0.6 * pitch if k + 1 < len(items) else h - pad
+        weight = "semibold" if m.get("note") else "regular"
+        tr = (turkish.get(m["text"]) or m["text"]).strip()
+        fnt, lines, p, fits = paint.layout(tr, width, height, pitch, weight, 0.6 if note else paint.MIN_SHARE)
+        if not fits and not note:
+            fnt, lines, p, fits = paint.layout(tr, width, max(height, nxt - ty0 - pad), pitch, weight)
+            if not fits:
+                keep = max(1, int((nxt - ty0 - pad) // p))
+                if keep < len(lines):
+                    lines = lines[:keep]
+                    lines[-1] = lines[-1].rstrip(" ,.") + "…"
+        text_w = max(fnt.getlength(line) for line in lines)
+        text_h = len(lines) * p
+        # the Turkish lines centred on the English ones when they take less room, from the same top when more
+        top = ty0 + (ty1 - ty0) / 2 - text_h / 2 if text_h <= (ty1 - ty0) + 0.4 * p else ty0 - 0.2 * p
+        x0, y0 = tx0 - pad, min(ty0, top) - pad
+        x1 = max(tx1, tx0 + text_w) + pad
+        y1 = max(ty1, top + text_h) + pad
+        if m.get("note"):
+            mid = (tx0 + tx1) / 2
+            x0, x1 = min(x0, mid - text_w / 2 - pad), max(x1, mid + text_w / 2 + pad)
+        # inside the bubble / card (its plain colour's reach), unless the Turkish needs more room
+        # not above the message's own first line: the sender's name over it stays
+        x0, y0 = max(x0, room[0] + 1, 0), max(y0, room[1] + 1, it["rect"][1] - 2, it["ceiling"], title_bottom)
+        x1 = min(x1, w) if tx0 + text_w > room[2] - 1 else min(x1, room[2] - 1)
+        y1 = min(y1, h) if top + text_h > room[3] - 1 else min(y1, room[3] - 1)
+        fill = tuple(int(v) for v in np.clip(bg[::-1], 0, 255)) + (255,)
+        draw.rounded_rectangle([x0 * s, y0 * s, x1 * s, y1 * s], radius=min(pad, 0.25 * pitch) * s, fill=fill)
+        ink_ = tuple(int(v) for v in np.clip(fg[::-1], 0, 255)) + (255,)
+        if m.get("note"):
+            paint.draw_text(draw, (x0 + pad) * s, top * s, lines, paint.font(fnt.size * s, weight), p * s, ink_, "center",
+                            (x1 - x0 - 2 * pad) * s)
+        else:
+            paint.draw_text(draw, tx0 * s, top * s, lines, paint.font(fnt.size * s, weight), p * s, ink_)
+        patches.append([int(x0), int(y0), int(x1), int(y1)])
+    return paint.shrink(img), patches
+

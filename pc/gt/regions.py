@@ -32,7 +32,7 @@ import cv2
 import numpy as np
 from rapidfuzz import fuzz
 
-from . import phone
+from . import gamemap, paint, phone
 from .config import ROOT
 from .screen import group
 from .tracker import normalize
@@ -81,11 +81,24 @@ LOOK = {"place": "cover", "offset": 8, "align": "left", "size": 100, "fg": "#FFF
 # blurred picture while scrolling, the hand shaking); read when its screen has not changed for PHONE_SETTLE s (right
 # after a scroll the stream's picture is still soft: misread letters).
 PHONE_EVERY = 0.3
+PHONE_EVERY_ON = 0.15   # s: while the Turkish is painted on the phone, it follows the phone this often
+PHONE_FOLLOW = 0.006    # share of the picture's height: the painted phone is moved when the phone moved this much
 PHONE_CLOSE = 1.8
 PHONE_SETTLE = 0.6
 PHONE_SAME = 88         # % alike: a new reading of what is shown (letters read a little differently) changes nothing
-# bubbles: every message beside its own place on the phone, in the phone's colours (off: one panel of text)
-PHONE_LOOK = {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61, "bubbles": True}
+# place: "on" - every message's Turkish painted over its English on the phone itself (gt/paint.py), like the game's
+# own phone; "bubbles" - beside the phone, every message at its own height in the phone's colours; "panel" - one panel
+# of text beside the phone. size / fg / bg / opacity: the look beside the phone.
+PHONE_LOOK = {"enabled": True, "place": "on", "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61,
+              "bubbles": True}
+# GTA 6's map (gt/gamemap.py): a colour check this often while GTA 6 runs; while the map is open, looked at more often
+# and read when the picture has not changed for MAP_SETTLE s (the cursor stopped on a place)
+MAP_EVERY = 0.4
+MAP_EVERY_OPEN = 0.2
+MAP_SETTLE = 0.35
+MAP_CONTEXT = ("A place's card on the map of a video game: a shop, a garage, a club or a mission, what it is and offers. "
+               "Natural, short Turkish, like the game's own Turkish edition would write it. Keep names as they are.")
+TAG_CONTEXT = "A category label on a map card in a video game, one or two words (like STYLE, FOOD, SOUVENIR)."
 _GTA6 = re.compile(r"grand theft auto vi\b|\bgta\s*(6|vi)\b", re.I)
 
 
@@ -525,6 +538,10 @@ class RegionTranslator:
         threading.Thread(target=self._loop, daemon=True).start()
         threading.Thread(target=self._translate_loop, daemon=True).start()
         threading.Thread(target=self._phone_loop, daemon=True).start()
+        self._map = self._map_state()
+        self._map_box = None
+        self._map_reader = None
+        threading.Thread(target=self._map_loop, daemon=True).start()
 
     # ---- control ----
 
@@ -561,8 +578,14 @@ class RegionTranslator:
     def restyle(self):
         """The place setting changed: send the boxes again."""
         with self._lock:
-            if self._phone_box is not None and self._phone["corners"] is not None:
-                self._phone_box = self._phone_panel(self._phone["corners"], self._phone_box)
+            st = self._phone
+            corners = st["drawn"] if self.phone_on() and st["drawn"] is not None else st["corners"]
+            if self._phone_box is not None and corners is not None:
+                if self.phone_on() and self._phone_box.get("layer") is None and st["layer"] is None:
+                    st["read_sig"] = None       # switched to "on the phone": painted at the next steady look
+                if self.phone_on() and self._phone_box.get("layer") is None and st["layer"] is not None:
+                    self._phone_box = dict(self._phone_box, layer=st["layer"])
+                self._phone_box = self._phone_panel(corners, self._phone_box)
         self._sent = None
         self._send()
 
@@ -721,11 +744,16 @@ class RegionTranslator:
     def _phone_state():
         return {"hits": 0, "open": False, "seen_at": 0.0, "corners": None, "sig": None, "changed_at": 0.0,
                 "read_sig": None, "english": "", "title": None, "messages": [], "known": [], "moved": None,
-                "read": False}      # read: text was read off it (only then is it left out of the other readers)
+                "read": False,      # read: text was read off it (only then is it left out of the other readers)
+                "layer": None, "drawn": None}   # the Turkish painted on the upright screen; the corners it was put on
 
     def phone_look(self):
         """The phone panel's settings (cfg regions.gta_phone, missing keys from PHONE_LOOK)."""
         return {**PHONE_LOOK, **(self.cfg.get("regions", {}).get("gta_phone") or {})}
+
+    def phone_on(self):
+        """The Turkish is painted on the phone itself (not beside it)."""
+        return self.phone_look().get("place", "on") == "on"
 
     def phone_active(self):
         """On, and the game is GTA 6 (or not known yet): another game's light, upright panel full of text is not
@@ -737,7 +765,7 @@ class RegionTranslator:
 
     def _phone_loop(self):
         while True:
-            time.sleep(PHONE_EVERY)
+            time.sleep(PHONE_EVERY_ON if self._phone["open"] and self.phone_on() else PHONE_EVERY)
             try:
                 if not self.phone_active() or self.rp is None or not self.rp.seq:
                     self._phone_close()
@@ -754,9 +782,14 @@ class RegionTranslator:
     def _phone_look_once(self, frame, reader=None):
         st = self._phone
         now = time.monotonic()
+        on = self.phone_on()
         found = phone.find_phone(frame)
         if not found:
             st["hits"] = 0
+            if on and self._phone_box is not None and self._phone_box.get("boxes"):
+                # The Turkish painted on the phone must not stay in the air when the phone goes down: off at once,
+                # back from the kept picture when the phone is seen again (a blurred look).
+                self._phone_show(dict(self._phone_box, boxes=[]))
             if st["open"] and now - st["seen_at"] > PHONE_CLOSE:
                 self._phone_close()
             return
@@ -775,7 +808,7 @@ class RegionTranslator:
                 st["corners"], st["moved"] = corners, None
                 if st["read"]:
                     self._phone_hole(corners)
-                if self._phone_box is not None:
+                if self._phone_box is not None and not on:
                     with self._lock:
                         self._phone_box = self._phone_panel(corners, self._phone_box)
                     self._send()
@@ -790,8 +823,15 @@ class RegionTranslator:
         sig = phone.signature(screen)
         if phone.changed(sig, st["sig"]):
             st["changed_at"] = now          # scrolling / a new message: read when it stops
+            if on and self._phone_box is not None and self._phone_box.get("boxes"):
+                # the painted messages would stand in the wrong places: off until the screen is read again
+                self._phone_show(dict(self._phone_box, boxes=[]))
         st["sig"] = sig
-        if now - st["changed_at"] < PHONE_SETTLE or not phone.changed(sig, st["read_sig"], 3.0):
+        settled = now - st["changed_at"] >= PHONE_SETTLE
+        fresh = phone.changed(sig, st["read_sig"], 3.0)
+        if on and settled and not fresh and st["layer"] is not None:
+            self._phone_follow(corners, frame.shape[0])
+        if not settled or not fresh:
             return
         st["read_sig"] = sig
         if reader is None:
@@ -801,15 +841,19 @@ class RegionTranslator:
         title, messages = phone.read_screen(reader, screen)
         english = "\n".join(m["text"] for m in messages)
         if not english:
-            return                          # the home screen, a picture: the last panel stays until it closes
+            if on and self._phone_box is not None:
+                st["layer"] = None          # the home screen, a picture: nothing painted over it
+                self._phone_show(dict(self._phone_box, boxes=[], layer=None))
+            return                          # beside the phone: the last panel stays until it closes
         if not st["read"]:
             # text on it: a phone for sure (not a dark shutter or a door) - now the subtitle reader leaves it out
             st["read"] = True
             self._phone_hole(st["corners"])
         # The same screen read again (the hand moved it a little): a letter or a line break read differently must not
         # change the TV, so a reading this much like the shown one is left alone.
-        if st["english"] and fuzz.ratio(normalize(english.replace("\n", " ")),
-                                        normalize(st["english"].replace("\n", " "))) >= PHONE_SAME:
+        # (On the phone itself the same messages may stand elsewhere now: painted again, with the kept translations.)
+        if not on and st["english"] and fuzz.ratio(normalize(english.replace("\n", " ")),
+                                                   normalize(st["english"].replace("\n", " "))) >= PHONE_SAME:
             return
         # A message seen before in this phone session keeps its first reading and its translation (after a scroll
         # the old messages are read again, a little differently).
@@ -835,10 +879,29 @@ class RegionTranslator:
         text = phone.panel_text(title, messages, turkish)
         self.last["gta_phone"] = {"en": english, "tr": text, "via": " + ".join(sorted(via)) or "önbellek"}
         view = {"tr": text, "title": title, "messages": messages, "turkish": turkish}
-        with self._lock:
-            self._phone_box = self._phone_panel(st["corners"], view)
+        if on:
+            st["layer"], st["patches"] = phone.cover_layer(screen, messages, turkish)
+            st["drawn"] = corners
+            view["layer"] = st["layer"]
         self.on_status("gta_phone", f"Çevrildi · {self.last['gta_phone']['via']}")
+        self._phone_show(self._phone_panel(corners if on else st["corners"], view))
+
+    def _phone_show(self, view):
+        """What the TV shows for the phone now (None: nothing)."""
+        with self._lock:
+            self._phone_box = view
         self._send()
+
+    def _phone_follow(self, corners, frame_h):
+        """The Turkish painted on the phone follows the phone (the hand moves it) and comes back after a lost look."""
+        st = self._phone
+        view = self._phone_box
+        if view is None or view.get("layer") is None:
+            return
+        moved = st["drawn"] is None or float(np.abs(corners - st["drawn"]).max()) > PHONE_FOLLOW * frame_h
+        if moved or not view.get("boxes"):
+            st["drawn"] = corners
+            self._phone_show(self._phone_panel(corners, view))
 
     def _translate_phone(self, english, title=None):
         """A phone message: DeepL first (the packs hold spoken dialogue, not texts), then the pack / local model."""
@@ -860,7 +923,11 @@ class RegionTranslator:
         grows down with the text, smaller letters when it does not fit the phone's height)."""
         w, h = self._size
         look = self.phone_look()
-        if look.get("bubbles", True) and view.get("messages"):
+        place = look.get("place", "on")
+        if place == "on":
+            got = paint.warp(view["layer"], corners, w, h) if view.get("layer") is not None else None
+            return dict(view, boxes=[paint.tv_box("gta_phone", *got, w, h)] if got else [])
+        if place == "bubbles" and view.get("messages"):
             return dict(view, boxes=phone.bubble_boxes(view.get("title"), view["messages"], view.get("turkish") or {},
                                                        corners, w, h, look))
         x0, y0, pw, ph = phone.panel_place(corners, w, h)
@@ -893,6 +960,124 @@ class RegionTranslator:
             with self._lock:
                 self._phone_box = None
             self.on_status("gta_phone", "Telefon kapalı")
+            self._send()
+
+    # ---- GTA 6's map ----
+
+    @staticmethod
+    def _map_state():
+        return {"open": False, "misses": 0, "sig": None, "changed_at": 0.0, "read_sig": None}
+
+    def map_active(self):
+        """On (cfg regions.gta_map), and the game is GTA 6 (or not known yet)."""
+        if not (self.cfg.get("regions", {}).get("gta_map") or {}).get("enabled", True):
+            return False
+        title = self.engine.game_title(self.cfg) if self.engine else ""
+        return not title or bool(_GTA6.search(title))
+
+    def _map_loop(self):
+        while True:
+            time.sleep(MAP_EVERY_OPEN if self._map["open"] else MAP_EVERY)
+            try:
+                if not self.map_active() or self.rp is None or not self.rp.seq:
+                    self._map_close()
+                    continue
+                _, frame = self.rp.frame()
+                if frame is None:
+                    continue
+                self._map_look_once(frame)
+            except Exception as e:  # noqa: BLE001 - shown in the UI, the loop goes on
+                self.on_status("gta_map", f"Hata: {e}")
+                time.sleep(2)
+
+    def _map_look_once(self, frame, reader=None):
+        st = self._map
+        now = time.monotonic()
+        opened = False
+        if gamemap.pink_tab(frame) is not None:
+            if reader is None:
+                if self._map_reader is None:
+                    self._map_reader = gamemap.MapReader()     # ~1 s, the first time a pink tab is seen
+                reader = self._map_reader
+            opened = gamemap.is_map(reader, frame)
+        if not opened:
+            st["misses"] += 1
+            if st["open"] and st["misses"] >= 2:
+                self._map_close()
+            return
+        st["misses"] = 0
+        if not st["open"]:
+            st["open"] = True
+            self.on_status("gta_map", "Harita açık")
+        sig = gamemap.signature(frame)
+        if gamemap.changed(sig, st["sig"]):
+            st["changed_at"] = now          # the map moves / the card comes or goes: read when it stops
+            if self._map_box is not None:
+                self._map_show(None)        # the Turkish card would stand over another place
+        st["sig"] = sig
+        if now - st["changed_at"] < MAP_SETTLE or not gamemap.changed(sig, st["read_sig"]):
+            return
+        st["read_sig"] = sig
+        card = gamemap.find_card(reader, frame)
+        if card is None:
+            return
+        turkish, via = {}, set()
+        for b in card["blocks"]:
+            key = ("map-tag:" if b["kind"] == "tag" else "map:") + b["text"]
+            if key not in self._cache:
+                self.on_status("gta_map", "Çevriliyor…")
+                self._cache[key], used = self._translate_map(b["text"], b["kind"] == "tag")
+                via.add(used)
+                self._save_cache()
+            turkish[b["text"]] = self._cache[key]
+        # Read and translated meanwhile (~1 s): the card must still be there.
+        if self.rp is not None and self.rp.seq:
+            _, now_frame = self.rp.frame()
+            if now_frame is not None and gamemap.changed(gamemap.signature(now_frame), sig):
+                st["read_sig"] = None
+                return
+        got = gamemap.paint_card(frame, card, turkish)
+        if got is None:
+            return
+        w, h = frame.shape[1], frame.shape[0]
+        english = "\n".join(b["text"] for b in card["blocks"])
+        text = "\n".join(turkish[b["text"]] for b in card["blocks"])
+        self.last["gta_map"] = {"en": english, "tr": text, "via": " + ".join(sorted(via)) or "önbellek"}
+        self.on_status("gta_map", f"Çevrildi · {self.last['gta_map']['via']}")
+        self._map_show({"en": english, "tr": text, "boxes": [paint.tv_box("gta_map", *got, w, h)]})
+
+    def _translate_map(self, english, tag=False):
+        """A map card's text: a pack, DeepL, the local model."""
+        if self.engine is not None and not tag:
+            hit = self.engine.pack_hit(english, self.cfg)
+            if hit:
+                return hit.turkish, f"Paket · {hit.pack.title}"
+        if tag:
+            english = english.capitalize()      # in capitals DeepL takes a word for a name and leaves it ("STYLE")
+        deepl = self._client()
+        if deepl is not None and deepl.up:
+            try:
+                turkish = from_xml(deepl.translate_xml(to_xml(english), TAG_CONTEXT if tag else MAP_CONTEXT))
+                if self.engine is not None and not tag:
+                    turkish = self.engine.polish(english, turkish, self.cfg)
+                return turkish, "DeepL"
+            except Exception:  # noqa: BLE001 - the local model below
+                pass
+        if self.engine is None:
+            return english, "yok"
+        return self.engine.machine_translate(english, self.cfg), "yerel model"
+
+    def _map_show(self, view):
+        with self._lock:
+            self._map_box = view
+        self._send()
+
+    def _map_close(self):
+        if self._map["open"] or self._map_box is not None:
+            self._map = self._map_state()
+            with self._lock:
+                self._map_box = None
+            self.on_status("gta_map", "Harita kapalı")
             self._send()
 
     # ---- translating ----
@@ -1016,6 +1201,7 @@ class RegionTranslator:
     def _send(self):
         w, h = self._size
         boxes = []
+        map_view = None
         with self._lock:
             for kind, a in self._areas.items():
                 if a.english and a.tr and a.rect:
@@ -1024,6 +1210,9 @@ class RegionTranslator:
             phone_tr = self._phone_box["tr"] if self._phone_box is not None else ""
             if self._phone_box is not None:
                 boxes.extend(self._phone_box["boxes"])
+            if self._map_box is not None:
+                boxes.extend(self._map_box["boxes"])
+                map_view = self._map_box
         key = json.dumps(boxes, sort_keys=True)
         if key == self._sent:
             return
@@ -1031,12 +1220,21 @@ class RegionTranslator:
         self.server.send({"type": "regions", "boxes": boxes})
         phone_logged = False
         for b in boxes:
+            if b["id"] == "gta_map":
+                self._log("gta_map", en=map_view["en"], tr=map_view["tr"],
+                          box=[round(b[k], 4) for k in ("x", "y", "w", "h")])
+                continue
             if b["id"].startswith("gta_phone"):
                 if not phone_logged:
                     phone_logged = True
-                    self._log("gta_phone", en=self._phone["english"], tr=phone_tr,
-                              bubbles=[[round(x["y"], 4), x["bg"], x["tr"][:40]] for x in boxes
-                                       if x["id"].startswith("gta_phone")])
+                    if b.get("img"):
+                        self._log("gta_phone", en=self._phone["english"], tr=phone_tr, on_phone=True,
+                                  box=[round(b[k], 4) for k in ("x", "y", "w", "h")],
+                                  patches=len(self._phone.get("patches") or []))
+                    else:
+                        self._log("gta_phone", en=self._phone["english"], tr=phone_tr,
+                                  bubbles=[[round(x["y"], 4), x["bg"], x["tr"][:40]] for x in boxes
+                                           if x["id"].startswith("gta_phone")])
                 continue
             a = self._areas[b["id"]]
             self._log(b["id"], en=a.english, tr=b["tr"], rows=b["lines"], scale=b["scale"],

@@ -4,7 +4,7 @@
  * messages: one box per area, "⟦1⟧" in the text is a button icon sent as a PNG). */
 (function () {
   "use strict";
-  var VERSION = "1.6-web";
+  var VERSION = "1.7-web";
   var PORT = 8765;
   var PLATFORM = window.tizen ? "tizen"
     : (window.PalmSystem || window.webOSSystem || /Web0S|webOS/i.test(navigator.userAgent)) ? "webos" : "browser";
@@ -387,6 +387,19 @@
     layer.innerHTML = "";
     for (var i = 0; i < list.length; i++) {
       var b = list[i], el = document.createElement("div");
+      if (b.img) {
+        // a picture painted by the PC (GTA 6's phone in Turkish, bent to the phone's angle) over x, y, w, h
+        var pic = document.createElement("img");
+        pic.className = "picture";
+        pic.style.position = "absolute";
+        pic.style.left = (b.x * 1920) + "px";
+        pic.style.top = (b.y * 1080) + "px";
+        pic.style.width = (b.w * 1920) + "px";
+        pic.style.height = (b.h * 1080) + "px";
+        pic.src = "data:image/png;base64," + b.img;
+        layer.appendChild(pic);
+        continue;
+      }
       var w = b.w * 1920, h = b.h * 1080, lineH = h / Math.max(1, b.lines || 1), pad = Math.min(lineH * 0.12, 6);
       // the room the Turkish may use without covering the next translated text (sent by the PC)
       var roomW = Math.max(w, (b.mw || b.w * 1.8) * 1920), roomH = Math.max(h, (b.mh || b.h) * 1080);

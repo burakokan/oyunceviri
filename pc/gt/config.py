@@ -113,8 +113,11 @@ DEFAULTS = {
                                  "GD"],
                       "place": "top", "offset": 8, "align": "center", "size": 85, "fg": "#FFFFFF",
                       "bg": "#000000", "opacity": 34, "keep_lines": True},
-        # GTA 6's phone, found by itself (no area): its messages in Turkish in a panel next to it on the TV
-        "gta_phone": {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61, "bubbles": True},
+        # GTA 6's phone, found by itself (no area): its messages in Turkish painted on the phone on the TV (place "on")
+        "gta_phone": {"enabled": True, "size": 100, "fg": "#FFFFFF", "bg": "#10151C", "opacity": 61, "bubbles": True,
+                      "place": "on"},
+        # GTA 6's map: a place's card (description, tags) in Turkish over the English (gt/gamemap.py)
+        "gta_map": {"enabled": True},
     },
     # Lines that are not in a game pack: smart (DeepL + Qwen + OPUS-MT, best of them) | deepl | groq |
     # gemma (Gemma 4 E2B on this PC) | local (OPUS-MT). deadline_ms: the longest wait for an online answer.

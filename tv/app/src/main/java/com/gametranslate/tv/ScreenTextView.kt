@@ -27,12 +27,14 @@ import org.json.JSONObject
  * A box may carry button icons ("icons": {"1": base64 PNG}); "⟦1⟧" in its text is drawn as that picture, as high
  * as the letters. "align": "center" keeps the box centred on the English text (the room "mw" then reaches the same
  * distance to both sides), like a mission objective under the subtitles.
+ * A box may be a picture instead ("img": base64 PNG with transparency, drawn over x, y, w, h): the PC paints the
+ * Turkish the game's way itself (GTA 6's phone: every message in its own bubble, bent to the phone's angle).
  */
 class ScreenTextView(context: Context) : View(context) {
 
     private class Box(val x: Float, val y: Float, val w: Float, val h: Float, val mw: Float, val mh: Float,
                       val lines: Int, val text: CharSequence, val fg: Int, val bg: Int, val scale: Float,
-                      val shadow: Boolean, val center: Boolean)
+                      val shadow: Boolean, val center: Boolean, val picture: Bitmap? = null)
 
     /** A button icon inside the text: scales with the font, centred on the letters. */
     private class IconSpan(val bitmap: Bitmap) : ReplacementSpan() {
@@ -64,9 +66,31 @@ class ScreenTextView(context: Context) : View(context) {
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     }
 
+    private val pictures = HashMap<String, Bitmap>()
+    private val pictureFill = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+
+    /** A box's picture: decoded once (the same picture sent again only moved keeps its bitmap). */
+    private fun picture(img: String, keep: HashMap<String, Bitmap>): Bitmap? {
+        val key = img.length.toString() + ":" + img.hashCode()
+        val known = pictures[key] ?: runCatching {
+            val bytes = Base64.decode(img, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        }.getOrNull() ?: return null
+        keep[key] = known
+        return known
+    }
+
     fun setBoxes(json: JSONArray) {
+        val keep = HashMap<String, Bitmap>()
         boxes = (0 until json.length()).mapNotNull { i ->
             val b = json.optJSONObject(i) ?: return@mapNotNull null
+            val img = b.optString("img")
+            if (img.isNotEmpty()) {
+                val bitmap = picture(img, keep) ?: return@mapNotNull null
+                return@mapNotNull Box(b.optDouble("x").toFloat(), b.optDouble("y").toFloat(),
+                    b.optDouble("w").toFloat(), b.optDouble("h").toFloat(), 0f, 0f, 1, "", Color.WHITE,
+                    Color.TRANSPARENT, 1f, false, false, bitmap)
+            }
             val bg = runCatching { Color.parseColor(b.optString("bg", "#000000")) }.getOrDefault(Color.BLACK)
             val alpha = (b.optDouble("alpha", 0.9) * 255).toInt().coerceIn(0, 255)
             val w = b.optDouble("w").toFloat()
@@ -79,6 +103,8 @@ class ScreenTextView(context: Context) : View(context) {
                 b.optDouble("scale", 1.0).toFloat().coerceIn(0.4f, 2.5f), b.optBoolean("shadow", false),
                 b.optString("align") == "center")
         }
+        pictures.clear()
+        pictures.putAll(keep)
         visibility = if (boxes.isEmpty()) GONE else VISIBLE
         invalidate()
     }
@@ -113,6 +139,10 @@ class ScreenTextView(context: Context) : View(context) {
         for (b in boxes) {
             val left = b.x * sw
             val top = b.y * sh
+            if (b.picture != null) {
+                canvas.drawBitmap(b.picture, null, RectF(left, top, left + b.w * sw, top + b.h * sh), pictureFill)
+                continue
+            }
             val boxW = (b.w * sw).coerceAtLeast(8f)
             val boxH = (b.h * sh).coerceAtLeast(8f)
             val roomW = maxOf(boxW, b.mw * sw)
